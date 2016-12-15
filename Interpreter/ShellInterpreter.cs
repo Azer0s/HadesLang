@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NCalc;
+using StringExtension;
 using Variables;
 
 namespace Interpreter
@@ -15,37 +16,29 @@ namespace Interpreter
     public class ShellInterpreter
     {
         private static readonly Evaluator _evaluator = new Evaluator();
-        private static string _varPattern = @"as (num|dec|word)+ (reachable|reachable_all|closed)+";
 
         public string InterpretLine(string lineToInterprete)
         {
-            if (Regex.IsMatch(lineToInterprete, _varPattern))
+            if (Regex.IsMatch(lineToInterprete, Evaluator.VarPattern))
             {
                 return _evaluator.EvaluateVar(lineToInterprete);
             }
 
-            if (lineToInterprete.Contains("=")) { }
+            if (lineToInterprete == "clear")
+            {
+                Console.Clear();
+                return string.Empty;
+            }
+
+            if (lineToInterprete.Contains("="))
+            {
+                return _evaluator.EvaluateAssign(lineToInterprete);
+            }
 
             //Method call
             if (lineToInterprete.Contains(":"))
             {
                 var call = lineToInterprete.Split(':');
-
-                if (call[0] == "out")
-                {
-                    if (Regex.IsMatch(call[1], @"\\""([^]]*)\\"""))
-                    {
-                        return call[1];
-                    }
-                    if (Cache.Instance.Variables.ContainsKey(call[1]))
-                    {
-                        return Cache.Instance.Variables[call[1]].Value;
-                    }
-                    else
-                    {
-                        return "Variable not defined";
-                    }
-                }
 
                 if (call[0] == "exit")
                 {
@@ -58,18 +51,20 @@ namespace Interpreter
                         return e.Message;
                     }
                 }
+
+                return _evaluator.EvaluateCall(call);
             }
             else
             {
                 //Function call 
                 try
                 {
-                    if (lineToInterprete.Contains("[") && lineToInterprete.Contains("]"))
+                    if (Regex.IsMatch(lineToInterprete, @"\[([^]]*)\]"))
                     {
-                        return _evaluator.EvaluateBool(lineToInterprete);
+                        return _evaluator.EvaluateBool(lineToInterprete).Result.ToString().ToLower();
                     }
 
-                    if (lineToInterprete.Contains("+") || lineToInterprete.Contains("-") || lineToInterprete.Contains("*") || lineToInterprete.Contains("/"))
+                    if (lineToInterprete.ContainsFromList(Evaluator.OpperatorList))
                     {
                         var e = new Expression(lineToInterprete);
                         return e.Evaluate().ToString();

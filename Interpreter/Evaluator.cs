@@ -4,28 +4,33 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Exceptions;
 using NCalc;
+using StringExtension;
 using Variables;
+using InvalidOperationException = Exceptions.InvalidOperationException;
 
 namespace Interpreter
 {
     public class Evaluator
     {
-        public string EvaluateBool(string toEvaluate)
+        public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
+        public static List<string> OpperatorList = new List<string>() {"+", "-", "*", "/", "sqrt", "sin", "cos", "tan"};
+
+        public EvaluatedOperation EvaluateBool(string toEvaluate)
         {
             var reg = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[1].Value;
-            var func =
-                toEvaluate.Replace(
-                    Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[0].Value, "");
+            var func = EvaluateOperation(toEvaluate.Replace(Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[0].Value, ""),toEvaluate);
 
             if (!string.IsNullOrWhiteSpace(reg))
             {
                 if (reg == "true" || reg == "false")
                 {
-                    return reg;
+                    return new EvaluatedOperation(func,bool.Parse(reg));
                 }
 
-                if (reg.Contains("is") || reg.Contains("or") || reg.Contains("and") || reg.Contains("not") || reg.Contains("smaller") || reg.Contains("bigger"))
+                if (reg.Contains("is") || reg.Contains("or") || reg.Contains("and") || reg.Contains("not") ||
+                    reg.Contains("smaller") || reg.Contains("bigger"))
                 {
                     reg = reg.Replace("is", "==");
                     reg = reg.Replace("or", "||");
@@ -37,7 +42,7 @@ namespace Interpreter
                     reg = reg.Replace("biggerIs", ">=");
 
                     var e = new Expression(reg);
-                    return e.Evaluate().ToString().ToLower();
+                    return new EvaluatedOperation(func,bool.Parse(e.Evaluate().ToString().ToLower()));
                 }
             }
             return null;
@@ -45,34 +50,153 @@ namespace Interpreter
 
         public string EvaluateVar(string toEvaluate)
         {
-            var data = toEvaluate.Split(new char[] { ' ', '=' }).ToList();
-            data.RemoveAll(s => s.Equals(""));
-
             try
             {
+                var data = toEvaluate.Split(' ', '=').ToList();
+                data.RemoveAll(s => s.Equals(""));
+
                 if (data.Count > 4)
                 {
-                    if (data[4].Contains("+") || data[4].Contains("-") || data[4].Contains("*") ||
-                        data[4].Contains("/"))
-                    {
-                        data[4] = new Expression(data[4]).Evaluate().ToString();
-                    }
-                    if (data[4].Contains("[") && data[4].Contains("]"))
-                    {
-                        data[4] = EvaluateBool(data[4]);
-                    }
-                    Cache.Instance.Variables.Add(data[0], new Types(AccessTypeParse.ParseTypes(data[3]), data[4]));
-                    return $"{data[0]} is {data[4]}";
+                    Cache.Instance.Variables.Add(data[0],new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
+                    return EvaluateAssign(data[0] + "=" + data[4]);
                 }
                 else
                 {
-                    Cache.Instance.Variables.Add(data[0], new Types(AccessTypeParse.ParseTypes(data[3]), ""));
+                    Cache.Instance.Variables.Add(data[0],new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
                     return $"{data[0]} is undefined";
                 }
             }
             catch (Exception e)
             {
                 return e.Message;
+            }
+        }
+
+        public string EvaluateAssign(string toEvaluate)
+        {
+            try
+            {
+                var data = toEvaluate.Split('=');
+                var index = data[0].Replace(" ", "");
+                var dt = Cache.Instance.Variables[index].DataType;
+                var isOut = false;
+
+                if (data[1].Contains(":"))
+                {
+                    var operation = data[1].Split(':');
+                    operation[0] = operation[0].Replace(" ", "");
+                    data[1] = "'" + EvaluateCall(operation) + "'";
+                    isOut = true;
+                }
+
+                if (dt == EvaluateData(data[1]) || isOut)
+                {
+                    if (dt == DataTypes.WORD)
+                    {
+                        data[1] = Regex.Match(data[1], @"\'([^]]*)\'").Groups[1].Value;
+                    }
+                    Cache.Instance.Variables[index].Value = data[1];
+                }
+                else
+                {
+                    throw new InvalidDataAssignException(
+                        "The data type of the variable does not match the assignment type!");
+                }
+
+                return $"{index} is {data[1]}";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+
+        public string EvaluateOut(string toEvaluate)
+        {
+            if (Regex.IsMatch(toEvaluate, @"\[([^]]*)\]"))
+            {
+                return EvaluateBool(toEvaluate).Result.ToString().ToLower();
+            }
+            if (toEvaluate.ContainsFromList(OpperatorList))
+            {
+                try
+                {
+                    var e = new Expression(toEvaluate);
+                    return e.Evaluate().ToString();
+                }
+                catch (Exception e)
+                {
+                    return e.Message;
+                }
+            }
+            if (Regex.IsMatch(toEvaluate, @"\'([^]]*)\'"))
+            {
+                return Regex.Match(toEvaluate, @"\'([^]]*)\'").Groups[1].Value; ;
+            }
+            if (Cache.Instance.Variables.ContainsKey(toEvaluate))
+            {
+                return Cache.Instance.Variables[toEvaluate].Value;
+            }
+            else
+            {
+                return "Variable not defined";
+            }
+        }
+
+        public string EvaluateCall(string[] toEvaluate)
+        {
+            switch (toEvaluate[0])
+            {
+                case "out":
+                    return EvaluateOut(toEvaluate[1]);
+                case "load":
+                    //TODO make load file
+                    return /*new FileInterpreter(toEvaluate[1]).FileName*/ "";
+            }
+
+            return null;
+        }
+
+        public DataTypes EvaluateData(string data)
+        {
+            if (data.IsNum())
+            {
+                return DataTypes.NUM;
+            }
+
+            if (data.IsBinary())
+            {
+                return DataTypes.BINARY;
+            }
+
+            if (data.IsDec())
+            {
+                return DataTypes.DEC;
+            }
+
+            if (Regex.IsMatch(data, @"\'([^]]*)\'"))
+            {
+                return DataTypes.WORD;
+            }
+
+            throw new InvalidDataTypeException("Invalid data type!");
+        }
+
+        public OperationTypes EvaluateOperation(string operation, string toEvaluate)
+        {
+            if (operation == toEvaluate)
+            {
+                return OperationTypes.NONE;
+            }
+
+            switch (operation)
+            {
+                case "case":
+                    return OperationTypes.CASE;
+                case "runala":
+                    return OperationTypes.RUNALA;
+                default:
+                    throw new InvalidOperationException("Invalid operation!");
             }
         }
     }

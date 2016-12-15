@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache", "Cache\Cache.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Variables", "Variables\Variables.csproj", "{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exceptions", "Exceptions\Exceptions.csproj", "{7FF8E52E-753A-4075-8019-EE83CDCBB8FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringExtension", "StringExtension\StringExtension.csproj", "{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FF8E52E-753A-4075-8019-EE83CDCBB8FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FF8E52E-753A-4075-8019-EE83CDCBB8FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FF8E52E-753A-4075-8019-EE83CDCBB8FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FF8E52E-753A-4075-8019-EE83CDCBB8FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
