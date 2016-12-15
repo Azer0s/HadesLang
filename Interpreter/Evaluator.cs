@@ -19,14 +19,18 @@ namespace Interpreter
 
         public EvaluatedOperation EvaluateBool(string toEvaluate)
         {
+            toEvaluate = ReplaceWithVars(toEvaluate);
             var reg = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[1].Value;
-            var func = EvaluateOperation(toEvaluate.Replace(Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[0].Value, ""),toEvaluate);
+            var func =
+                EvaluateOperation(
+                    toEvaluate.Replace(Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[0].Value, ""),
+                    toEvaluate);
 
             if (!string.IsNullOrWhiteSpace(reg))
             {
                 if (reg == "true" || reg == "false")
                 {
-                    return new EvaluatedOperation(func,bool.Parse(reg));
+                    return new EvaluatedOperation(func, bool.Parse(reg));
                 }
 
                 if (reg.Contains("is") || reg.Contains("or") || reg.Contains("and") || reg.Contains("not") ||
@@ -42,13 +46,13 @@ namespace Interpreter
                     reg = reg.Replace("biggerIs", ">=");
 
                     var e = new Expression(reg);
-                    return new EvaluatedOperation(func,bool.Parse(e.Evaluate().ToString().ToLower()));
+                    return new EvaluatedOperation(func, bool.Parse(e.Evaluate().ToString().ToLower()));
                 }
             }
             return null;
         }
 
-        public string EvaluateVar(string toEvaluate)
+        public string CreateVariable(string toEvaluate)
         {
             try
             {
@@ -57,12 +61,14 @@ namespace Interpreter
 
                 if (data.Count > 4)
                 {
-                    Cache.Instance.Variables.Add(data[0],new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
-                    return EvaluateAssign(data[0] + "=" + data[4]);
+                    Cache.Instance.Variables.Add(data[0],
+                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
+                    return AssignValueToVariable(data[0] + "=" + data[4]);
                 }
                 else
                 {
-                    Cache.Instance.Variables.Add(data[0],new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
+                    Cache.Instance.Variables.Add(data[0],
+                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
                     return $"{data[0]} is undefined";
                 }
             }
@@ -72,7 +78,7 @@ namespace Interpreter
             }
         }
 
-        public string EvaluateAssign(string toEvaluate)
+        public string AssignValueToVariable(string toEvaluate)
         {
             try
             {
@@ -89,7 +95,18 @@ namespace Interpreter
                     isOut = true;
                 }
 
-                if (dt == EvaluateData(data[1]) || isOut)
+                if (data[1].ContainsFromList(OpperatorList))
+                {
+                    var e = new Expression(data[1]);
+                    data[1] = e.Evaluate().ToString();
+                }
+
+                if (Regex.IsMatch(data[1], @"\[([^]]*)\]"))
+                {
+                    data[1] = EvaluateBool(data[1]).Result.ToString().ToLower();
+                }
+
+                if (dt == DataTypeFromData(data[1]) || isOut)
                 {
                     if (dt == DataTypes.WORD)
                     {
@@ -113,38 +130,52 @@ namespace Interpreter
 
         public string EvaluateOut(string toEvaluate)
         {
-            if (Regex.IsMatch(toEvaluate, @"\[([^]]*)\]"))
+            try
             {
-                return EvaluateBool(toEvaluate).Result.ToString().ToLower();
-            }
-            if (toEvaluate.ContainsFromList(OpperatorList))
-            {
-                try
+                if (Regex.IsMatch(toEvaluate, @"\[([^]]*)\]"))
                 {
-                    var e = new Expression(toEvaluate);
-                    return e.Evaluate().ToString();
+                    return EvaluateBool(toEvaluate).Result.ToString().ToLower();
                 }
-                catch (Exception e)
+                if (toEvaluate.ContainsFromList(OpperatorList))
                 {
-                    return e.Message;
+                    try
+                    {
+                        var e = new Expression(toEvaluate);
+                        return e.Evaluate().ToString();
+                    }
+                    catch (Exception e)
+                    {
+                        return e.Message;
+                    }
+                }
+                if (Regex.IsMatch(toEvaluate, @"\'([^]]*)\'"))
+                {
+                    return Regex.Match(toEvaluate, @"\'([^]]*)\'").Groups[1].Value;
+                    ;
+                }
+                if (Cache.Instance.Variables.ContainsKey(toEvaluate))
+                {
+                    return Cache.Instance.Variables[toEvaluate].Value;
+                }
+                else
+                {
+                    throw new VariableNotDefinedException("Variable not defined!");
                 }
             }
-            if (Regex.IsMatch(toEvaluate, @"\'([^]]*)\'"))
+            catch (VariableNotDefinedException ve)
             {
-                return Regex.Match(toEvaluate, @"\'([^]]*)\'").Groups[1].Value; ;
+                return ve.Message;
             }
-            if (Cache.Instance.Variables.ContainsKey(toEvaluate))
+            catch (Exception e)
             {
-                return Cache.Instance.Variables[toEvaluate].Value;
-            }
-            else
-            {
-                return "Variable not defined";
+                return e.Message;
             }
         }
 
         public string EvaluateCall(string[] toEvaluate)
         {
+            toEvaluate[1] = ReplaceWithVars(toEvaluate[1]);
+
             switch (toEvaluate[0])
             {
                 case "out":
@@ -152,12 +183,109 @@ namespace Interpreter
                 case "load":
                     //TODO make load file
                     return /*new FileInterpreter(toEvaluate[1]).FileName*/ "";
+                case "type":
+                    return GetVarType(toEvaluate[1]);
+                case "uload":
+                    return DeleteVar(toEvaluate[1]);
+                case "dumpVars":
+                    return DumpAllVariables(toEvaluate[1]);
             }
 
             return null;
         }
 
-        public DataTypes EvaluateData(string data)
+        private string DumpAllVariables(string s)
+        {
+            var sb = new StringBuilder();
+            DataTypes dt = DataTypes.NONE;
+
+            if (s != "all")
+            {
+                try
+                {
+                    dt = DataTypeFromString(s.ToUpper());
+                }
+                catch (Exception e)
+                {
+                    return e.Message;
+                }
+            }
+
+            foreach (var variable in Cache.Instance.Variables)
+            {
+                if (variable.Value.DataType == dt || dt == DataTypes.NONE)
+                {
+                    sb.Append($"{variable.Key} = {variable.Value.Value}\n");
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private string DeleteVar(string s)
+        {
+            try
+            {
+                if (Cache.Instance.Variables.ContainsKey(s))
+                {
+                    Cache.Instance.Variables.Remove(s);
+                    return "Variable unloaded!";
+                }
+                else
+                {
+                    throw new VariableNotDefinedException("Variable not defined!");
+                }
+            }
+            catch (VariableNotDefinedException ve)
+            {
+                return ve.Message;
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+
+        public string ReplaceWithVars(string s)
+        {
+            var reg = new Regex(@"\{([^\}]+)\}");
+            var matches  = reg.Matches(s);
+
+            foreach (var variable in matches)
+            {
+                var varName = variable.ToString().Replace("{", "").Replace("}", "");
+                var data = Cache.Instance.Variables[varName].Value;
+
+                s = s.Replace(variable.ToString(), data);
+            }
+
+            return s;
+        }
+
+        private string GetVarType(string s)
+        { 
+            try
+            {
+                if (Cache.Instance.Variables.ContainsKey(s))
+                {
+                    return Cache.Instance.Variables[s].DataType.ToString().ToLower();
+                }
+                else
+                {
+                    throw new VariableNotDefinedException("Variable not defined!");
+                }
+            }
+            catch (VariableNotDefinedException ve)
+            {
+                return ve.Message;
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+
+        public DataTypes DataTypeFromData(string data)
         {
             if (data.IsNum())
             {
@@ -180,6 +308,23 @@ namespace Interpreter
             }
 
             throw new InvalidDataTypeException("Invalid data type!");
+        }
+
+        public DataTypes DataTypeFromString(string typeName)
+        {
+            switch (typeName.ToLower())
+            {
+                case "word":
+                    return DataTypes.WORD;
+                case "num":
+                    return DataTypes.NUM;
+                case "dec":
+                    return DataTypes.DEC;
+                case "binary":
+                    return DataTypes.BINARY;
+                default:
+                    throw new InvalidDataTypeException("Given data type was invalid!");
+            }
         }
 
         public OperationTypes EvaluateOperation(string operation, string toEvaluate)

@@ -21,7 +21,7 @@ namespace Interpreter
         {
             if (Regex.IsMatch(lineToInterprete, Evaluator.VarPattern))
             {
-                return _evaluator.EvaluateVar(lineToInterprete);
+                return _evaluator.CreateVariable(lineToInterprete);
             }
 
             if (lineToInterprete == "clear")
@@ -32,7 +32,7 @@ namespace Interpreter
 
             if (lineToInterprete.Contains("="))
             {
-                return _evaluator.EvaluateAssign(lineToInterprete);
+                return _evaluator.AssignValueToVariable(lineToInterprete);
             }
 
             //Method call
@@ -66,6 +66,7 @@ namespace Interpreter
 
                     if (lineToInterprete.ContainsFromList(Evaluator.OpperatorList))
                     {
+                        lineToInterprete = _evaluator.ReplaceWithVars(lineToInterprete);
                         var e = new Expression(lineToInterprete);
                         return e.Evaluate().ToString();
                     }

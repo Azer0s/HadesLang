@@ -11,6 +11,7 @@ namespace Variables
         NUM = 1,
         DEC = 2,
         WORD = 3,
-        BINARY = 4
+        BINARY = 4,
+        NONE = -1
     }
 }
