@@ -4,17 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1111A8CF-8D05-4914-88EB-AD6CAA7AD6FB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HadesLang</RootNamespace>
-    <AssemblyName>HadesLang</AssemblyName>
+    <RootNamespace>Variables</RootNamespace>
+    <AssemblyName>Variables</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,25 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="AccessTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Cache\Cache.csproj">
-      <Project>{8D612C08-A3D3-4E2F-BD66-FBB7533CAD1E}</Project>
-      <Name>Cache</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Interpreter\Interpreter.csproj">
-      <Project>{ace3e078-2bc8-4c64-a6f3-64d4d00b68ad}</Project>
-      <Name>Interpreter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Variables\Variables.csproj">
-      <Project>{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}</Project>
-      <Name>Variables</Name>
-    </ProjectReference>
+    <Compile Include="Types.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
