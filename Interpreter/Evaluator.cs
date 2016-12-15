@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -61,6 +62,11 @@ namespace Interpreter
 
                 if (data.Count > 4)
                 {
+                    for (int i = 5; i < data.Count; i++)
+                    {
+                        data[4] += data[i];
+                    }
+
                     Cache.Instance.Variables.Add(data[0],
                         new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
                     return AssignValueToVariable(data[0] + "=" + data[4]);
@@ -329,7 +335,7 @@ namespace Interpreter
 
         public OperationTypes EvaluateOperation(string operation, string toEvaluate)
         {
-            if (operation == toEvaluate)
+            if (operation == toEvaluate || operation == "")
             {
                 return OperationTypes.NONE;
             }
