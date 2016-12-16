@@ -15,7 +15,7 @@ namespace Interpreter
     {
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
         public static List<string> OperatorList = new List<string> {"+", "-", "*", "/", "Sqrt", "Sin", "Cos", "Tan"};
-        public static List<string> CompOperatorList = new List<string> {"is","or","and","not","smaller","bigger"};
+        public static List<string> CompOperatorList = new List<string> {"is", "or", "and", "not", "smaller", "bigger"};
         private bool ForceOut = false;
 
         public EvaluatedOperation EvaluateBool(string toEvaluate, string access)
@@ -60,7 +60,7 @@ namespace Interpreter
                         }
                     }
 
-                    return new EvaluatedOperation(func,bool.Parse(e));
+                    return new EvaluatedOperation(func, bool.Parse(e));
                 }
             }
             return null;
@@ -124,7 +124,7 @@ namespace Interpreter
             return false;
         }
 
-        public string CreateVariable(string toEvaluate,string access)
+        public string CreateVariable(string toEvaluate, string access)
         {
             try
             {
@@ -140,12 +140,12 @@ namespace Interpreter
 
                     Cache.Instance.Variables.Add(data[0],
                         new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), "", access));
-                    return AssignValueToVariable(data[0] + "=" + data[4],access);
+                    return AssignValueToVariable(data[0] + "=" + data[4], access);
                 }
                 else
                 {
                     Cache.Instance.Variables.Add(data[0],
-                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), "",access));
+                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), "", access));
                     return $"{data[0]} is undefined";
                 }
             }
@@ -155,21 +155,21 @@ namespace Interpreter
             }
         }
 
-        public string AssignValueToVariable(string toEvaluate,string access)
+        public string AssignValueToVariable(string toEvaluate, string access)
         {
             try
             {
                 var data = toEvaluate.Split('=');
                 var index = data[0].Replace(" ", "");
-                var dt = GetVariable(index,access).Value.DataType;
-                data[1] = ReplaceWithVars(data[1],access);
+                var dt = GetVariable(index, access).Value.DataType;
+                data[1] = ReplaceWithVars(data[1], access);
                 var isOut = false;
 
                 if (data[1].Contains(":"))
                 {
                     var operation = data[1].Split(':');
                     operation[0] = operation[0].Replace(" ", "");
-                    data[1] = "'" + EvaluateCall(operation,access) + "'";
+                    data[1] = "'" + EvaluateCall(operation, access) + "'";
                     isOut = true;
                 }
 
@@ -180,7 +180,7 @@ namespace Interpreter
 
                 if (Regex.IsMatch(data[1], @"\[([^]]*)\]"))
                 {
-                    data[1] = EvaluateBool(data[1],access).Result.ToString().ToLower();
+                    data[1] = EvaluateBool(data[1], access).Result.ToString().ToLower();
                 }
 
                 if (dt == DataTypeFromData(data[1]) || isOut)
@@ -194,7 +194,7 @@ namespace Interpreter
                     {
                         data[1] = data[1].Replace(",", ".");
                     }
-                    SetVariable(index,data[1],access);
+                    SetVariable(index, data[1], access);
                 }
                 else
                 {
@@ -210,7 +210,7 @@ namespace Interpreter
             }
         }
 
-        public KeyValuePair<string,Types> GetVariable(string index,string access)
+        public KeyValuePair<string, Types> GetVariable(string index, string access)
         {
             if (access == Cache.Instance.Variables[index].Owner)
             {
@@ -222,7 +222,7 @@ namespace Interpreter
             }
         }
 
-        public void SetVariable(string variable, string value,string access)
+        public void SetVariable(string variable, string value, string access)
         {
             if (Cache.Instance.Variables[variable].Owner == access)
             {
@@ -236,6 +236,31 @@ namespace Interpreter
 
         public string EvaluateCalculation(string toEvaluate)
         {
+            try
+            {
+                var data = toEvaluate.Split('+');
+
+                foreach (var variable in data)
+                {
+                    if (DataTypeFromData(variable) != DataTypes.WORD)
+                    {
+                        goto tryNumeric;
+                    }
+                }
+
+                string resultString = string.Empty;
+                foreach (var variable in data)
+                {
+                    resultString += Regex.Match(variable, @"\'([^]]*)\'").Groups[1].Value;
+                }
+
+                return resultString;
+            }
+            catch (Exception)
+            {
+            }
+
+            tryNumeric:
             try
             {
                 var e = new Expression(toEvaluate);
@@ -459,11 +484,11 @@ namespace Interpreter
             foreach (var variable in matches)
             {
                 var varName = variable.ToString().Replace("{", "").Replace("}", "");
-                var data = GetVariable(varName,access).Value.Value;
+                var data = GetVariable(varName, access).Value.Value;
 
                 if (GetVariable(varName, access).Value.DataType == DataTypes.WORD)
                 {
-                    s = s.Replace(variable.ToString(), $"\"{data}\"");
+                    s = s.Replace(variable.ToString(), $"'{data}'");
                 }
                 else
                 {
