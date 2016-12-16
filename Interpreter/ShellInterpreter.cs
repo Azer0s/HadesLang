@@ -38,19 +38,7 @@ namespace Interpreter
             //Method call
             if (lineToInterprete.Contains(":"))
             {
-                var call = lineToInterprete.Split(':');
-
-                if (call[0] == "exit")
-                {
-                    try
-                    {
-                        Environment.Exit(int.Parse(call[1]));
-                    }
-                    catch (Exception e)
-                    {
-                        return e.Message;
-                    }
-                }
+                var call = lineToInterprete.Split(new[] {':'},2);
 
                 return _evaluator.EvaluateCall(call);
             }

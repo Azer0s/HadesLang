@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -91,6 +92,7 @@ namespace Interpreter
                 var data = toEvaluate.Split('=');
                 var index = data[0].Replace(" ", "");
                 var dt = Cache.Instance.Variables[index].DataType;
+                data[1] = ReplaceWithVars(data[1]);
                 var isOut = false;
 
                 if (data[1].Contains(":"))
@@ -134,8 +136,12 @@ namespace Interpreter
             }
         }
 
-        public string EvaluateOut(string toEvaluate)
+        public string EvaluateOut(string toEvaluate,bool ignoreQuote)
         {
+            if (ignoreQuote)
+            {
+                toEvaluate = $"'{toEvaluate}'";
+            }
             try
             {
                 if (Regex.IsMatch(toEvaluate, @"\[([^]]*)\]"))
@@ -157,7 +163,6 @@ namespace Interpreter
                 if (Regex.IsMatch(toEvaluate, @"\'([^]]*)\'"))
                 {
                     return Regex.Match(toEvaluate, @"\'([^]]*)\'").Groups[1].Value;
-                    ;
                 }
                 if (Cache.Instance.Variables.ContainsKey(toEvaluate))
                 {
@@ -181,11 +186,25 @@ namespace Interpreter
         public string EvaluateCall(string[] toEvaluate)
         {
             toEvaluate[1] = ReplaceWithVars(toEvaluate[1]);
+            bool isRec = false;
+
+            if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
+            {
+                int index = toEvaluate[1].IndexOf("[");
+                toEvaluate[1] = (index < 0)
+                ? toEvaluate[1]
+                : toEvaluate[1].Remove(index, "[".Length);
+                toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]"));
+
+                var result = EvaluateCall(toEvaluate[1].Split(new[] { ':' }, 2));
+                toEvaluate[1] = result;
+                isRec = true;
+            }
 
             switch (toEvaluate[0])
             {
                 case "out":
-                    return EvaluateOut(toEvaluate[1]);
+                    return EvaluateOut(toEvaluate[1],isRec);
                 case "load":
                     //TODO make load file
                     return /*new FileInterpreter(toEvaluate[1]).FileName*/ "";
@@ -195,6 +214,16 @@ namespace Interpreter
                     return DeleteVar(toEvaluate[1]);
                 case "dumpVars":
                     return DumpAllVariables(toEvaluate[1]);
+                case "exit":
+                    try
+                    {
+                        Environment.Exit(int.Parse(toEvaluate[1]));
+                    }
+                    catch (Exception e)
+                    {
+                        return e.Message;
+                    }
+                    break;
             }
 
             return null;
