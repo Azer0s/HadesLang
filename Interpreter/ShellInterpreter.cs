@@ -37,9 +37,18 @@ namespace Interpreter
             }
 
             //Method call
-            if (lineToInterprete.Contains(":"))
+            if (lineToInterprete.Contains(":") || lineToInterprete.Contains("->"))
             {
-                var call = lineToInterprete.Split(new[] {':'},2);
+                string[] call;
+                if (lineToInterprete.CheckOrder(":","->"))
+                {
+                    call = lineToInterprete.Split(new[] {':'}, 2);
+                }
+                else
+                {
+                    call = new string[2];
+                    call[1] = lineToInterprete;
+                }
 
                 return _evaluator.EvaluateCall(call);
             }
@@ -56,8 +65,7 @@ namespace Interpreter
                     if (lineToInterprete.ContainsFromList(Evaluator.OpperatorList))
                     {
                         lineToInterprete = _evaluator.ReplaceWithVars(lineToInterprete);
-                        var e = new Expression(lineToInterprete);
-                        return e.Evaluate().ToString();
+                        return _evaluator.EvaluateCalculation(lineToInterprete);
                     }
                 }
                 catch (Exception e)

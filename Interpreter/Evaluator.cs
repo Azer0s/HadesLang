@@ -14,7 +14,7 @@ namespace Interpreter
     public class Evaluator
     {
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
-        public static List<string> OpperatorList = new List<string> {"+", "-", "*", "/", "sqrt", "sin", "cos", "tan"};
+        public static List<string> OpperatorList = new List<string> {"+", "-", "*", "/", "Sqrt", "Sin", "Cos", "Tan"};
 
         public EvaluatedOperation EvaluateBool(string toEvaluate)
         {
@@ -102,8 +102,7 @@ namespace Interpreter
 
                 if (data[1].ContainsFromList(OpperatorList))
                 {
-                    var e = new Expression(data[1]);
-                    data[1] = e.Evaluate().ToString();
+                    data[1] = EvaluateCalculation(data[1]);
                 }
 
                 if (Regex.IsMatch(data[1], @"\[([^]]*)\]"))
@@ -116,6 +115,11 @@ namespace Interpreter
                     if (dt == DataTypes.WORD)
                     {
                         data[1] = Regex.Match(data[1], @"\'([^]]*)\'").Groups[1].Value;
+                    }
+
+                    if (dt == DataTypes.DEC)
+                    {
+                        data[1] = data[1].Replace(",", ".");
                     }
                     Cache.Instance.Variables[index].Value = data[1];
                 }
@@ -133,7 +137,20 @@ namespace Interpreter
             }
         }
 
-        public string EvaluateOut(string toEvaluate,bool ignoreQuote)
+        public string EvaluateCalculation(string toEvaluate)
+        {
+            try
+            {
+                var e = new Expression(toEvaluate);
+                return e.Evaluate().ToString().Replace(",",".");
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+
+        public string EvaluateOut(string toEvaluate, bool ignoreQuote)
         {
             if (ignoreQuote)
             {
@@ -147,15 +164,7 @@ namespace Interpreter
                 }
                 if (toEvaluate.ContainsFromList(OpperatorList))
                 {
-                    try
-                    {
-                        var e = new Expression(toEvaluate);
-                        return e.Evaluate().ToString();
-                    }
-                    catch (Exception e)
-                    {
-                        return e.Message;
-                    }
+                    return EvaluateCalculation(toEvaluate);
                 }
                 if (Regex.IsMatch(toEvaluate, @"\'([^]]*)\'"))
                 {
@@ -182,45 +191,75 @@ namespace Interpreter
 
         public string EvaluateCall(string[] toEvaluate)
         {
-            toEvaluate[1] = ReplaceWithVars(toEvaluate[1]);
-            bool isRec = false;
-
-            if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
+            try
             {
-                int index = toEvaluate[1].IndexOf("[");
-                toEvaluate[1] = (index < 0)
-                ? toEvaluate[1]
-                : toEvaluate[1].Remove(index, "[".Length);
-                toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]"));
+                toEvaluate[1] = ReplaceWithVars(toEvaluate[1]);
+                bool isRec = false;
 
-                var result = EvaluateCall(toEvaluate[1].Split(new[] { ':' }, 2));
-                toEvaluate[1] = result;
-                isRec = true;
+                if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
+                {
+                    int index = toEvaluate[1].IndexOf("[");
+                    toEvaluate[1] = (index < 0)
+                    ? toEvaluate[1]
+                    : toEvaluate[1].Remove(index, "[".Length);
+                    toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]"));
+
+                    var result = EvaluateCall(toEvaluate[1].Split(new[] { ':' }, 2));
+                    toEvaluate[1] = result;
+                    isRec = true;
+                }
+
+                if (toEvaluate[1].Contains("->"))
+                {
+                    var call = toEvaluate[1].Split(new[] { "->" }, 2, StringSplitOptions.None);
+
+                    if (Cache.Instance.Variables.ContainsKey(call[0]))
+                    {
+                        if (Cache.Instance.Variables[call[0]].DataType == DataTypes.OBJECT)
+                        {
+                            //Todo call method
+                        }
+                        else
+                        {
+                           throw new InvalidDataTypeException("Variable is not an object!"); 
+                        }
+                    }
+                    else
+                    {
+                        throw new VariableNotDefinedException("Variable not defined!");
+                    }
+                }
+
+                switch (toEvaluate[0])
+                {
+                    case "out":
+                        return EvaluateOut(toEvaluate[1], isRec);
+                    case "load":
+                        //TODO load file
+                        return /*new FileInterpreter(toEvaluate[1]).FileName*/ "";
+                    case "type":
+                        return GetVarType(toEvaluate[1]);
+                    case "uload":
+                        return DeleteVar(toEvaluate[1]);
+                    case "dumpVars":
+                        return DumpAllVariables(toEvaluate[1]);
+                    case "exists":
+                        return Cache.Instance.Variables.ContainsKey(toEvaluate[1]).ToString().ToLower();
+                    case "exit":
+                        try
+                        {
+                            Environment.Exit(int.Parse(toEvaluate[1]));
+                        }
+                        catch (Exception e)
+                        {
+                            return e.Message;
+                        }
+                        break;
+                }
             }
-
-            switch (toEvaluate[0])
+            catch (Exception e)
             {
-                case "out":
-                    return EvaluateOut(toEvaluate[1],isRec);
-                case "load":
-                    //TODO make load file
-                    return /*new FileInterpreter(toEvaluate[1]).FileName*/ "";
-                case "type":
-                    return GetVarType(toEvaluate[1]);
-                case "uload":
-                    return DeleteVar(toEvaluate[1]);
-                case "dumpVars":
-                    return DumpAllVariables(toEvaluate[1]);
-                case "exit":
-                    try
-                    {
-                        Environment.Exit(int.Parse(toEvaluate[1]));
-                    }
-                    catch (Exception e)
-                    {
-                        return e.Message;
-                    }
-                    break;
+                return e.Message;
             }
 
             return null;
@@ -250,6 +289,8 @@ namespace Interpreter
                     sb.Append($"{variable.Key} = {variable.Value.Value}\n");
                 }
             }
+
+            sb.Length = sb.Length - 2;
 
             return sb.ToString();
         }
@@ -288,7 +329,15 @@ namespace Interpreter
                 var varName = variable.ToString().Replace("{", "").Replace("}", "");
                 var data = Cache.Instance.Variables[varName].Value;
 
-                s = s.Replace(variable.ToString(), data);
+                if (Cache.Instance.Variables[varName].DataType == DataTypes.WORD)
+                {
+                    s = s.Replace(variable.ToString(), $"\"{data}\"");
+                }
+                else
+                {
+                    s = s.Replace(variable.ToString(), data);
+                }
+
             }
 
             return s;

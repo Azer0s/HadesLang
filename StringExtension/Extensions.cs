@@ -37,5 +37,32 @@ namespace StringExtension
             }
             return false;
         }
+
+        public static bool CheckOrder(this string s, string toCheck, string toCheck2)
+        {
+            var a = s.IndexOf(toCheck);
+            var b = s.IndexOf(toCheck2);
+
+            if (a == -1)
+            {
+                return false;
+            }
+
+            if (b == -1)
+            {
+                return true;
+            }
+
+            if (a < b)
+            {
+                return true;
+            }
+
+            if (a > b)
+            {
+                return false;
+            }
+            return false;
+        }
     }
 }

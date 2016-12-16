@@ -12,6 +12,7 @@ namespace Variables
         DEC = 2,
         WORD = 3,
         BINARY = 4,
+        OBJECT = 5,
         NONE = -1
     }
 }
