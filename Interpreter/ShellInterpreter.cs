@@ -22,7 +22,7 @@ namespace Interpreter
         {
             if (Regex.IsMatch(lineToInterprete, Evaluator.VarPattern))
             {
-                return _evaluator.CreateVariable(lineToInterprete);
+                return _evaluator.CreateVariable(lineToInterprete,"console");
             }
 
             if (lineToInterprete == "clear")
@@ -33,7 +33,7 @@ namespace Interpreter
 
             if (lineToInterprete.Contains("="))
             {
-                return _evaluator.AssignValueToVariable(lineToInterprete);
+                return _evaluator.AssignValueToVariable(lineToInterprete,"console");
             }
 
             //Method call
@@ -50,7 +50,7 @@ namespace Interpreter
                     call[1] = lineToInterprete;
                 }
 
-                return _evaluator.EvaluateCall(call);
+                return _evaluator.EvaluateCall(call,"console");
             }
             else
             {
@@ -59,12 +59,12 @@ namespace Interpreter
                 {
                     if (Regex.IsMatch(lineToInterprete, @"\[([^]]*)\]"))
                     {
-                        return _evaluator.EvaluateBool(lineToInterprete).Result.ToString().ToLower();
+                        return _evaluator.EvaluateBool(lineToInterprete,"console").Result.ToString().ToLower();
                     }
 
                     if (lineToInterprete.ContainsFromList(Evaluator.OpperatorList))
                     {
-                        lineToInterprete = _evaluator.ReplaceWithVars(lineToInterprete);
+                        lineToInterprete = _evaluator.ReplaceWithVars(lineToInterprete,"console");
                         return _evaluator.EvaluateCalculation(lineToInterprete);
                     }
                 }

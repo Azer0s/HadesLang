@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessDeniedException.cs" />
     <Compile Include="InvalidAccessTypeException.cs" />
     <Compile Include="InvalidDataAssignException.cs" />
     <Compile Include="InvalidDataTypeException.cs" />

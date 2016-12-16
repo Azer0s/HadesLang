@@ -16,9 +16,9 @@ namespace Interpreter
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
         public static List<string> OpperatorList = new List<string> {"+", "-", "*", "/", "Sqrt", "Sin", "Cos", "Tan"};
 
-        public EvaluatedOperation EvaluateBool(string toEvaluate)
+        public EvaluatedOperation EvaluateBool(string toEvaluate,string access)
         {
-            toEvaluate = ReplaceWithVars(toEvaluate);
+            toEvaluate = ReplaceWithVars(toEvaluate,access);
             var reg = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[1].Value;
             var func =
                 EvaluateOperation(
@@ -51,7 +51,7 @@ namespace Interpreter
             return null;
         }
 
-        public string CreateVariable(string toEvaluate)
+        public string CreateVariable(string toEvaluate,string access)
         {
             try
             {
@@ -66,13 +66,13 @@ namespace Interpreter
                     }
 
                     Cache.Instance.Variables.Add(data[0],
-                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
-                    return AssignValueToVariable(data[0] + "=" + data[4]);
+                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), "", access));
+                    return AssignValueToVariable(data[0] + "=" + data[4],access);
                 }
                 else
                 {
                     Cache.Instance.Variables.Add(data[0],
-                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), ""));
+                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), "",access));
                     return $"{data[0]} is undefined";
                 }
             }
@@ -82,21 +82,21 @@ namespace Interpreter
             }
         }
 
-        public string AssignValueToVariable(string toEvaluate)
+        public string AssignValueToVariable(string toEvaluate,string access)
         {
             try
             {
                 var data = toEvaluate.Split('=');
                 var index = data[0].Replace(" ", "");
-                var dt = Cache.Instance.Variables[index].DataType;
-                data[1] = ReplaceWithVars(data[1]);
+                var dt = GetVariable(index,access).Value.DataType;
+                data[1] = ReplaceWithVars(data[1],access);
                 var isOut = false;
 
                 if (data[1].Contains(":"))
                 {
                     var operation = data[1].Split(':');
                     operation[0] = operation[0].Replace(" ", "");
-                    data[1] = "'" + EvaluateCall(operation) + "'";
+                    data[1] = "'" + EvaluateCall(operation,access) + "'";
                     isOut = true;
                 }
 
@@ -107,7 +107,7 @@ namespace Interpreter
 
                 if (Regex.IsMatch(data[1], @"\[([^]]*)\]"))
                 {
-                    data[1] = EvaluateBool(data[1]).Result.ToString().ToLower();
+                    data[1] = EvaluateBool(data[1],access).Result.ToString().ToLower();
                 }
 
                 if (dt == DataTypeFromData(data[1]) || isOut)
@@ -121,7 +121,7 @@ namespace Interpreter
                     {
                         data[1] = data[1].Replace(",", ".");
                     }
-                    Cache.Instance.Variables[index].Value = data[1];
+                    SetVariable(index,data[1],access);
                 }
                 else
                 {
@@ -134,6 +134,30 @@ namespace Interpreter
             catch (Exception e)
             {
                 return e.Message;
+            }
+        }
+
+        public KeyValuePair<string,Types> GetVariable(string index,string access)
+        {
+            if (access == Cache.Instance.Variables[index].Owner)
+            {
+                return new KeyValuePair<string, Types>(index, Cache.Instance.Variables[index]);
+            }
+            else
+            {
+                throw new AccessDeniedException("You are note allowed to access this variable!");
+            }
+        }
+
+        public void SetVariable(string variable, string value,string access)
+        {
+            if (Cache.Instance.Variables[variable].Owner == access)
+            {
+                Cache.Instance.Variables[variable].Value = value;
+            }
+            else
+            {
+                throw new AccessDeniedException("You are note allowed to access this variable!");
             }
         }
 
@@ -150,7 +174,7 @@ namespace Interpreter
             }
         }
 
-        public string EvaluateOut(string toEvaluate, bool ignoreQuote)
+        public string EvaluateOut(string toEvaluate, bool ignoreQuote,string access)
         {
             if (ignoreQuote)
             {
@@ -160,7 +184,7 @@ namespace Interpreter
             {
                 if (Regex.IsMatch(toEvaluate, @"\[([^]]*)\]"))
                 {
-                    return EvaluateBool(toEvaluate).Result.ToString().ToLower();
+                    return EvaluateBool(toEvaluate,access).Result.ToString().ToLower();
                 }
                 if (toEvaluate.ContainsFromList(OpperatorList))
                 {
@@ -172,7 +196,7 @@ namespace Interpreter
                 }
                 if (Cache.Instance.Variables.ContainsKey(toEvaluate))
                 {
-                    return Cache.Instance.Variables[toEvaluate].Value;
+                    return GetVariable(toEvaluate,access).Value.Value;
                 }
                 else
                 {
@@ -189,11 +213,11 @@ namespace Interpreter
             }
         }
 
-        public string EvaluateCall(string[] toEvaluate)
+        public string EvaluateCall(string[] toEvaluate,string access)
         {
             try
             {
-                toEvaluate[1] = ReplaceWithVars(toEvaluate[1]);
+                toEvaluate[1] = ReplaceWithVars(toEvaluate[1],access);
                 bool isRec = false;
 
                 if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
@@ -204,7 +228,7 @@ namespace Interpreter
                     : toEvaluate[1].Remove(index, "[".Length);
                     toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]"));
 
-                    var result = EvaluateCall(toEvaluate[1].Split(new[] { ':' }, 2));
+                    var result = EvaluateCall(toEvaluate[1].Split(new[] { ':' }, 2),access);
                     toEvaluate[1] = result;
                     isRec = true;
                 }
@@ -215,7 +239,7 @@ namespace Interpreter
 
                     if (Cache.Instance.Variables.ContainsKey(call[0]))
                     {
-                        if (Cache.Instance.Variables[call[0]].DataType == DataTypes.OBJECT)
+                        if (GetVariable(call[0],access).Value.DataType == DataTypes.OBJECT)
                         {
                             //Todo call method
                         }
@@ -233,14 +257,14 @@ namespace Interpreter
                 switch (toEvaluate[0])
                 {
                     case "out":
-                        return EvaluateOut(toEvaluate[1], isRec);
+                        return EvaluateOut(toEvaluate[1], isRec,access);
                     case "load":
                         //TODO load file
                         return /*new FileInterpreter(toEvaluate[1]).FileName*/ "";
                     case "type":
-                        return GetVarType(toEvaluate[1]);
+                        return GetVarType(toEvaluate[1],access);
                     case "uload":
-                        return DeleteVar(toEvaluate[1]);
+                        return DeleteVar(toEvaluate[1],access);
                     case "dumpVars":
                         return DumpAllVariables(toEvaluate[1]);
                     case "exists":
@@ -295,13 +319,13 @@ namespace Interpreter
             return sb.ToString();
         }
 
-        private string DeleteVar(string s)
+        private string DeleteVar(string s,string access)
         {
             try
             {
                 if (Cache.Instance.Variables.ContainsKey(s))
                 {
-                    Cache.Instance.Variables.Remove(s);
+                    RemoveVariable(s,access);
                     return "Variable unloaded!";
                 }
                 else
@@ -319,7 +343,19 @@ namespace Interpreter
             }
         }
 
-        public string ReplaceWithVars(string s)
+        private void RemoveVariable(string s, string access)
+        {
+            if (Cache.Instance.Variables[s].Owner == access)
+            {
+                Cache.Instance.Variables.Remove(s);
+            }
+            else
+            {
+                throw new AccessDeniedException("You are note allowed to access this variable!");
+            }
+        }
+
+        public string ReplaceWithVars(string s,string access)
         {
             var reg = new Regex(@"\{([^\}]+)\}");
             var matches  = reg.Matches(s);
@@ -327,9 +363,9 @@ namespace Interpreter
             foreach (var variable in matches)
             {
                 var varName = variable.ToString().Replace("{", "").Replace("}", "");
-                var data = Cache.Instance.Variables[varName].Value;
+                var data = GetVariable(varName,access).Value.Value;
 
-                if (Cache.Instance.Variables[varName].DataType == DataTypes.WORD)
+                if (GetVariable(varName, access).Value.DataType == DataTypes.WORD)
                 {
                     s = s.Replace(variable.ToString(), $"\"{data}\"");
                 }
@@ -343,13 +379,13 @@ namespace Interpreter
             return s;
         }
 
-        private string GetVarType(string s)
+        private string GetVarType(string s,string access)
         { 
             try
             {
                 if (Cache.Instance.Variables.ContainsKey(s))
                 {
-                    return Cache.Instance.Variables[s].DataType.ToString().ToLower();
+                    return GetVariable(s, access).Value.DataType.ToString().ToLower();
                 }
                 else
                 {
