@@ -16,6 +16,7 @@ namespace Interpreter
     public class ShellInterpreter
     {
         private static readonly Evaluator _evaluator = new Evaluator();
+        public bool Clear { get; set; } = false;
 
         public string InterpretLine(string lineToInterprete)
         {
@@ -26,7 +27,7 @@ namespace Interpreter
 
             if (lineToInterprete == "clear")
             {
-                Console.Clear();
+                Clear = true;
                 return string.Empty;
             }
 

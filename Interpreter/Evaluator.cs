@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Exceptions;
 using NCalc;
 using StringExtension;
@@ -17,7 +14,7 @@ namespace Interpreter
     public class Evaluator
     {
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
-        public static List<string> OpperatorList = new List<string>() {"+", "-", "*", "/", "sqrt", "sin", "cos", "tan"};
+        public static List<string> OpperatorList = new List<string> {"+", "-", "*", "/", "sqrt", "sin", "cos", "tan"};
 
         public EvaluatedOperation EvaluateBool(string toEvaluate)
         {
@@ -38,14 +35,14 @@ namespace Interpreter
                 if (reg.Contains("is") || reg.Contains("or") || reg.Contains("and") || reg.Contains("not") ||
                     reg.Contains("smaller") || reg.Contains("bigger"))
                 {
+                    reg = reg.Replace("smallerIs", "<=");
+                    reg = reg.Replace("biggerIs", ">=");
                     reg = reg.Replace("is", "==");
                     reg = reg.Replace("or", "||");
                     reg = reg.Replace("and", "&&");
                     reg = reg.Replace("not", "!=");
                     reg = reg.Replace("smaller", "<");
                     reg = reg.Replace("bigger", ">");
-                    reg = reg.Replace("smallerIs", "<=");
-                    reg = reg.Replace("biggerIs", ">=");
 
                     var e = new Expression(reg);
                     return new EvaluatedOperation(func, bool.Parse(e.Evaluate().ToString().ToLower()));
@@ -58,14 +55,14 @@ namespace Interpreter
         {
             try
             {
-                var data = toEvaluate.Split(' ', '=').ToList();
-                data.RemoveAll(s => s.Equals(""));
+                var data = toEvaluate.Split(' ').ToList();
+                data.RemoveAll(s => s.Equals("") || s.Equals("="));
 
                 if (data.Count > 4)
                 {
                     for (int i = 5; i < data.Count; i++)
                     {
-                        data[4] += data[i];
+                        data[4] += $" {data[i]}";
                     }
 
                     Cache.Instance.Variables.Add(data[0],

@@ -23,7 +23,17 @@ namespace HadesLang
             {
                 Console.Write(">");
                 var res = Console.ReadLine();
-                Console.WriteLine(interpreter.InterpretLine(res));
+                var returnVar = interpreter.InterpretLine(res);
+
+                if (interpreter.Clear)
+                {
+                    interpreter.Clear = false;
+                    Console.Clear();
+                }
+                else
+                {
+                    Console.WriteLine(returnVar);
+                }
             }
         }
     }
