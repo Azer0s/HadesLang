@@ -50,7 +50,7 @@ namespace Interpreter
                     call[1] = lineToInterprete;
                 }
 
-                return _evaluator.EvaluateCall(call,"console");
+                return _evaluator.EvaluateCall(call,"console").Key;
             }
             else
             {
@@ -62,7 +62,7 @@ namespace Interpreter
                         return _evaluator.EvaluateBool(lineToInterprete,"console").Result.ToString().ToLower();
                     }
 
-                    if (lineToInterprete.ContainsFromList(Evaluator.OpperatorList))
+                    if (lineToInterprete.ContainsFromList(Evaluator.OperatorList))
                     {
                         lineToInterprete = _evaluator.ReplaceWithVars(lineToInterprete,"console");
                         return _evaluator.EvaluateCalculation(lineToInterprete);

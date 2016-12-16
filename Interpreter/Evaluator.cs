@@ -14,11 +14,13 @@ namespace Interpreter
     public class Evaluator
     {
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
-        public static List<string> OpperatorList = new List<string> {"+", "-", "*", "/", "Sqrt", "Sin", "Cos", "Tan"};
+        public static List<string> OperatorList = new List<string> {"+", "-", "*", "/", "Sqrt", "Sin", "Cos", "Tan"};
+        public static List<string> CompOperatorList = new List<string> {"is","or","and","not","smaller","bigger"};
+        private bool ForceOut = false;
 
-        public EvaluatedOperation EvaluateBool(string toEvaluate,string access)
+        public EvaluatedOperation EvaluateBool(string toEvaluate, string access)
         {
-            toEvaluate = ReplaceWithVars(toEvaluate,access);
+            toEvaluate = ReplaceWithVars(toEvaluate, access);
             var reg = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[1].Value;
             var func =
                 EvaluateOperation(
@@ -32,11 +34,11 @@ namespace Interpreter
                     return new EvaluatedOperation(func, bool.Parse(reg));
                 }
 
-                if (reg.Contains("is") || reg.Contains("or") || reg.Contains("and") || reg.Contains("not") ||
-                    reg.Contains("smaller") || reg.Contains("bigger"))
+                if (reg.ContainsFromList(CompOperatorList))
                 {
                     reg = reg.Replace("smallerIs", "<=");
                     reg = reg.Replace("biggerIs", ">=");
+                    reg = reg.Replace("xor", "^");
                     reg = reg.Replace("is", "==");
                     reg = reg.Replace("or", "||");
                     reg = reg.Replace("and", "&&");
@@ -44,11 +46,82 @@ namespace Interpreter
                     reg = reg.Replace("smaller", "<");
                     reg = reg.Replace("bigger", ">");
 
-                    var e = new Expression(reg);
-                    return new EvaluatedOperation(func, bool.Parse(e.Evaluate().ToString().ToLower()));
+                    var e = new Expression(reg).Evaluate().ToString().ToLower();
+
+                    if (e.IsNum())
+                    {
+                        if (e == "1")
+                        {
+                            e = "true";
+                        }
+                        if (e == "0")
+                        {
+                            e = "false";
+                        }
+                    }
+
+                    return new EvaluatedOperation(func,bool.Parse(e));
                 }
             }
             return null;
+        }
+
+        public bool TryEvaluateBool(string toEvaluate, string access, out string result)
+        {
+            try
+            {
+                toEvaluate = ReplaceWithVars(toEvaluate, access);
+                var reg = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[1].Value;
+
+                if (reg == "")
+                {
+                    reg = toEvaluate;
+                }
+
+                if (!string.IsNullOrWhiteSpace(reg))
+                {
+                    if (reg == "true" || reg == "false")
+                    {
+                        result = reg;
+                        return true;
+                    }
+
+                    if (reg.ContainsFromList(CompOperatorList))
+                    {
+                        reg = reg.Replace("smallerIs", "<=");
+                        reg = reg.Replace("biggerIs", ">=");
+                        reg = reg.Replace("is", "==");
+                        reg = reg.Replace("xor", "^");
+                        reg = reg.Replace("or", "||");
+                        reg = reg.Replace("and", "&&");
+                        reg = reg.Replace("not", "!=");
+                        reg = reg.Replace("smaller", "<");
+                        reg = reg.Replace("bigger", ">");
+
+                        var e = new Expression(reg).Evaluate().ToString().ToLower();
+
+                        if (e.IsNum())
+                        {
+                            if (e == "1")
+                            {
+                                e = "true";
+                            }
+                            if (e == "0")
+                            {
+                                e = "false";
+                            }
+                        }
+
+                        result = e;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            result = null;
+            return false;
         }
 
         public string CreateVariable(string toEvaluate,string access)
@@ -100,7 +173,7 @@ namespace Interpreter
                     isOut = true;
                 }
 
-                if (data[1].ContainsFromList(OpperatorList))
+                if (data[1].ContainsFromList(OperatorList))
                 {
                     data[1] = EvaluateCalculation(data[1]);
                 }
@@ -186,7 +259,7 @@ namespace Interpreter
                 {
                     return EvaluateBool(toEvaluate,access).Result.ToString().ToLower();
                 }
-                if (toEvaluate.ContainsFromList(OpperatorList))
+                if (toEvaluate.ContainsFromList(OperatorList))
                 {
                     return EvaluateCalculation(toEvaluate);
                 }
@@ -213,8 +286,17 @@ namespace Interpreter
             }
         }
 
-        public string EvaluateCall(string[] toEvaluate,string access)
+        public KeyValuePair<string,bool> EvaluateCall(string[] toEvaluate,string access)
         {
+            if (toEvaluate.Length == 1)
+            {
+                string tryResult;
+                if (TryEvaluateBool(toEvaluate[0],access,out tryResult))
+                {
+                    return new KeyValuePair<string, bool>(tryResult, false);
+                }
+            }
+
             try
             {
                 toEvaluate[1] = ReplaceWithVars(toEvaluate[1],access);
@@ -229,7 +311,7 @@ namespace Interpreter
                     toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]"));
 
                     var result = EvaluateCall(toEvaluate[1].Split(new[] { ':' }, 2),access);
-                    toEvaluate[1] = result;
+                    toEvaluate[1] = result.Key;
                     isRec = true;
                 }
 
@@ -254,21 +336,27 @@ namespace Interpreter
                     }
                 }
 
+                string callResult = null;
                 switch (toEvaluate[0])
                 {
                     case "out":
-                        return EvaluateOut(toEvaluate[1], isRec,access);
+                        callResult = EvaluateOut(toEvaluate[1], isRec, access);
+                        ForceOut = true;
+                        goto returnResult;
                     case "load":
-                        //TODO load file
-                        return /*new FileInterpreter(toEvaluate[1]).FileName*/ "";
+                        //TODO load file new FileInterpreter(toEvaluate[1]).FileName
+                        return new KeyValuePair<string, bool>("",false);
                     case "type":
-                        return GetVarType(toEvaluate[1],access);
+                        callResult = GetVarType(toEvaluate[1], access);
+                        goto returnResult;
                     case "uload":
-                        return DeleteVar(toEvaluate[1],access);
+                        callResult = DeleteVar(toEvaluate[1], access);
+                        goto returnResult;
                     case "dumpVars":
-                        return DumpAllVariables(toEvaluate[1]);
+                        callResult = DumpAllVariables(toEvaluate[1]);
+                        goto returnResult;
                     case "exists":
-                        return Cache.Instance.Variables.ContainsKey(toEvaluate[1]).ToString().ToLower();
+                        return new KeyValuePair<string, bool>(Cache.Instance.Variables.ContainsKey(toEvaluate[1]).ToString().ToLower(),false);
                     case "exit":
                         try
                         {
@@ -276,17 +364,25 @@ namespace Interpreter
                         }
                         catch (Exception e)
                         {
-                            return e.Message;
+                            return new KeyValuePair<string, bool>(e.Message,true);
                         }
                         break;
                 }
+
+                returnResult:
+                if (ForceOut)
+                {
+                    ForceOut = false;
+                    return new KeyValuePair<string, bool>(callResult,true);
+                }
+                return new KeyValuePair<string, bool>(callResult,false);
             }
             catch (Exception e)
             {
-                return e.Message;
+                return new KeyValuePair<string, bool>(e.Message,true);
             }
 
-            return null;
+            return new KeyValuePair<string, bool>();
         }
 
         private string DumpAllVariables(string s)
