@@ -29,7 +29,7 @@ endala
 ### foo.hades
 ```
 a as num reachable_all = 18
-load:bar.hades as b
+load:'bar.hades' as b
 b->printA:void
 ```
 ### bar.hades
@@ -40,6 +40,11 @@ endfunc
 ```
 
 ## Conditions
+```
+case[Sqrt(9) smallerIs 3]
+out:'The squareroot of 9 is smaller/equals 3'
+endcase
+```
 
 ## Unloading
 ```
