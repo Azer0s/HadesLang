@@ -10,7 +10,7 @@ namespace Interpreter
 {
     class Interpreter
     {
-        private static readonly Evaluator _evaluator = new Evaluator();
+        public readonly Evaluator Evaluator = new Evaluator();
         public bool Clear { get; set; } = false;
 
         public KeyValuePair<string, bool> InterpretLine(string lineToInterprete, string access, out string operation)
@@ -18,11 +18,11 @@ namespace Interpreter
             operation = "";
             if (Regex.IsMatch(lineToInterprete, Evaluator.VarPattern))
             {
-                var createResult = _evaluator.CreateVariable(lineToInterprete, access);
+                var createResult = Evaluator.CreateVariable(lineToInterprete, access);
 
-                if (_evaluator.ForceOut)
+                if (Evaluator.ForceOut)
                 {
-                    _evaluator.ForceOut = false;
+                    Evaluator.ForceOut = false;
                     return new KeyValuePair<string, bool>(createResult, true);
                 }
                 return new KeyValuePair<string, bool>(createResult, false);
@@ -36,7 +36,7 @@ namespace Interpreter
 
             if (lineToInterprete.Contains("="))
             {
-                return new KeyValuePair<string, bool>(_evaluator.AssignValueToVariable(lineToInterprete, access), false);
+                return new KeyValuePair<string, bool>(Evaluator.AssignValueToVariable(lineToInterprete, access), false);
             }
 
             //Method call
@@ -53,7 +53,7 @@ namespace Interpreter
                     call[1] = lineToInterprete;
                 }
 
-                return _evaluator.EvaluateCall(call, access);
+                return Evaluator.EvaluateCall(call, access);
             }
             else
             {
@@ -62,14 +62,14 @@ namespace Interpreter
                 {
                     if (Regex.IsMatch(lineToInterprete, @"\[([^]]*)\]"))
                     {
-                        var boolRes = _evaluator.EvaluateBool(lineToInterprete, access);
+                        var boolRes = Evaluator.EvaluateBool(lineToInterprete, access);
                         operation = boolRes.OperationType.ToString().ToLower();
                         return new KeyValuePair<string, bool>(boolRes.Result.ToString().ToLower(), false);
                     }
 
                     if (lineToInterprete.ContainsFromList(Evaluator.OperatorList))
                     {
-                        return new KeyValuePair<string, bool>(_evaluator.EvaluateCalculation(lineToInterprete), false);
+                        return new KeyValuePair<string, bool>(Evaluator.EvaluateCalculation(lineToInterprete), false);
                     }
                 }
                 catch (Exception e)

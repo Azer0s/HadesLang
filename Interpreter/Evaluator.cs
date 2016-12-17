@@ -37,11 +37,9 @@ namespace Interpreter
         public EvaluatedOperation EvaluateBool(string toEvaluate, string access)
         {
             toEvaluate = ReplaceWithVars(toEvaluate, access);
-            var reg = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[1].Value;
-            var func =
-                EvaluateOperation(
-                    toEvaluate.Replace(Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[0].Value, ""),
-                    toEvaluate);
+            var groups = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups;
+            var reg = groups[1].Value;
+            var func = EvaluateOperation(toEvaluate.Replace(" ", "").Replace(groups[1].Value, "").Replace("[", "").Replace("]",""));
 
             if (!string.IsNullOrWhiteSpace(reg))
             {
@@ -86,35 +84,37 @@ namespace Interpreter
         {
             try
             {
-                toEvaluate = ReplaceWithVars(toEvaluate, access);
-                var reg = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups[1].Value;
+                var groups = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups;
+                var reg = groups[1].Value;
 
-                if (reg == "")
+                if (reg != "")
                 {
-                    reg = toEvaluate;
+                    toEvaluate = reg;
                 }
 
-                if (!string.IsNullOrWhiteSpace(reg))
+                toEvaluate = ReplaceWithVars(toEvaluate, access);
+
+                if (!string.IsNullOrWhiteSpace(toEvaluate))
                 {
-                    if (reg == "true" || reg == "false")
+                    if (toEvaluate == "true" || toEvaluate == "false")
                     {
-                        result = reg;
+                        result = toEvaluate;
                         return true;
                     }
 
-                    if (reg.ContainsFromList(CompOperatorList))
+                    if (toEvaluate.ContainsFromList(CompOperatorList))
                     {
-                        reg = reg.Replace("smallerIs", "<=");
-                        reg = reg.Replace("biggerIs", ">=");
-                        reg = reg.Replace("is", "==");
-                        reg = reg.Replace("xor", "^");
-                        reg = reg.Replace("or", "||");
-                        reg = reg.Replace("and", "&&");
-                        reg = reg.Replace("not", "!=");
-                        reg = reg.Replace("smaller", "<");
-                        reg = reg.Replace("bigger", ">");
+                        toEvaluate = toEvaluate.Replace("smallerIs", "<=");
+                        toEvaluate = toEvaluate.Replace("biggerIs", ">=");
+                        toEvaluate = toEvaluate.Replace("xor", "^");
+                        toEvaluate = toEvaluate.Replace("is", "==");
+                        toEvaluate = toEvaluate.Replace("or", "||");
+                        toEvaluate = toEvaluate.Replace("and", "&&");
+                        toEvaluate = toEvaluate.Replace("not", "!=");
+                        toEvaluate = toEvaluate.Replace("smaller", "<");
+                        toEvaluate = toEvaluate.Replace("bigger", ">");
 
-                        var e = new Expression(reg).Evaluate().ToString().ToLower();
+                        var e = new Expression(toEvaluate).Evaluate().ToString().ToLower();
 
                         if (e.IsNum())
                         {
@@ -135,6 +135,7 @@ namespace Interpreter
             }
             catch (Exception)
             {
+                //ignored
             }
             result = null;
             return false;
@@ -209,6 +210,11 @@ namespace Interpreter
                     if (dt == DataTypes.WORD)
                     {
                         data[1] = Regex.Match(data[1], @"\'([^]]*)\'").Groups[1].Value;
+                    }
+
+                    if (dt != DataTypes.WORD)
+                    {
+                        data[1] = data[1].Replace(" ", "");
                     }
 
                     if (dt == DataTypes.DEC)
@@ -482,13 +488,10 @@ namespace Interpreter
 
                     Cache.Instance.Variables.Add(kwp.Key,kwp.Value);
                 }
-                if (Regex.IsMatch(s, @"'([^]]*)'"))
-                {
-                    var fiL = new FileInterpreter(s);
-                    fiL.LoadAll();
-                    return "";
-                }
-                throw new InvalidFileNameException("Filename is invalid!");
+                if (!Regex.IsMatch(s, @"'([^]]*)'")) throw new InvalidFileNameException("Filename is invalid!");
+                var fiL = new FileInterpreter(s);
+                fiL.LoadAll();
+                return "";
             }
             catch (Exception e)
             {
@@ -530,6 +533,11 @@ namespace Interpreter
                 {
                     return e.Message;
                 }
+            }
+
+            if (Cache.Instance.Variables.Count == 0)
+            {
+                return string.Empty;
             }
 
             foreach (var variable in Cache.Instance.Variables)
@@ -583,12 +591,9 @@ namespace Interpreter
 
         private bool Exists(Tuple<string, string> instanceVariable)
         {
-            foreach (var variable in Cache.Instance.Variables)
+            if (Cache.Instance.Variables.Any(variable => variable.Value.Access == AccessTypes.REACHABLE_ALL && variable.Key.Item1 == instanceVariable.Item1))
             {
-                if (variable.Value.Access == AccessTypes.REACHABLE_ALL && variable.Key.Item1 == instanceVariable.Item1)
-                {
-                    return true;
-                }
+                return true;
             }
 
             try
@@ -612,15 +617,7 @@ namespace Interpreter
                 var varName = variable.ToString().Replace("{", "").Replace("}", "");
                 var data = GetVariable(varName, access).Value.Value;
 
-                if (GetVariable(varName, access).Value.DataType == DataTypes.WORD)
-                {
-                    s = s.Replace(variable.ToString(), $"'{data}'");
-                }
-                else
-                {
-                    s = s.Replace(variable.ToString(), data);
-                }
-
+                s = s.Replace(variable.ToString(), GetVariable(varName, access).Value.DataType == DataTypes.WORD ? $"'{data}'" : data);
             }
 
             return s;
@@ -691,9 +688,9 @@ namespace Interpreter
             }
         }
 
-        public OperationTypes EvaluateOperation(string operation, string toEvaluate)
+        public OperationTypes EvaluateOperation(string operation)
         {
-            if (operation == toEvaluate || operation == "")
+            if (operation == "")
             {
                 return OperationTypes.NONE;
             }
