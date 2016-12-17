@@ -8,6 +8,6 @@ namespace Exceptions
 {
     public class InvalidAccessTypeException : Exception
     {
-        public InvalidAccessTypeException(string message) : base(message) { }
+        public InvalidAccessTypeException(string message) : base(typeof(InvalidAccessTypeException).Name + ": " + message) { }
     }
 }

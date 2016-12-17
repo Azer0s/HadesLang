@@ -47,6 +47,7 @@
     <Compile Include="EvaluatedOperation.cs" />
     <Compile Include="Evaluator.cs" />
     <Compile Include="FileInterpreter.cs" />
+    <Compile Include="Interpreter.cs" />
     <Compile Include="OperationTypes.cs" />
     <Compile Include="ShellInterpreter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

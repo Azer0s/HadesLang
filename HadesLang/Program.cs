@@ -16,25 +16,10 @@ namespace HadesLang
         static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+            Console.OutputEncoding = Encoding.UTF8;
 
-            var interpreter = new ShellInterpreter();
-            Cache.Instance.Variables = new Dictionary<string,Types>();
-            while (true)
-            {
-                Console.Write(">");
-                var res = Console.ReadLine();
-                var returnVar = interpreter.InterpretLine(res);
-
-                if (interpreter.Clear)
-                {
-                    interpreter.Clear = false;
-                    Console.Clear();
-                }
-                else
-                {
-                    Console.WriteLine(returnVar);
-                }
-            }
+            var s = new ShellInterpreter();
+            s.Start();
         }
     }
 }

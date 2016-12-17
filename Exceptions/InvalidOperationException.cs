@@ -8,6 +8,6 @@ namespace Exceptions
 {
     public class InvalidOperationException : Exception
     {
-        public InvalidOperationException (string message) : base(message) { }
+        public InvalidOperationException (string message) : base(typeof(InvalidOperationException).Name + ": " + message) { }
     }
 }

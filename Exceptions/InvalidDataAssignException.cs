@@ -8,6 +8,6 @@ namespace Exceptions
 {
     public class InvalidDataAssignException : Exception
     {
-        public InvalidDataAssignException(string message) : base(message){ }
+        public InvalidDataAssignException(string message) : base(typeof(InvalidDataTypeException).Name + ": " + message) { }
     }
 }

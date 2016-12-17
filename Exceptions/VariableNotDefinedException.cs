@@ -8,6 +8,6 @@ namespace Exceptions
 {
     public class VariableNotDefinedException : Exception
     {
-        public VariableNotDefinedException(string message) : base(message) { }
+        public VariableNotDefinedException(string message) : base(typeof(VariableNotDefinedException).Name + ": " + message) { }
     }
 }

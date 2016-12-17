@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Exceptions;
@@ -14,9 +16,23 @@ namespace Interpreter
     public class Evaluator
     {
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
-        public static List<string> OperatorList = new List<string> {"+", "-", "*", "/", "Sqrt", "Sin", "Cos", "Tan"};
+
+        public static List<string> OperatorList = new List<string>
+        {
+            "+",
+            "-",
+            "*",
+            "/",
+            "Sqrt",
+            "Sin",
+            "Cos",
+            "Tan",
+            "Pow",
+            "[Pi]"
+        };
+
         public static List<string> CompOperatorList = new List<string> {"is", "or", "and", "not", "smaller", "bigger"};
-        private bool ForceOut = false;
+        public bool ForceOut = false;
 
         public EvaluatedOperation EvaluateBool(string toEvaluate, string access)
         {
@@ -130,7 +146,14 @@ namespace Interpreter
             {
                 var data = toEvaluate.Split(' ').ToList();
                 data.RemoveAll(s => s.Equals("") || s.Equals("="));
+                var dt = TypeParser.ParseDataType(data[2]);
+                var at = TypeParser.ParseAccessType(data[3]);
 
+                if (Exists(new Tuple<string, string>(data[0], access)))
+                {
+                    ForceOut = true;
+                    throw new DefinationDeniedException("Variable has already been defined with acces type: reachable_all");
+                }
                 if (data.Count > 4)
                 {
                     for (int i = 5; i < data.Count; i++)
@@ -138,14 +161,12 @@ namespace Interpreter
                         data[4] += $" {data[i]}";
                     }
 
-                    Cache.Instance.Variables.Add(data[0],
-                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), "", access));
+                    Cache.Instance.Variables.Add(new Tuple<string, string>(data[0], access), new Types(at, dt, ""));
                     return AssignValueToVariable(data[0] + "=" + data[4], access);
                 }
                 else
                 {
-                    Cache.Instance.Variables.Add(data[0],
-                        new Types(TypeParser.ParseAccessType(data[3]), TypeParser.ParseDataType(data[2]), "", access));
+                    Cache.Instance.Variables.Add(new Tuple<string, string>(data[0], access), new Types(at, dt, ""));
                     return $"{data[0]} is undefined";
                 }
             }
@@ -183,7 +204,7 @@ namespace Interpreter
                     data[1] = EvaluateBool(data[1], access).Result.ToString().ToLower();
                 }
 
-                if (dt == DataTypeFromData(data[1]) || isOut)
+                if (dt == DataTypeFromData(data[1]) || isOut || (dt == DataTypes.DEC && DataTypeFromData(data[1]) == DataTypes.NUM))
                 {
                     if (dt == DataTypes.WORD)
                     {
@@ -212,9 +233,17 @@ namespace Interpreter
 
         public KeyValuePair<string, Types> GetVariable(string index, string access)
         {
-            if (access == Cache.Instance.Variables[index].Owner)
+            if (Exists(new Tuple<string, string>(index, access)))
             {
-                return new KeyValuePair<string, Types>(index, Cache.Instance.Variables[index]);
+                foreach (var varN in Cache.Instance.Variables)
+                {
+                    if (varN.Value.Access == AccessTypes.REACHABLE_ALL && varN.Key.Item1 == index)
+                    {
+                        return new KeyValuePair<string, Types>(varN.Key.Item1,varN.Value);
+                    }
+                }
+
+                return new KeyValuePair<string, Types>(index, Cache.Instance.Variables[new Tuple<string, string>(index,access)]);
             }
             else
             {
@@ -224,9 +253,17 @@ namespace Interpreter
 
         public void SetVariable(string variable, string value, string access)
         {
-            if (Cache.Instance.Variables[variable].Owner == access)
+            foreach (var varN in Cache.Instance.Variables)
             {
-                Cache.Instance.Variables[variable].Value = value;
+                if (varN.Value.Access == AccessTypes.REACHABLE_ALL && varN.Key.Item1 == variable)
+                {
+                    Cache.Instance.Variables[varN.Key].Value = value;
+                }
+            }
+
+            if (Exists(new Tuple<string, string>(variable, access)))
+            {
+                Cache.Instance.Variables[new Tuple<string, string>(variable,access)].Value = value;
             }
             else
             {
@@ -236,6 +273,7 @@ namespace Interpreter
 
         public string EvaluateCalculation(string toEvaluate)
         {
+            toEvaluate = ReplaceWithVars(toEvaluate, "console");
             try
             {
                 var data = toEvaluate.Split('+');
@@ -263,8 +301,15 @@ namespace Interpreter
             tryNumeric:
             try
             {
-                var e = new Expression(toEvaluate);
-                return e.Evaluate().ToString().Replace(",",".");
+                var e = new Expression(toEvaluate)
+                {
+                    Parameters =
+                    {
+                        ["Pi"] = Math.PI,
+                        ["E"] = Math.E
+                    }
+                };
+                return e.Evaluate().ToString().Replace(",", ".");
             }
             catch (Exception e)
             {
@@ -272,7 +317,7 @@ namespace Interpreter
             }
         }
 
-        public string EvaluateOut(string toEvaluate, bool ignoreQuote,string access)
+        public string EvaluateOut(string toEvaluate, bool ignoreQuote, string access)
         {
             if (ignoreQuote)
             {
@@ -282,7 +327,7 @@ namespace Interpreter
             {
                 if (Regex.IsMatch(toEvaluate, @"\[([^]]*)\]"))
                 {
-                    return EvaluateBool(toEvaluate,access).Result.ToString().ToLower();
+                    return EvaluateBool(toEvaluate, access).Result.ToString().ToLower();
                 }
                 if (toEvaluate.ContainsFromList(OperatorList))
                 {
@@ -292,9 +337,9 @@ namespace Interpreter
                 {
                     return Regex.Match(toEvaluate, @"\'([^]]*)\'").Groups[1].Value;
                 }
-                if (Cache.Instance.Variables.ContainsKey(toEvaluate))
+                if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(toEvaluate,access)))
                 {
-                    return GetVariable(toEvaluate,access).Value.Value;
+                    return GetVariable(toEvaluate, access).Value.Value;
                 }
                 else
                 {
@@ -311,12 +356,12 @@ namespace Interpreter
             }
         }
 
-        public KeyValuePair<string,bool> EvaluateCall(string[] toEvaluate,string access)
+        public KeyValuePair<string, bool> EvaluateCall(string[] toEvaluate, string access)
         {
             if (toEvaluate.Length == 1)
             {
                 string tryResult;
-                if (TryEvaluateBool(toEvaluate[0],access,out tryResult))
+                if (TryEvaluateBool(toEvaluate[0], access, out tryResult))
                 {
                     return new KeyValuePair<string, bool>(tryResult, false);
                 }
@@ -324,35 +369,35 @@ namespace Interpreter
 
             try
             {
-                toEvaluate[1] = ReplaceWithVars(toEvaluate[1],access);
+                toEvaluate[1] = ReplaceWithVars(toEvaluate[1], access);
                 bool isRec = false;
 
                 if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
                 {
                     int index = toEvaluate[1].IndexOf("[");
                     toEvaluate[1] = (index < 0)
-                    ? toEvaluate[1]
-                    : toEvaluate[1].Remove(index, "[".Length);
+                        ? toEvaluate[1]
+                        : toEvaluate[1].Remove(index, "[".Length);
                     toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]"));
 
-                    var result = EvaluateCall(toEvaluate[1].Split(new[] { ':' }, 2),access);
+                    var result = EvaluateCall(toEvaluate[1].Split(new[] {':'}, 2), access);
                     toEvaluate[1] = result.Key;
                     isRec = true;
                 }
 
                 if (toEvaluate[1].Contains("->"))
                 {
-                    var call = toEvaluate[1].Split(new[] { "->" }, 2, StringSplitOptions.None);
+                    var call = toEvaluate[1].Split(new[] {"->"}, 2, StringSplitOptions.None);
 
-                    if (Cache.Instance.Variables.ContainsKey(call[0]))
+                    if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(call[0],access)))
                     {
-                        if (GetVariable(call[0],access).Value.DataType == DataTypes.OBJECT)
+                        if (GetVariable(call[0], access).Value.DataType == DataTypes.OBJECT)
                         {
                             //Todo call method
                         }
                         else
                         {
-                           throw new InvalidDataTypeException("Variable is not an object!"); 
+                            throw new InvalidDataTypeException("Variable is not an object!");
                         }
                     }
                     else
@@ -369,10 +414,13 @@ namespace Interpreter
                         ForceOut = true;
                         goto returnResult;
                     case "load":
-                        //TODO load file new FileInterpreter(toEvaluate[1]).FileName
-                        return new KeyValuePair<string, bool>("",false);
+                        callResult = LoadFile(toEvaluate[1],access);
+                        goto returnResult;
                     case "type":
                         callResult = GetVarType(toEvaluate[1], access);
+                        goto returnResult;
+                    case "dtype":
+                        callResult = DataTypeFromData(toEvaluate[1]).ToString().ToLower();
                         goto returnResult;
                     case "uload":
                         callResult = DeleteVar(toEvaluate[1], access);
@@ -380,8 +428,12 @@ namespace Interpreter
                     case "dumpVars":
                         callResult = DumpAllVariables(toEvaluate[1]);
                         goto returnResult;
+                    case "rand":
+                        callResult = GetRandom(toEvaluate[1]);
+                        goto returnResult;
                     case "exists":
-                        return new KeyValuePair<string, bool>(Cache.Instance.Variables.ContainsKey(toEvaluate[1]).ToString().ToLower(),false);
+                        return
+                            new KeyValuePair<string, bool>(Exists(new Tuple<string, string>(toEvaluate[1], access)).ToString().ToLower(), false);
                     case "exit":
                         try
                         {
@@ -389,7 +441,7 @@ namespace Interpreter
                         }
                         catch (Exception e)
                         {
-                            return new KeyValuePair<string, bool>(e.Message,true);
+                            return new KeyValuePair<string, bool>(e.Message, true);
                         }
                         break;
                 }
@@ -398,16 +450,69 @@ namespace Interpreter
                 if (ForceOut)
                 {
                     ForceOut = false;
-                    return new KeyValuePair<string, bool>(callResult,true);
+                    return new KeyValuePair<string, bool>(callResult, true);
                 }
-                return new KeyValuePair<string, bool>(callResult,false);
+                return new KeyValuePair<string, bool>(callResult, false);
             }
             catch (Exception e)
             {
-                return new KeyValuePair<string, bool>(e.Message,true);
+                return new KeyValuePair<string, bool>(e.Message, true);
             }
 
             return new KeyValuePair<string, bool>();
+        }
+
+        private string LoadFile(string s,string access)
+        {
+            try
+            {
+                if (Regex.IsMatch(s, @"'([^]]*)' (as)+"))
+                {
+                    if (!Regex.IsMatch(s, @"'([^]]*)'"))
+                    {
+                        throw new InvalidFileNameException("Filename is invalid!");
+                    }
+                    var fiW = new FileInterpreter(s);
+                    fiW.LoadFunctions();
+                    fiW.LoadReachableVars();
+
+                    var kwp = new KeyValuePair<Tuple<string,string>,Types>(new Tuple<string, string>(Regex.Split(s, @"(as)")[1].Replace(" ", ""),access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
+                    kwp.Value.Lines = fiW.Lines;
+                    kwp.Value.Methods = fiW.Methods;
+
+                    Cache.Instance.Variables.Add(kwp.Key,kwp.Value);
+                }
+                if (Regex.IsMatch(s, @"'([^]]*)'"))
+                {
+                    var fiL = new FileInterpreter(s);
+                    fiL.LoadAll();
+                    return "";
+                }
+                throw new InvalidFileNameException("Filename is invalid!");
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+
+        private string GetRandom(string s)
+        {
+            if (s == "void")
+            {
+                return new Random().Next().ToString();
+            }
+            else
+            {
+                try
+                {
+                    return new Random().Next(int.Parse(s)).ToString();
+                }
+                catch (Exception e)
+                {
+                    return e.Message;
+                }
+            }
         }
 
         private string DumpAllVariables(string s)
@@ -431,11 +536,11 @@ namespace Interpreter
             {
                 if (variable.Value.DataType == dt || dt == DataTypes.NONE)
                 {
-                    sb.Append($"{variable.Key} = {variable.Value.Value}\n");
+                    sb.Append($"{variable.Key.Item1}@{variable.Key.Item2} = {variable.Value.Value}\n");
                 }
             }
 
-            sb.Length = sb.Length - 2;
+            sb.Length = sb.Length - 1;
 
             return sb.ToString();
         }
@@ -444,7 +549,7 @@ namespace Interpreter
         {
             try
             {
-                if (Cache.Instance.Variables.ContainsKey(s))
+                if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(s,access)))
                 {
                     RemoveVariable(s,access);
                     return "Variable unloaded!";
@@ -466,13 +571,34 @@ namespace Interpreter
 
         private void RemoveVariable(string s, string access)
         {
-            if (Cache.Instance.Variables[s].Owner == access)
+            if (Exists(new Tuple<string, string>(s,access)))
             {
-                Cache.Instance.Variables.Remove(s);
+                Cache.Instance.Variables.Remove(new Tuple<string, string>(s,access));
             }
             else
             {
                 throw new AccessDeniedException("You are note allowed to access this variable!");
+            }
+        }
+
+        private bool Exists(Tuple<string, string> instanceVariable)
+        {
+            foreach (var variable in Cache.Instance.Variables)
+            {
+                if (variable.Value.Access == AccessTypes.REACHABLE_ALL && variable.Key.Item1 == instanceVariable.Item1)
+                {
+                    return true;
+                }
+            }
+
+            try
+            {
+                var test = Cache.Instance.Variables[instanceVariable].Value;
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
@@ -504,7 +630,7 @@ namespace Interpreter
         { 
             try
             {
-                if (Cache.Instance.Variables.ContainsKey(s))
+                if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(s,access)))
                 {
                     return GetVariable(s, access).Value.DataType.ToString().ToLower();
                 }

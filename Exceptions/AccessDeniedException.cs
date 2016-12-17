@@ -8,6 +8,6 @@ namespace Exceptions
 {
     public class AccessDeniedException : Exception
     {
-        public AccessDeniedException(string message) : base(message) { }
+        public AccessDeniedException(string message) : base(typeof(AccessDeniedException).Name + ": " + message) { }
     }
 }

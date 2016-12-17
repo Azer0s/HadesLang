@@ -15,65 +15,27 @@ namespace Interpreter
 {
     public class ShellInterpreter
     {
-        private static readonly Evaluator _evaluator = new Evaluator();
-        public bool Clear { get; set; } = false;
-
-        public string InterpretLine(string lineToInterprete)
+        public void Start()
         {
-            if (Regex.IsMatch(lineToInterprete, Evaluator.VarPattern))
+            var interpreter = new Interpreter();
+            Cache.Instance.Variables = new Dictionary<Tuple<string,string>, Types>();
+            while (true)
             {
-                return _evaluator.CreateVariable(lineToInterprete,"console");
-            }
+                Console.Write(">");
+                var res = Console.ReadLine();
+                string op;
+                var returnVar = interpreter.InterpretLine(res,"console",out op).Key;
 
-            if (lineToInterprete == "clear")
-            {
-                Clear = true;
-                return string.Empty;
-            }
-
-            if (lineToInterprete.Contains("="))
-            {
-                return _evaluator.AssignValueToVariable(lineToInterprete,"console");
-            }
-
-            //Method call
-            if (lineToInterprete.Contains(":") || lineToInterprete.Contains("->"))
-            {
-                string[] call;
-                if (lineToInterprete.CheckOrder(":","->"))
+                if (interpreter.Clear)
                 {
-                    call = lineToInterprete.Split(new[] {':'}, 2);
+                    interpreter.Clear = false;
+                    Console.Clear();
                 }
                 else
                 {
-                    call = new string[2];
-                    call[1] = lineToInterprete;
+                    Console.WriteLine(returnVar);
                 }
-
-                return _evaluator.EvaluateCall(call,"console").Key;
             }
-            else
-            {
-                //Function call 
-                try
-                {
-                    if (Regex.IsMatch(lineToInterprete, @"\[([^]]*)\]"))
-                    {
-                        return _evaluator.EvaluateBool(lineToInterprete,"console").Result.ToString().ToLower();
-                    }
-
-                    if (lineToInterprete.ContainsFromList(Evaluator.OperatorList))
-                    {
-                        lineToInterprete = _evaluator.ReplaceWithVars(lineToInterprete,"console");
-                        return _evaluator.EvaluateCalculation(lineToInterprete);
-                    }
-                }
-                catch (Exception e)
-                {
-                    return e.Message;
-                }                
-            }
-            return null;
         }
     }
 }
