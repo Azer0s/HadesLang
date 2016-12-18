@@ -37,13 +37,16 @@ namespace Interpreter
         {
             ExecuteFromLineToLine(new Tuple<int, int>(-1, Lines.Count));
 
-            foreach (var variable in Cache.Instance.Variables.ToList())
+            if (Cache.Instance.EraseVars)
             {
-                if (variable.Key.Item2 == FileName)
+                foreach (var variable in Cache.Instance.Variables.ToList())
                 {
-                    Cache.Instance.Variables.Remove(variable.Key);
+                    if (variable.Key.Item2 == FileName || Cache.Instance.LoadFiles.Contains(variable.Key.Item2))
+                    {
+                        Cache.Instance.Variables.Remove(variable.Key);
+                    }
                 }
-            }
+            }        
         }
 
         private void ExecuteFromLineToLine(Tuple<int, int> fromTo)

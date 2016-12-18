@@ -437,6 +437,21 @@ namespace Interpreter
                     case "rand":
                         callResult = GetRandom(toEvaluate[1]);
                         goto returnResult;
+                    case "eraseVars":
+                        if (toEvaluate[1] == "1")
+                        {
+                            Cache.Instance.EraseVars = true;
+                            callResult = "EraseVars set to true";
+                            goto returnResult;
+                        }
+                        if (toEvaluate[1] == "0")
+                        {
+                            Cache.Instance.EraseVars = false;
+                            callResult = "EraseVars set to false";
+                            goto returnResult;
+                        }
+                        callResult = "Invalid input!";
+                        goto returnResult;
                     case "exists":
                         return
                             new KeyValuePair<string, bool>(Exists(new Tuple<string, string>(toEvaluate[1], access)).ToString().ToLower(), false);
@@ -490,6 +505,7 @@ namespace Interpreter
                 }
                 if (!Regex.IsMatch(s, @"'([^]]*)'")) throw new InvalidFileNameException("Filename is invalid!");
                 var fiL = new FileInterpreter(s);
+                Cache.Instance.LoadFiles.Add(s);
                 fiL.LoadAll();
                 return "";
             }
