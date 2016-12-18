@@ -46,11 +46,20 @@ namespace Interpreter
             }
         }
 
-        private void ExecuteFromLineToLine(Tuple<int,int> fromTo)
+        private void ExecuteFromLineToLine(Tuple<int, int> fromTo)
         {
             for (int i = fromTo.Item1 + 1; i <= fromTo.Item2; i++)
             {
                 string operation;
+
+                try
+                {
+                    var temp = Lines[i];
+                }
+                catch (Exception)
+                {
+                    return;
+                }
 
                 if (Lines[i] == "stopExec")
                 {
