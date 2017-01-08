@@ -1,5 +1,5 @@
 # Hades - Breathing new life into scripting
-*Tired of seeing JavaScript or Python?*
+*Tired of seeing the same old scripting language over and over again?*
 <br>
 *Hades is a scripting language built from scratch!*
 <br>
