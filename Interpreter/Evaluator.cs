@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Exceptions;
@@ -393,15 +391,15 @@ namespace Interpreter
             try
             {
                 toEvaluate[1] = ReplaceWithVars(toEvaluate[1], access);
-                bool isRec = false;
+                var isRec = false;
 
                 if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
                 {
-                    int index = toEvaluate[1].IndexOf("[");
+                    var index = toEvaluate[1].IndexOf("[", StringComparison.Ordinal);
                     toEvaluate[1] = (index < 0)
                         ? toEvaluate[1]
                         : toEvaluate[1].Remove(index, "[".Length);
-                    toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]"));
+                    toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]", StringComparison.Ordinal));
 
                     var result = EvaluateCall(toEvaluate[1].Split(new[] {':'}, 2), access);
                     toEvaluate[1] = result.Key;
@@ -582,14 +580,9 @@ namespace Interpreter
             {
                 if (variable.Value.DataType == dt || dt == DataTypes.NONE)
                 {
-                    if (variable.Value.DataType == DataTypes.OBJECT)
-                    {
-                        sb.Append($"{variable.Key.Item1}@{variable.Key.Item2} = OBJECT\n");
-                    }
-                    else
-                    {
-                        sb.Append($"{variable.Key.Item1}@{variable.Key.Item2} = {variable.Value.Value}\n");
-                    }
+                    sb.Append(variable.Value.DataType == DataTypes.OBJECT
+                        ? $"{variable.Key.Item1}@{variable.Key.Item2} = OBJECT\n"
+                        : $"{variable.Key.Item1}@{variable.Key.Item2} = {variable.Value.Value}\n");
                 }
             }
 

@@ -16,6 +16,6 @@ namespace Variables
         }
 
         public string Name { get; set; }
-        public Tuple<int, int> Postition { get; set; }
+        public Tuple<int,int> Postition { get; set; }
     }
 }

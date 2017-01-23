@@ -14,6 +14,8 @@ namespace Interpreter
         public List<Methods> Methods = new List<Methods>();
         private readonly Interpreter _interpreter = new Interpreter();
         private bool _stop = false;
+        private List<int> _nextBreak = new List<int>();
+        private bool _breakMode;
 
         public FileInterpreter(string fileName)
         {
@@ -35,8 +37,8 @@ namespace Interpreter
 
         public void LoadAll()
         {
-            ExecuteFromLineToLine(new Tuple<int, int>(-1, Lines.Count));
-
+            LoadFunctions();
+            ExecuteFromLineToLine(new Tuple<int, int>(-1, Lines.Count),true);
             if (Cache.Instance.EraseVars)
             {
                 foreach (var variable in Cache.Instance.Variables.ToList())
@@ -49,11 +51,34 @@ namespace Interpreter
             }        
         }
 
-        private void ExecuteFromLineToLine(Tuple<int, int> fromTo)
+        private void ExecuteFromLineToLine(Tuple<int, int> fromTo,bool firstLevel)
         {
             for (int i = fromTo.Item1 + 1; i <= fromTo.Item2; i++)
             {
                 string operation;
+
+                if (i > Lines.Count - 1)
+                {
+                   break; 
+                }
+
+                if (Lines[i] == "break")
+                {
+                    if (!firstLevel)
+                    {
+                        _breakMode = true;
+                        return;
+                    }
+                    return;
+                }
+
+                if (Lines[i].StartsWith("func"))
+                {
+                    //TODO input parameters
+                    var func = GetLineToLine(i, "func");
+                    i = func.Item2;
+                    continue;
+                }
 
                 try
                 {
@@ -68,7 +93,8 @@ namespace Interpreter
                 {
                     _stop = true;
                     return;
-                }
+                }  
+
                 if (_stop)
                 {
                     return;
@@ -88,7 +114,7 @@ namespace Interpreter
 
                     if (bool.Parse(result.Key))
                     {
-                        ExecuteFromLineToLine(LineToLine);
+                        ExecuteFromLineToLine(LineToLine,false);
                         i = LineToLine.Item2;
                     }
                     else
@@ -99,18 +125,30 @@ namespace Interpreter
 
                 if (_interpreter.Evaluator.EvaluateOperation(operation) == OperationTypes.RUNALA)
                 {
-                    var LineToLine = GetLineToLine(i, "runala");
+                    var lineToLine = GetLineToLine(i, "runala");
+                    _nextBreak.Add(lineToLine.Item2);
+
                     while (bool.Parse(result.Key))
                     {
-                        ExecuteFromLineToLine(LineToLine);
+                        ExecuteFromLineToLine(lineToLine,false);
                         result = _interpreter.InterpretLine(Lines[i], FileName, out operation);
 
                         if (_stop)
                         {
                             return;
                         }
+
+                        if (_breakMode && !firstLevel)
+                        {
+                            return;
+                        }
+                        if (_breakMode && firstLevel)
+                        {
+                            i = _nextBreak.Last();
+                            break;
+                        }
                     }
-                    i = LineToLine.Item2 + 1;
+                    i = lineToLine.Item2 + 1;
                 }
 
 
@@ -124,8 +162,8 @@ namespace Interpreter
         private Tuple<int, int> GetLineToLine(int variable, string lookOut)
         {
             var currentLine = variable;
-            int endCase = 0;
-            int buffer = 0;
+            var endCase = 0;
+            var buffer = 0;
 
             for (var i = currentLine + 1; i < Lines.Count; i++)
             {
@@ -153,7 +191,13 @@ namespace Interpreter
 
         public void LoadFunctions()
         {
-            //throw new NotImplementedException();
+            for (var i = 0; i < Lines.Count; i++)
+            {
+                if (!Lines[i].StartsWith("func")) continue;
+                var func = GetLineToLine(i,"func");
+                Methods.Add(new Methods(Lines[i].Split(' ')[1],func));
+                i = func.Item2;
+            }
         }
 
         public void LoadReachableVars()
