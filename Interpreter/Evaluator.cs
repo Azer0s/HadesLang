@@ -347,6 +347,10 @@ namespace Interpreter
                 {
                     return GetVariable(toEvaluate, access).Value.Value;
                 }
+                if (VariableIsReachableAll(toEvaluate))
+                {
+                    return GetVariable(toEvaluate, access).Value.Value;
+                }
                 else
                 {
                     throw new VariableNotDefinedException("Variable not defined!");
@@ -360,6 +364,18 @@ namespace Interpreter
             {
                 return e.Message;
             }
+        }
+
+        private bool VariableIsReachableAll(string toEvaluate)
+        {
+            foreach (var variable in Cache.Instance.Variables)
+            {
+                if (variable.Value.Access == AccessTypes.REACHABLE_ALL && variable.Key.Item1 == toEvaluate)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public KeyValuePair<string, bool> EvaluateCall(string[] toEvaluate, string access)
@@ -489,24 +505,31 @@ namespace Interpreter
             {
                 if (Regex.IsMatch(s, @"'([^]]*)' (as)+"))
                 {
+                    var fn = Regex.Match(s, @"'([^]]*)'").Value;
+                    var varName = s.Replace(fn + " as ", "");
+
                     if (!Regex.IsMatch(s, @"'([^]]*)'"))
                     {
                         throw new InvalidFileNameException("Filename is invalid!");
                     }
-                    var fiW = new FileInterpreter(s);
+                    var fiW = new FileInterpreter(fn);
                     fiW.LoadFunctions();
                     fiW.LoadReachableVars();
 
-                    var kwp = new KeyValuePair<Tuple<string,string>,Types>(new Tuple<string, string>(Regex.Split(s, @"(as)")[1].Replace(" ", ""),access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
+                    var kwp = new KeyValuePair<Tuple<string,string>,Types>(new Tuple<string, string>(varName,access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
                     kwp.Value.Lines = fiW.Lines;
                     kwp.Value.Methods = fiW.Methods;
 
                     Cache.Instance.Variables.Add(kwp.Key,kwp.Value);
                 }
-                if (!Regex.IsMatch(s, @"'([^]]*)'")) throw new InvalidFileNameException("Filename is invalid!");
-                var fiL = new FileInterpreter(s);
-                Cache.Instance.LoadFiles.Add(s);
-                fiL.LoadAll();
+                else
+                {
+                    var fiL = new FileInterpreter(s);
+                    Cache.Instance.LoadFiles.Add(s);
+                    fiL.LoadAll();
+                }
+                if (!Regex.IsMatch(s, @"'([^]]*)'")) throw new InvalidFileNameException("Filename is invalid!"); 
+                
                 return "";
             }
             catch (Exception e)
@@ -537,7 +560,7 @@ namespace Interpreter
         private string DumpAllVariables(string s)
         {
             var sb = new StringBuilder();
-            DataTypes dt = DataTypes.NONE;
+            var dt = DataTypes.NONE;
 
             if (s != "all")
             {
@@ -560,7 +583,14 @@ namespace Interpreter
             {
                 if (variable.Value.DataType == dt || dt == DataTypes.NONE)
                 {
-                    sb.Append($"{variable.Key.Item1}@{variable.Key.Item2} = {variable.Value.Value}\n");
+                    if (variable.Value.DataType == DataTypes.OBJECT)
+                    {
+                        sb.Append($"{variable.Key.Item1}@{variable.Key.Item2} = OBJECT\n");
+                    }
+                    else
+                    {
+                        sb.Append($"{variable.Key.Item1}@{variable.Key.Item2} = {variable.Value.Value}\n");
+                    }
                 }
             }
 
@@ -699,6 +729,8 @@ namespace Interpreter
                     return DataTypes.DEC;
                 case "binary":
                     return DataTypes.BINARY;
+                case "object":
+                    return DataTypes.OBJECT;
                 default:
                     throw new InvalidDataTypeException("Given data type was invalid!");
             }
