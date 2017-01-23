@@ -26,7 +26,8 @@ namespace Interpreter
             "Cos",
             "Tan",
             "Pow",
-            "[Pi]"
+            "[Pi]",
+            "[e]"
         };
 
         public static List<string> CompOperatorList = new List<string> {"is", "or", "and", "not", "smaller", "bigger"};
