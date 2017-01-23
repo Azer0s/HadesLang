@@ -32,7 +32,7 @@ namespace Interpreter
         };
 
         public static List<string> CompOperatorList = new List<string> {"is", "or", "and", "not", "smaller", "bigger"};
-        public bool ForceOut = false;
+        public bool ForceOut;
 
         public EvaluatedOperation EvaluateBool(string toEvaluate, string access)
         {
@@ -302,6 +302,7 @@ namespace Interpreter
             }
             catch (Exception)
             {
+                // ignored
             }
 
             tryNumeric:
@@ -495,8 +496,6 @@ namespace Interpreter
             {
                 return new KeyValuePair<string, bool>(e.Message, true);
             }
-
-            return new KeyValuePair<string, bool>();
         }
 
         private string LoadFile(string s,string access)

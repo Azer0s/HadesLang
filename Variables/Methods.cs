@@ -9,13 +9,13 @@ namespace Variables
 {
     public class Methods
     {
-        public Methods(string name, int postition)
+        public Methods(string name, Tuple<int,int> postition)
         {
             Name = name;
             Postition = postition;
         }
 
         public string Name { get; set; }
-        public int Postition { get; set; }
+        public Tuple<int, int> Postition { get; set; }
     }
 }
