@@ -13,8 +13,8 @@ namespace Interpreter
         public List<string> Lines = new List<string>();
         public List<Methods> Methods = new List<Methods>();
         private readonly Interpreter _interpreter = new Interpreter();
-        private bool _stop = false;
-        private List<int> _nextBreak = new List<int>();
+        private bool _stop;
+        private readonly List<int> _nextBreak = new List<int>();
         private bool _breakMode;
 
         public FileInterpreter(string fileName)
