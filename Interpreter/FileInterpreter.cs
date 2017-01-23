@@ -74,19 +74,9 @@ namespace Interpreter
 
                 if (Lines[i].StartsWith("func"))
                 {
-                    //TODO input parameters
                     var func = GetLineToLine(i, "func");
                     i = func.Item2;
                     continue;
-                }
-
-                try
-                {
-                    var temp = Lines[i];
-                }
-                catch (Exception)
-                {
-                    return;
                 }
 
                 if (Lines[i] == "stopExec")
@@ -145,6 +135,7 @@ namespace Interpreter
                         if (_breakMode && firstLevel)
                         {
                             i = _nextBreak.Last();
+                            _breakMode = false;
                             break;
                         }
                     }
@@ -191,6 +182,7 @@ namespace Interpreter
 
         public void LoadFunctions()
         {
+            //TODO input parameters
             for (var i = 0; i < Lines.Count; i++)
             {
                 if (!Lines[i].StartsWith("func")) continue;
