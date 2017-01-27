@@ -190,12 +190,19 @@ namespace Interpreter
                 {
                     var operation = data[1].Split(':');
                     operation[0] = operation[0].Replace(" ", "");
+
+                    if (operation[0] == "out" && !operation[1].Contains("[") && !operation[1].Contains("]") && !operation[1].ContainsFromList(OperatorList))
+                    {
+                        return AssignValueToVariable($"{data[0]} = '{operation[1]}'",access);
+                    }
+
                     data[1] = "'" + EvaluateCall(operation, access) + "'";
                     isOut = true;
                 }
 
                 if (data[1].ContainsFromList(OperatorList))
                 {
+                    //TODO Calculation
                     data[1] = EvaluateCalculation(data[1]);
                 }
 
