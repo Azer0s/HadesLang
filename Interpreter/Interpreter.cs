@@ -8,7 +8,7 @@ using StringExtension;
 
 namespace Interpreter
 {
-    class Interpreter
+    public class Interpreter
     {
         public readonly Evaluator Evaluator = new Evaluator();
         public bool Clear { get; set; } = false;
