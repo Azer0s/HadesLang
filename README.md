@@ -22,6 +22,11 @@ out:b
 
 a = {a} + {b}
 b = {a} + {b}
+
+case[{a} bigger 10000]
+put a
+endcase
+
 endala
 ```
 
