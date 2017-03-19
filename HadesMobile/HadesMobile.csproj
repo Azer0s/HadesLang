@@ -43,29 +43,35 @@
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cache">
-      <HintPath>.\Cache.dll</HintPath>
+    <Reference Include="Cache, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HadesLang\bin\Release\Cache.dll</HintPath>
     </Reference>
-    <Reference Include="Exceptions">
-      <HintPath>.\Exceptions.dll</HintPath>
+    <Reference Include="Exceptions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HadesLang\bin\Release\Exceptions.dll</HintPath>
     </Reference>
-    <Reference Include="Interpreter">
-      <HintPath>.\Interpreter.dll</HintPath>
+    <Reference Include="Interpreter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HadesLang\bin\Release\Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
-    <Reference Include="NCalc">
-      <HintPath>.\NCalc.dll</HintPath>
+    <Reference Include="NCalc, Version=1.3.8.0, Culture=neutral, PublicKeyToken=973cde3f1cafed03, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HadesLang\bin\Release\NCalc.dll</HintPath>
     </Reference>
-    <Reference Include="StringExtension">
-      <HintPath>.\StringExtension.dll</HintPath>
+    <Reference Include="StringExtension, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HadesLang\bin\Release\StringExtension.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="Variables">
-      <HintPath>.\Variables.dll</HintPath>
+    <Reference Include="Variables, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HadesLang\bin\Release\Variables.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -16,6 +16,7 @@ namespace Interpreter
         private bool _stop;
         private readonly List<int> _nextBreak = new List<int>();
         private bool _breakMode;
+        public KeyValuePair<string, Types> Return;
 
         public FileInterpreter(string fileName)
         {
@@ -38,7 +39,7 @@ namespace Interpreter
         public void LoadAll()
         {
             LoadFunctions();
-            ExecuteFromLineToLine(new Tuple<int, int>(-1, Lines.Count),true);
+            ExecuteFromLineToLine(new Tuple<int, int>(-1, Lines.Count),true,out Return);
             if (Cache.Instance.EraseVars)
             {
                 foreach (var variable in Cache.Instance.Variables.ToList())
@@ -51,8 +52,9 @@ namespace Interpreter
             }        
         }
 
-        private void ExecuteFromLineToLine(Tuple<int, int> fromTo,bool firstLevel)
+        private void ExecuteFromLineToLine(Tuple<int, int> fromTo,bool firstLevel,out KeyValuePair<string, Types> returnVal)
         {
+            returnVal = new KeyValuePair<string, Types>();
             for (int i = fromTo.Item1 + 1; i <= fromTo.Item2; i++)
             {
                 string operation;
@@ -60,6 +62,13 @@ namespace Interpreter
                 if (i > Lines.Count - 1)
                 {
                    break; 
+                }
+
+                if (Lines[i].StartsWith("put"))
+                {
+                    var returnVar = Lines[i].Split(' ');
+                    returnVal = _interpreter.Evaluator.GetVariable(returnVar[1], FileName);
+                    _stop = true;
                 }
 
                 if (Lines[i] == "break")
@@ -104,7 +113,7 @@ namespace Interpreter
 
                     if (bool.Parse(result.Key))
                     {
-                        ExecuteFromLineToLine(LineToLine,false);
+                        ExecuteFromLineToLine(LineToLine,false,out returnVal);
                         i = LineToLine.Item2;
                     }
                     else
@@ -120,7 +129,7 @@ namespace Interpreter
 
                     while (bool.Parse(result.Key))
                     {
-                        ExecuteFromLineToLine(lineToLine,false);
+                        ExecuteFromLineToLine(lineToLine,false,out Return);
                         result = _interpreter.InterpretLine(Lines[i], FileName, out operation);
 
                         if (_stop)

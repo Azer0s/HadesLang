@@ -249,7 +249,7 @@ namespace Interpreter
             {
                 foreach (var varN in Cache.Instance.Variables)
                 {
-                    if (varN.Value.Access == AccessTypes.REACHABLE_ALL && varN.Key.Item1 == index)
+                    if ((varN.Value.Access == AccessTypes.REACHABLE_ALL)&& varN.Key.Item1 == index)
                     {
                         return new KeyValuePair<string, Types>(varN.Key.Item1,varN.Value);
                     }
@@ -532,6 +532,11 @@ namespace Interpreter
                     var fiL = new FileInterpreter(s);
                     Cache.Instance.LoadFiles.Add(s);
                     fiL.LoadAll();
+
+                    if (!string.IsNullOrEmpty(fiL.Return.Value.Value))
+                    {
+                        return "\n" + fiL.Return.Value.Value;
+                    }
                 }
                 if (!Regex.IsMatch(s, @"'([^]]*)'")) throw new InvalidFileNameException("Filename is invalid!"); 
                 
