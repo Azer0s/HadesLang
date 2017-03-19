@@ -28,14 +28,7 @@ namespace StringExtension
 
         public static bool ContainsFromList(this string s, List<string> source)
         {
-            foreach (var variable in source)
-            {
-                if (s.Contains(variable))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return source.Any(s.Contains);
         }
 
         public static bool CheckOrder(this string s, string toCheck, string toCheck2)
