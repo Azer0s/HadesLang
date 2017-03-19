@@ -188,7 +188,7 @@ namespace Interpreter
 
                 if (data[1].Contains(":"))
                 {
-                    var operation = data[1].Split(':');
+                    var operation = data[1].Split(new[] { ':' },2);
                     operation[0] = operation[0].Replace(" ", "");
 
                     if (operation[0] == "out" && !operation[1].Contains("[") && !operation[1].Contains("]") && !operation[1].ContainsFromList(OperatorList))
@@ -196,7 +196,7 @@ namespace Interpreter
                         return AssignValueToVariable($"{data[0]} = '{operation[1]}'",access);
                     }
 
-                    data[1] = "'" + EvaluateCall(operation, access) + "'";
+                    data[1] = "'" + EvaluateCall(operation, access).Key + "'";
                     isOut = true;
                 }
 
