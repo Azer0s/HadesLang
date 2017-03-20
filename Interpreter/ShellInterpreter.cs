@@ -17,12 +17,31 @@ namespace Interpreter
     {
         public void Start()
         {
-            var interpreter = new Interpreter();
+            var interpreter = new Interpreter(new ConsoleOutput());
             Cache.Instance.Variables = new Dictionary<Tuple<string,string>, Types>();
             while (true)
             {
                 Console.Write(">");
                 var res = Console.ReadLine();
+
+                if (res != null && res.Split(':')[0] == "scriptOutput")
+                {
+                    int toggle;
+                    int.TryParse(res.Split(':')[1], out toggle);
+                    switch (toggle)
+                    {
+                        case 0:
+                            interpreter.Evaluator.Output = new NoOutput();
+                            Console.WriteLine("Script-output disabled!");
+                            break;
+                        case 1:
+                            interpreter.Evaluator.Output = new ConsoleOutput();
+                            Console.WriteLine("Script-output enabled!");
+                            break;
+                    }
+                    continue;
+                }
+
                 string op;
                 var returnVar = interpreter.InterpretLine(res,"console",out op).Key;
 

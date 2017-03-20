@@ -11,6 +11,7 @@
         android:id="@+id/textView1"
         android:background="@android:color/black"
         android:textColor="#00a000"
+        android:scrollbars="vertical"
         android:text="&gt;" />
     <EditText
         android:layout_width="match_parent"

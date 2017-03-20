@@ -10,9 +10,13 @@ namespace Interpreter
 {
     public class Interpreter
     {
-        public readonly Evaluator Evaluator = new Evaluator();
+        public Evaluator Evaluator;
         public bool Clear { get; set; } = false;
 
+        public Interpreter(IScriptOutput output)
+        {
+            Evaluator = new Evaluator(output);
+        }
         public KeyValuePair<string, bool> InterpretLine(string lineToInterprete, string access, out string operation)
         {
             operation = "";

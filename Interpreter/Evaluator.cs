@@ -14,7 +14,7 @@ namespace Interpreter
     public class Evaluator
     {
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
-
+        
         public static List<string> OperatorList = new List<string>
         {
             "+",
@@ -32,6 +32,12 @@ namespace Interpreter
 
         public static List<string> CompOperatorList = new List<string> {"is", "or", "and", "not", "smaller", "bigger"};
         public bool ForceOut;
+        public IScriptOutput Output;
+
+        public Evaluator(IScriptOutput output)
+        {
+            Output = output;
+        }
 
         public EvaluatedOperation EvaluateBool(string toEvaluate, string access)
         {
@@ -517,7 +523,7 @@ namespace Interpreter
                     {
                         throw new InvalidFileNameException("Filename is invalid!");
                     }
-                    var fiW = new FileInterpreter(fn);
+                    var fiW = new FileInterpreter(fn,Output);
                     fiW.LoadFunctions();
                     fiW.LoadReachableVars();
 
@@ -529,7 +535,7 @@ namespace Interpreter
                 }
                 else
                 {
-                    var fiL = new FileInterpreter(s);
+                    var fiL = new FileInterpreter(s,Output);
                     Cache.Instance.LoadFiles.Add(s);
                     fiL.LoadAll();
 

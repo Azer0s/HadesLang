@@ -12,16 +12,20 @@ namespace Interpreter
         public string FileName { get; set; }
         public List<string> Lines = new List<string>();
         public List<Methods> Methods = new List<Methods>();
-        private readonly Interpreter _interpreter = new Interpreter();
+        private readonly Interpreter _interpreter;
         private bool _stop;
         private readonly List<int> _nextBreak = new List<int>();
         private bool _breakMode;
         public KeyValuePair<string, Types> Return;
+        public IScriptOutput Output;
 
-        public FileInterpreter(string fileName)
+        public FileInterpreter(string fileName,IScriptOutput outp)
         {
             fileName = fileName.Replace("'", "");
             FileName = fileName;
+            Output = outp;
+
+            _interpreter = new Interpreter(outp);
 
             int counter = 0;
             string line;
@@ -104,7 +108,7 @@ namespace Interpreter
                 if (_interpreter.Clear)
                 {
                     _interpreter.Clear = false;
-                    Console.Clear();
+                    Output.Clear();
                 }
 
                 if (_interpreter.Evaluator.EvaluateOperation(operation) == OperationTypes.CASE)
@@ -154,7 +158,7 @@ namespace Interpreter
 
                 if (result.Value && result.Key != string.Empty)
                 {
-                    Console.WriteLine(result.Key);
+                    Output.WriteLine(result.Key);
                 }
             }
         }
