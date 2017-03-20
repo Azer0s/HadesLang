@@ -27,7 +27,7 @@ case[{a} bigger 10000]
 put a
 endcase
 
-endala
+endrunala
 ```
 
 ## Overarching variables
