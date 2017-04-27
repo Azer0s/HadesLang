@@ -10,15 +10,29 @@ using Variables;
 /// </summary>
 public sealed class Cache
 {
-    private static readonly Lazy<Cache> Lazy =
-    new Lazy<Cache>(() => new Cache());
-    public static Cache Instance { get { return Lazy.Value; } }
+    /// <summary>
+    /// Lazy Store
+    /// </summary>
+    private static readonly Lazy<Cache> Lazy = new Lazy<Cache>(() => new Cache());
+    /// <summary>
+    /// Cache instance
+    /// </summary>
+    public static Cache Instance => Lazy.Value;
     /// <summary>
     /// Var store
     /// </summary>
     public Dictionary<Tuple<string,string>, Types> Variables { get; set; }
+    /// <summary>
+    /// Determines whether the Hades garbage collector is enabled
+    /// </summary>
     public bool EraseVars { get; set; } = true;
+    /// <summary>
+    /// List of loaded files 
+    /// </summary>
     public List<string> LoadFiles { get; set; } = new List<string>();
+    /// <summary>
+    /// Singleton constructor
+    /// </summary>
     private Cache()
     {
     }
