@@ -72,6 +72,11 @@ namespace StringExtension
         /// <returns></returns>
         public static IEnumerable<string> CsvSplitter(this string source)
         {
+            if (string.IsNullOrEmpty(source))
+            {
+                yield break;
+            }
+
             var lastIndex = 0;
             var inQuot = false;
 
