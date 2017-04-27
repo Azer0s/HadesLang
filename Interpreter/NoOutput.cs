@@ -22,5 +22,10 @@ namespace Interpreter
         {
             //ignore
         }
+
+        public string ReadLine()
+        {
+            return "";
+        }
     }
 }

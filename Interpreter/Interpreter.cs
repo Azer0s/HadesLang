@@ -17,9 +17,18 @@ namespace Interpreter
         {
             Evaluator = new Evaluator(output);
         }
+
+        /// <summary>
+        /// Interpretes a code line
+        /// </summary>
+        /// <param name="lineToInterprete">Expression to interprete</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <param name="operation">Outputs the bool operation if available</param>
+        /// <returns></returns>
         public KeyValuePair<string, bool> InterpretLine(string lineToInterprete, string access, out string operation)
         {
             operation = "";
+            //Variable decleration
             if (Regex.IsMatch(lineToInterprete, Evaluator.VarPattern))
             {
                 var createResult = Evaluator.CreateVariable(lineToInterprete, access);
@@ -38,6 +47,7 @@ namespace Interpreter
                 return new KeyValuePair<string, bool>(string.Empty, false);
             }
 
+            //Variable assignment
             if (lineToInterprete.Contains("="))
             {
                 return new KeyValuePair<string, bool>(Evaluator.AssignValueToVariable(lineToInterprete, access), false);

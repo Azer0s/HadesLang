@@ -13,8 +13,14 @@ namespace Interpreter
 {
     public class Evaluator
     {
+        /// <summary>
+        /// Regex pattern for var decleration
+        /// </summary>
         public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
-        
+
+        /// <summary>
+        /// Available operators
+        /// </summary>
         public static List<string> OperatorList = new List<string>
         {
             "+",
@@ -30,29 +36,58 @@ namespace Interpreter
             "[e]"
         };
 
+        /// <summary>
+        /// Available comperators
+        /// </summary>
         public static List<string> CompOperatorList = new List<string> {"is", "or", "and", "not", "smaller", "bigger"};
+
+        /// <summary>
+        /// Suppresses errors
+        /// </summary>
         public bool ForceOut;
+
+        /// <summary>
+        /// IO system (Default: console), used for interpreter implementation
+        /// </summary>
         public IScriptOutput Output;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="output">Set the default IO</param>
         public Evaluator(IScriptOutput output)
         {
             Output = output;
         }
 
+        /// <summary>
+        /// Evaluates a boolean expression (binary type in Hades)
+        /// </summary>
+        /// <param name="toEvaluate">The expression to be evaluated</param>
+        /// <param name="access">Delimiter for variable ownership</param>
+        /// <returns></returns>
         public EvaluatedOperation EvaluateBool(string toEvaluate, string access)
         {
+            //Expression is replaced with var values
             toEvaluate = ReplaceWithVars(toEvaluate, access);
             var groups = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups;
             var reg = groups[1].Value;
-            var func = EvaluateOperation(toEvaluate.Replace(" ", "").Replace(groups[1].Value, "").Replace("[", "").Replace("]",""));
+            var func =
+                EvaluateOperation(toEvaluate.Replace(" ", "")
+                    .Replace(groups[1].Value, "")
+                    .Replace("[", "")
+                    .Replace("]", ""));
 
+            //No expression existent
             if (!string.IsNullOrWhiteSpace(reg))
             {
+                //Expression doesn´t need to be evaluated
                 if (reg == "true" || reg == "false")
                 {
                     return new EvaluatedOperation(func, bool.Parse(reg));
                 }
 
+                //Boolean comparison
                 if (reg.ContainsFromList(CompOperatorList))
                 {
                     reg = reg.Replace("smallerIs", "<=");
@@ -67,6 +102,7 @@ namespace Interpreter
 
                     var e = new Expression(reg).Evaluate().ToString().ToLower();
 
+                    //Library returns 1/0 in some cases, TODO: Try to fix
                     if (e.IsNum())
                     {
                         if (e == "1")
@@ -85,67 +121,33 @@ namespace Interpreter
             return null;
         }
 
+        /// <summary>
+        /// Tries to, safely, evaluate a bool expression
+        /// </summary>
+        /// <param name="toEvaluate">The expression to be evaluated</param>
+        /// <param name="access">Delimiter for variable ownership</param>
+        /// <param name="result">Output of method (is null if method was unsuccesful)</param>
+        /// <returns></returns>
         public bool TryEvaluateBool(string toEvaluate, string access, out string result)
         {
             try
             {
-                var groups = Regex.Match(toEvaluate.Replace(" ", ""), @"\[([^]]*)\]").Groups;
-                var reg = groups[1].Value;
-
-                if (reg != "")
-                {
-                    toEvaluate = reg;
-                }
-
-                toEvaluate = ReplaceWithVars(toEvaluate, access);
-
-                if (!string.IsNullOrWhiteSpace(toEvaluate))
-                {
-                    if (toEvaluate == "true" || toEvaluate == "false")
-                    {
-                        result = toEvaluate;
-                        return true;
-                    }
-
-                    if (toEvaluate.ContainsFromList(CompOperatorList))
-                    {
-                        toEvaluate = toEvaluate.Replace("smallerIs", "<=");
-                        toEvaluate = toEvaluate.Replace("biggerIs", ">=");
-                        toEvaluate = toEvaluate.Replace("xor", "^");
-                        toEvaluate = toEvaluate.Replace("is", "==");
-                        toEvaluate = toEvaluate.Replace("or", "||");
-                        toEvaluate = toEvaluate.Replace("and", "&&");
-                        toEvaluate = toEvaluate.Replace("not", "!=");
-                        toEvaluate = toEvaluate.Replace("smaller", "<");
-                        toEvaluate = toEvaluate.Replace("bigger", ">");
-
-                        var e = new Expression(toEvaluate).Evaluate().ToString().ToLower();
-
-                        if (e.IsNum())
-                        {
-                            if (e == "1")
-                            {
-                                e = "true";
-                            }
-                            if (e == "0")
-                            {
-                                e = "false";
-                            }
-                        }
-
-                        result = e;
-                        return true;
-                    }
-                }
+                result = EvaluateBool(toEvaluate, access).Result.ToString().ToLower();
+                return true;
             }
             catch (Exception)
             {
-                //ignored
-            }
-            result = null;
-            return false;
+                result = null;
+                return false;
+            }   
         }
 
+        /// <summary>
+        /// Creates a variable in the var store
+        /// </summary>
+        /// <param name="toEvaluate"></param>
+        /// <param name="access">Delimiter for variable ownership</param>
+        /// <returns></returns>
         public string CreateVariable(string toEvaluate, string access)
         {
             try
@@ -182,6 +184,12 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Assigns a value to a variable
+        /// </summary>
+        /// <param name="toEvaluate">Variable assignment expression</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
         public string AssignValueToVariable(string toEvaluate, string access)
         {
             try
@@ -208,7 +216,6 @@ namespace Interpreter
 
                 if (data[1].ContainsFromList(OperatorList))
                 {
-                    //TODO Calculation
                     data[1] = EvaluateCalculation(data[1]);
                 }
 
@@ -249,6 +256,12 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Gets a variable + value from the var store
+        /// </summary>
+        /// <param name="index">Variable name</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
         public KeyValuePair<string, Types> GetVariable(string index, string access)
         {
             if (Exists(new Tuple<string, string>(index, access)))
@@ -269,6 +282,12 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Sets the value of a variable
+        /// </summary>
+        /// <param name="variable">Name of the varible</param>
+        /// <param name="value">Value the variable should get</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
         public void SetVariable(string variable, string value, string access)
         {
             foreach (var varN in Cache.Instance.Variables)
@@ -289,6 +308,12 @@ namespace Interpreter
             }
         }
 
+
+        /// <summary>
+        /// Evaluates a mathematical expression
+        /// </summary>
+        /// <param name="toEvaluate">Expression to be evaluated</param>
+        /// <returns></returns>
         public string EvaluateCalculation(string toEvaluate)
         {
             toEvaluate = ReplaceWithVars(toEvaluate, "console");
@@ -336,6 +361,13 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Evaluates possible outputs for the "out" command
+        /// </summary>
+        /// <param name="toEvaluate">Expression to be evaluated</param>
+        /// <param name="ignoreQuote">Whether quotes should be ignored or not (true in console use)</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
         public string EvaluateOut(string toEvaluate, bool ignoreQuote, string access)
         {
             if (ignoreQuote)
@@ -379,6 +411,11 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Checks if a variable is global
+        /// </summary>
+        /// <param name="toEvaluate">Variable name</param>
+        /// <returns></returns>
         private bool VariableIsReachableAll(string toEvaluate)
         {
             foreach (var variable in Cache.Instance.Variables)
@@ -391,8 +428,15 @@ namespace Interpreter
             return false;
         }
 
+        /// <summary>
+        /// Evaluates a generic call/command
+        /// </summary>
+        /// <param name="toEvaluate">The expression to be evaluated</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
         public KeyValuePair<string, bool> EvaluateCall(string[] toEvaluate, string access)
         {
+            //only one information given - invalid
             if (toEvaluate.Length == 1)
             {
                 string tryResult;
@@ -407,6 +451,7 @@ namespace Interpreter
                 toEvaluate[1] = ReplaceWithVars(toEvaluate[1], access);
                 var isRec = false;
 
+                //if input is a boolean expression
                 if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
                 {
                     var index = toEvaluate[1].IndexOf("[", StringComparison.Ordinal);
@@ -420,6 +465,7 @@ namespace Interpreter
                     isRec = true;
                 }
 
+                //method call
                 if (toEvaluate[1].Contains("->"))
                 {
                     var call = toEvaluate[1].Split(new[] {"->"}, 2, StringSplitOptions.None);
@@ -441,6 +487,7 @@ namespace Interpreter
                     }
                 }
 
+                //normal, built in, methods
                 string callResult = null;
                 switch (toEvaluate[0])
                 {
@@ -554,6 +601,11 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Gets a random number
+        /// </summary>
+        /// <param name="s">Maximum</param>
+        /// <returns></returns>
         private string GetRandom(string s)
         {
             if (s == "void")
@@ -573,6 +625,11 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Outputs all variables to the screen
+        /// </summary>
+        /// <param name="s">Filtertype</param>
+        /// <returns></returns>
         private string DumpAllVariables(string s)
         {
             var sb = new StringBuilder();
@@ -610,6 +667,12 @@ namespace Interpreter
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Same as RemoveVariable - Generates output
+        /// </summary>
+        /// <param name="s">The name of the variable</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
         private string DeleteVar(string s,string access)
         {
             try
@@ -634,6 +697,11 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Removes a variable from the var cache
+        /// </summary>
+        /// <param name="s">The name of the variable</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
         private void RemoveVariable(string s, string access)
         {
             if (Exists(new Tuple<string, string>(s,access)))
@@ -646,6 +714,11 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Checks if a variable exists in the var store
+        /// </summary>
+        /// <param name="instanceVariable">Tuple of variable + access</param>
+        /// <returns></returns>
         private bool Exists(Tuple<string, string> instanceVariable)
         {
             if (Cache.Instance.Variables.Any(variable => variable.Value.Access == AccessTypes.REACHABLE_ALL && variable.Key.Item1 == instanceVariable.Item1))
@@ -664,6 +737,12 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Replaces the placeholder in a string with the data from a variable in the var store
+        /// </summary>
+        /// <param name="s">Expression with placeholders</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
         public string ReplaceWithVars(string s,string access)
         {
             var reg = new Regex(@"\{([^\}]+)\}");
@@ -680,6 +759,12 @@ namespace Interpreter
             return s;
         }
 
+        /// <summary>
+        /// Returns the data type from the data of a variable in the var store
+        /// </summary>
+        /// <param name="s">Variable</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
         private string GetVarType(string s,string access)
         { 
             try
@@ -703,6 +788,11 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Returns the data type of the data within the input string
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public DataTypes DataTypeFromData(string data)
         {
             if (data.IsNum())
@@ -728,6 +818,11 @@ namespace Interpreter
             throw new InvalidDataTypeException("Invalid data type!");
         }
 
+        /// <summary>
+        /// Returns an enum for the data type according to the input string
+        /// </summary>
+        /// <param name="typeName"></param>
+        /// <returns></returns>
         public DataTypes DataTypeFromString(string typeName)
         {
             switch (typeName.ToLower())
@@ -747,6 +842,11 @@ namespace Interpreter
             }
         }
 
+        /// <summary>
+        /// Returns an enum for the operation type according to the input string
+        /// </summary>
+        /// <param name="operation"></param>
+        /// <returns></returns>
         public OperationTypes EvaluateOperation(string operation)
         {
             if (operation == "")

@@ -7,6 +7,9 @@ using Variables;
 
 namespace Interpreter
 {
+    /// <summary>
+    /// TODO: Documentation
+    /// </summary>
     public class FileInterpreter
     {
         public string FileName { get; set; }

@@ -31,6 +31,13 @@ namespace StringExtension
             return source.Any(s.Contains);
         }
 
+        /// <summary>
+        /// Checks the order of two substrings in a string
+        /// </summary>
+        /// <param name="s">String to be checked</param>
+        /// <param name="toCheck"></param>
+        /// <param name="toCheck2"></param>
+        /// <returns>True if a comes before b or b is not included in the string</returns>
         public static bool CheckOrder(this string s, string toCheck, string toCheck2)
         {
             var a = s.IndexOf(toCheck);

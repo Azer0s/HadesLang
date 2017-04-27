@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Interpreter
 {
+    /// <summary>
+    /// Console IO
+    /// </summary>
     public class ConsoleOutput : IScriptOutput
     {
         public void Write(string input)
@@ -21,6 +24,11 @@ namespace Interpreter
         public void Clear()
         {
             Console.Clear();
+        }
+
+        public string ReadLine()
+        {
+            return Console.ReadLine();
         }
     }
 }
