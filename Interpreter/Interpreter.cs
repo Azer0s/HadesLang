@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CustomFunctions;
 using StringExtension;
 
 namespace Interpreter
@@ -16,6 +17,11 @@ namespace Interpreter
         public Interpreter(IScriptOutput output)
         {
             Evaluator = new Evaluator(output);
+
+            Evaluator.RegisterFunction(new Function("test", () =>
+            {
+                Evaluator.GetFunctionValues().ForEach(Console.WriteLine);
+            }));
         }
 
         /// <summary>

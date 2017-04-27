@@ -44,6 +44,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CustomFunctions\CustomFunctions.csproj">
+      <Project>{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}</Project>
+      <Name>CustomFunctions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Variables\Variables.csproj">
       <Project>{aaa81cdd-082c-4d3c-b2b4-88bce35d96a5}</Project>
       <Name>Variables</Name>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CustomFunctions;
 using Variables;
 
 /// <summary>
@@ -26,6 +27,10 @@ public sealed class Cache
     /// Determines whether the Hades garbage collector is enabled
     /// </summary>
     public bool EraseVars { get; set; } = true;
+    /// <summary>
+    /// A list of custom functions
+    /// </summary>
+    public List<Function> Functions { get; set; } = new List<Function>();
     /// <summary>
     /// List of loaded files 
     /// </summary>

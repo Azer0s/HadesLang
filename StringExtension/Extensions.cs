@@ -64,5 +64,40 @@ namespace StringExtension
             }
             return false;
         }
+
+        /// <summary>
+        /// Splits data for method calls
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static IEnumerable<string> CsvSplitter(this string source)
+        {
+            var lastIndex = 0;
+            var inQuot = false;
+
+            for (var i = 0; i < source.Length; ++i)
+            {
+                var c = source[i];
+
+                if (inQuot)
+                {
+                    if (c == '\'')
+                    {
+                        inQuot = false;
+                    }
+                }
+                else if (c == '\'')
+                {
+                    inQuot = true;
+                }
+                else if (c == ',')
+                {
+                    yield return source.Substring(lastIndex, i - lastIndex);
+                    lastIndex = i + 1;
+                }
+            }
+
+            yield return source.Substring(lastIndex);
+        }
     }
 }

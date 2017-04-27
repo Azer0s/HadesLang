@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using CustomFunctions;
 using Exceptions;
 using NCalc;
 using StringExtension;
@@ -50,6 +51,11 @@ namespace Interpreter
         /// IO system (Default: console), used for interpreter implementation
         /// </summary>
         public IScriptOutput Output;
+
+        /// <summary>
+        /// Vars for custom function call
+        /// </summary>
+        private List<string> _vars = new List<string>();
 
         /// <summary>
         /// Constructor
@@ -139,7 +145,7 @@ namespace Interpreter
             {
                 result = null;
                 return false;
-            }   
+            }
         }
 
         /// <summary>
@@ -160,7 +166,8 @@ namespace Interpreter
                 if (Exists(new Tuple<string, string>(data[0], access)))
                 {
                     ForceOut = true;
-                    throw new DefinationDeniedException("Variable has already been defined with acces type: reachable_all");
+                    throw new DefinationDeniedException(
+                        "Variable has already been defined with acces type: reachable_all");
                 }
                 if (data.Count > 4)
                 {
@@ -202,12 +209,13 @@ namespace Interpreter
 
                 if (data[1].Contains(":"))
                 {
-                    var operation = data[1].Split(new[] { ':' },2);
+                    var operation = data[1].Split(new[] {':'}, 2);
                     operation[0] = operation[0].Replace(" ", "");
 
-                    if (operation[0] == "out" && !operation[1].Contains("[") && !operation[1].Contains("]") && !operation[1].ContainsFromList(OperatorList))
+                    if (operation[0] == "out" && !operation[1].Contains("[") && !operation[1].Contains("]") &&
+                        !operation[1].ContainsFromList(OperatorList))
                     {
-                        return AssignValueToVariable($"{data[0]} = '{operation[1]}'",access);
+                        return AssignValueToVariable($"{data[0]} = '{operation[1]}'", access);
                     }
 
                     data[1] = "'" + EvaluateCall(operation, access).Key + "'";
@@ -224,7 +232,8 @@ namespace Interpreter
                     data[1] = EvaluateBool(data[1], access).Result.ToString().ToLower();
                 }
 
-                if (dt == DataTypeFromData(data[1]) || isOut || (dt == DataTypes.DEC && DataTypeFromData(data[1]) == DataTypes.NUM))
+                if (dt == DataTypeFromData(data[1]) || isOut ||
+                    (dt == DataTypes.DEC && DataTypeFromData(data[1]) == DataTypes.NUM))
                 {
                     if (dt == DataTypes.WORD)
                     {
@@ -268,13 +277,14 @@ namespace Interpreter
             {
                 foreach (var varN in Cache.Instance.Variables)
                 {
-                    if ((varN.Value.Access == AccessTypes.REACHABLE_ALL)&& varN.Key.Item1 == index)
+                    if ((varN.Value.Access == AccessTypes.REACHABLE_ALL) && varN.Key.Item1 == index)
                     {
-                        return new KeyValuePair<string, Types>(varN.Key.Item1,varN.Value);
+                        return new KeyValuePair<string, Types>(varN.Key.Item1, varN.Value);
                     }
                 }
 
-                return new KeyValuePair<string, Types>(index, Cache.Instance.Variables[new Tuple<string, string>(index,access)]);
+                return new KeyValuePair<string, Types>(index,
+                    Cache.Instance.Variables[new Tuple<string, string>(index, access)]);
             }
             else
             {
@@ -300,7 +310,7 @@ namespace Interpreter
 
             if (Exists(new Tuple<string, string>(variable, access)))
             {
-                Cache.Instance.Variables[new Tuple<string, string>(variable,access)].Value = value;
+                Cache.Instance.Variables[new Tuple<string, string>(variable, access)].Value = value;
             }
             else
             {
@@ -388,7 +398,7 @@ namespace Interpreter
                 {
                     return Regex.Match(toEvaluate, @"\'([^]]*)\'").Groups[1].Value;
                 }
-                if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(toEvaluate,access)))
+                if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(toEvaluate, access)))
                 {
                     return GetVariable(toEvaluate, access).Value.Value;
                 }
@@ -446,6 +456,11 @@ namespace Interpreter
                 }
             }
 
+            if (toEvaluate.Length == 1 && toEvaluate[0].Contains(","))
+            {
+                return new KeyValuePair<string, bool>(toEvaluate[0], false);
+            }
+
             try
             {
                 toEvaluate[1] = ReplaceWithVars(toEvaluate[1], access);
@@ -466,15 +481,30 @@ namespace Interpreter
                 }
 
                 //method call
-                if (toEvaluate[1].Contains("->"))
+                var contains = false;
+                var callIndex = 0;
+                toEvaluate.ToList().ForEach(a =>
                 {
-                    var call = toEvaluate[1].Split(new[] {"->"}, 2, StringSplitOptions.None);
-
-                    if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(call[0],access)))
+                    if (a.Contains("->"))
                     {
-                        if (GetVariable(call[0], access).Value.DataType == DataTypes.OBJECT)
+                        contains = true;
+                        callIndex = toEvaluate.ToList().IndexOf(a);
+                    }
+                });
+
+                if (contains)
+                {
+                    var call = toEvaluate[callIndex].Split(new[] {"->"}, 2, StringSplitOptions.None);
+
+                    if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(call[0], access)))
+                    {
+                        var variable = GetVariable(call[0], access);
+                        if (variable.Value.DataType == DataTypes.OBJECT)
                         {
                             //Todo call method
+                            var data = toEvaluate[callIndex + 1].CsvSplitter().ToArray();
+
+                            var method = variable.Value.Methods.Where(a => a.Name == call[1]);
                         }
                         else
                         {
@@ -541,6 +571,15 @@ namespace Interpreter
                             return new KeyValuePair<string, bool>(e.Message, true);
                         }
                         break;
+                    default:
+                        if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
+                        {
+                            _vars.AddRange(toEvaluate[1].CsvSplitter());
+                            Cache.Instance.Functions.First(a => a.Name == toEvaluate[0]).Execute();
+                            _vars.Clear();
+                            return new KeyValuePair<string, bool>(string.Empty,false);
+                        }
+                        break;
                 }
 
                 returnResult:
@@ -593,7 +632,7 @@ namespace Interpreter
                 }
                 if (!Regex.IsMatch(s, @"'([^]]*)'")) throw new InvalidFileNameException("Filename is invalid!"); 
                 
-                return "";
+                return "Loaded succesfuly!";
             }
             catch (Exception e)
             {
@@ -863,6 +902,23 @@ namespace Interpreter
                 default:
                     throw new InvalidOperationException("Invalid operation!");
             }
+        }
+
+        /// <summary>
+        /// Registers a custom function
+        /// </summary>
+        /// <param name="f">Custom function</param>
+        /// <returns></returns>
+        public bool RegisterFunction(Function f)
+        {
+            if (Cache.Instance.Functions.Contains(f)) return false;
+            Cache.Instance.Functions.Add(f);
+            return true;
+        }
+
+        public List<string> GetFunctionValues()
+        {
+            return _vars;
         }
     }
 }

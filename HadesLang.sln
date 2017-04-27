@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HadesMobile", "HadesMobile\
 EndProject
 Project("{7CF6DF6D-3B04-46F8-A40B-537D21BCA0B4}") = "HadesDocumentation", "HadesDocumentation\HadesDocumentation.shfbproj", "{817A8130-5283-4185-908D-4CF6ADCC275C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomFunctions", "CustomFunctions\CustomFunctions.csproj", "{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{817A8130-5283-4185-908D-4CF6ADCC275C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{817A8130-5283-4185-908D-4CF6ADCC275C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{817A8130-5283-4185-908D-4CF6ADCC275C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
