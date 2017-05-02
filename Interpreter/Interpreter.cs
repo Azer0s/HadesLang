@@ -17,11 +17,6 @@ namespace Interpreter
         public Interpreter(IScriptOutput output)
         {
             Evaluator = new Evaluator(output);
-
-            Evaluator.RegisterFunction(new Function("test", () =>
-            {
-                Evaluator.GetFunctionValues().ForEach(Console.WriteLine);
-            }));
         }
 
         /// <summary>
@@ -98,6 +93,23 @@ namespace Interpreter
                 }
             }
             return new KeyValuePair<string, bool>(null, false);
+        }
+
+        /// <summary>
+        /// Registers a custom function
+        /// </summary>
+        /// <param name="f">Custom function</param>
+        /// <returns></returns>
+        public bool RegisterFunction(Function f)
+        {
+            if (Cache.Instance.Functions.Contains(f)) return false;
+            Cache.Instance.Functions.Add(f);
+            return true;
+        }
+
+        public List<string> GetFunctionValues()
+        {
+            return Evaluator.GetFunctionValues();
         }
     }
 }
