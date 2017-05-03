@@ -10,6 +10,7 @@ using Android.Text;
 using Android.Text.Method;
 using Android.Util;
 using Android.Views.InputMethods;
+using CustomFunctions;
 using Interpreter;
 using Variables;
 using Inter = Interpreter.Interpreter;
@@ -53,6 +54,11 @@ namespace HadesMobile
 
             _interpreter = new Inter(new AndroidOutput(_textView));
             Cache.Instance.Variables = new Dictionary<Tuple<string, string>, Types>();
+
+            _interpreter.RegisterFunction(new Function("toast", () =>
+            {
+                Toast.MakeText(this, _interpreter.GetFunctionValues().FirstOrDefault(), ToastLength.Long).Show();
+            }));
         }
 
 

@@ -34,5 +34,10 @@ namespace HadesMobile
         {
             _text.Text = ">";
         }
+
+        public string ReadLine()
+        {
+            return "";
+        }
     }
 }

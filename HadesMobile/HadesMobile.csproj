@@ -45,25 +45,24 @@
   <ItemGroup>
     <Reference Include="Cache, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\HadesLang\bin\Release\Cache.dll</HintPath>
+      <HintPath>..\Cache\bin\Debug\Cache.dll</HintPath>
     </Reference>
     <Reference Include="Exceptions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\HadesLang\bin\Release\Exceptions.dll</HintPath>
+      <HintPath>..\Exceptions\bin\Debug\Exceptions.dll</HintPath>
     </Reference>
     <Reference Include="Interpreter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\HadesLang\bin\Release\Interpreter.dll</HintPath>
+      <HintPath>..\Interpreter\bin\Debug\Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
-    <Reference Include="NCalc, Version=1.3.8.0, Culture=neutral, PublicKeyToken=973cde3f1cafed03, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\HadesLang\bin\Release\NCalc.dll</HintPath>
+    <Reference Include="NCalc">
+      <HintPath>..\HadesLang\bin\Debug\NCalc.dll</HintPath>
     </Reference>
     <Reference Include="StringExtension, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\HadesLang\bin\Release\StringExtension.dll</HintPath>
+      <HintPath>..\StringExtension\bin\Debug\StringExtension.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -71,7 +70,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="Variables, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\HadesLang\bin\Release\Variables.dll</HintPath>
+      <HintPath>..\Variables\bin\Debug\Variables.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +101,12 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CustomFunctions\CustomFunctions.csproj">
+      <Project>{447dfd3e-2bd3-4de5-bfd2-8184fb6a5f3a}</Project>
+      <Name>CustomFunctions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

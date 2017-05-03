@@ -7,6 +7,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CustomFunctions;
 using NCalc;
 using StringExtension;
 using Variables;
@@ -18,6 +19,10 @@ namespace Interpreter
         public void Start()
         {
             var interpreter = new Interpreter(new ConsoleOutput());
+            interpreter.RegisterFunction(new Function("print", () =>
+            {
+                interpreter.GetFunctionValues().ForEach(Console.WriteLine);
+            }));
             Cache.Instance.Variables = new Dictionary<Tuple<string,string>, Types>();
             while (true)
             {

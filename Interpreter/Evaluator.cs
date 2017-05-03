@@ -904,18 +904,6 @@ namespace Interpreter
             }
         }
 
-        /// <summary>
-        /// Registers a custom function
-        /// </summary>
-        /// <param name="f">Custom function</param>
-        /// <returns></returns>
-        public bool RegisterFunction(Function f)
-        {
-            if (Cache.Instance.Functions.Contains(f)) return false;
-            Cache.Instance.Functions.Add(f);
-            return true;
-        }
-
         public List<string> GetFunctionValues()
         {
             return _vars;
