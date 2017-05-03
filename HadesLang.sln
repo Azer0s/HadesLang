@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HadesLang", "HadesLang\HadesLang.csproj", "{1111A8CF-8D05-4914-88EB-AD6CAA7AD6FB}"
 EndProject
@@ -16,8 +16,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringExtension", "StringExtension\StringExtension.csproj", "{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HadesMobile", "HadesMobile\HadesMobile.csproj", "{59EACE80-F5E4-41CC-B7D9-C397D69D3C7F}"
-EndProject
-Project("{7CF6DF6D-3B04-46F8-A40B-537D21BCA0B4}") = "HadesDocumentation", "HadesDocumentation\HadesDocumentation.shfbproj", "{817A8130-5283-4185-908D-4CF6ADCC275C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomFunctions", "CustomFunctions\CustomFunctions.csproj", "{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}"
 EndProject
@@ -57,10 +55,6 @@ Global
 		{59EACE80-F5E4-41CC-B7D9-C397D69D3C7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59EACE80-F5E4-41CC-B7D9-C397D69D3C7F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{59EACE80-F5E4-41CC-B7D9-C397D69D3C7F}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{817A8130-5283-4185-908D-4CF6ADCC275C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{817A8130-5283-4185-908D-4CF6ADCC275C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{817A8130-5283-4185-908D-4CF6ADCC275C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{817A8130-5283-4185-908D-4CF6ADCC275C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{447DFD3E-2BD3-4DE5-BFD2-8184FB6A5F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
