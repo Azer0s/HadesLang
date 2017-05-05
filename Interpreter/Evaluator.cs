@@ -476,7 +476,11 @@ namespace Interpreter
                     toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]", StringComparison.Ordinal));
 
                     var result = EvaluateCall(toEvaluate[1].Split(new[] {':'}, 2), access);
-                    toEvaluate[1] = result.Key;
+
+                    if (!Cache.Instance.Functions.Exists(a => a.Name == toEvaluate[0]))
+                    {
+                        toEvaluate[1] = result.Key;
+                    }
                     isRec = true;
                 }
 
@@ -574,7 +578,14 @@ namespace Interpreter
                     default:
                         if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
                         {
-                            _vars.AddRange(toEvaluate[1].CsvSplitter());
+                            if (!toEvaluate[1].Contains(','))
+                            {
+                                _vars.Add(toEvaluate[1]);
+                            }
+                            else
+                            {
+                                _vars.AddRange(toEvaluate[1].CsvSplitter());
+                            }
                             Cache.Instance.Functions.First(a => a.Name == toEvaluate[0]).Execute();
                             _vars.Clear();
                             return new KeyValuePair<string, bool>(string.Empty,false);
