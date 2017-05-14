@@ -1,7 +1,5 @@
 # Hades - Breathing new life into scripting
-<br>
 *Hades is a scripting language built from scratch!*
-<br>
 <br>
 Here are a few examples of the language in action:
 
