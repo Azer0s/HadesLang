@@ -1,4 +1,6 @@
 # Hades - Breathing new life into scripting
+![](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)
+
 *Hades is a scripting language built from scratch!*
 <br>
 Here are a few examples of the language in action:
