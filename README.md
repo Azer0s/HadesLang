@@ -6,6 +6,15 @@
 <br>
 Here are a few examples of the language in action:
 
+## Register a custom function in C#
+```cs
+var interpreter = new Interpreter(new ConsoleOutput());
+interpreter.RegisterFunction(new Function("print", () =>
+{
+    interpreter.GetFunctionValues().ForEach(Console.WriteLine);
+}));
+```
+
 ## Hello world
 ```
 out:'Hello world'
