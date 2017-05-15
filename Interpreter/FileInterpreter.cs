@@ -36,7 +36,7 @@ namespace Interpreter
             var file = new System.IO.StreamReader(fileName);
             while ((line = file.ReadLine()) != null)
             {
-                Lines.Add(line);
+                Lines.Add(line.TrimStart().Replace("\t",""));
                 counter++;
             }
 
