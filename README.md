@@ -1,4 +1,4 @@
-# HadesLang - An interpreted embedding language built on .Net
+# HadesLang - A simple embedding language built on .Net
 [![Build Status](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)](https://travis-ci.org/Azer0s/HadesLang)
 
 
