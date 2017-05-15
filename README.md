@@ -1,5 +1,6 @@
 # HadesLang - A simple embedding language built on .Net
 [![Build Status](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)](https://travis-ci.org/Azer0s/HadesLang)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Azer0s/HadesLang/blob/master/LICENSE)
 
 
 *Hades is a scripting/embedding language built from scratch!*
