@@ -26,15 +26,15 @@ a as num closed = 1
 b as num closed = 1
 
 runala[true]
-	out:a
-	out:b
+    out:a
+    out:b
 
-	a = {a} + {b}
-	b = {a} + {b}
-	
-	case[{a} bigger 10000]
-		put a
-	endcase
+    a = {a} + {b}
+    b = {a} + {b}
+
+    case[{a} bigger 10000]
+        put a
+    endcase
 endrunala
 ```
 
