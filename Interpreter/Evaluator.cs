@@ -171,7 +171,7 @@ namespace Interpreter
                 }
                 if (data.Count > 4)
                 {
-                    for (int i = 5; i < data.Count; i++)
+                    for (var i = 5; i < data.Count; i++)
                     {
                         data[4] += $" {data[i]}";
                     }
@@ -897,8 +897,8 @@ namespace Interpreter
             {
                 case "case":
                     return OperationTypes.CASE;
-                case "runala":
-                    return OperationTypes.RUNALA;
+                case "aslongas":
+                    return OperationTypes.ASLONGAS;
                 default:
                     throw new InvalidOperationException("Invalid operation!");
             }

@@ -129,9 +129,9 @@ namespace Interpreter
                     }
                 }
 
-                if (_interpreter.Evaluator.EvaluateOperation(operation) == OperationTypes.RUNALA)
+                if (_interpreter.Evaluator.EvaluateOperation(operation) == OperationTypes.ASLONGAS)
                 {
-                    var lineToLine = GetLineToLine(i, "runala");
+                    var lineToLine = GetLineToLine(i, "aslongas");
                     _nextBreak.Add(lineToLine.Item2);
 
                     while (bool.Parse(result.Key))
@@ -174,11 +174,11 @@ namespace Interpreter
 
             for (var i = currentLine + 1; i < Lines.Count; i++)
             {
-                if (Lines[i].Replace(" ", "").Contains($"{lookOut}[") && Lines[i].Contains("]") && Lines[i] != $"end{lookOut}")
+                if (Lines[i].ToLower().Replace(" ", "").Contains($"{lookOut}[") && Lines[i].ToLower().Contains("]") && Lines[i].ToLower() != $"end{lookOut}")
                 {
                     buffer++;
                 }
-                if (Lines[i].Replace(" ", "") == $"end{lookOut}")
+                if (Lines[i].ToLower().Replace(" ", "") == $"end{lookOut}")
                 {
                     if (buffer != 0)
                     {

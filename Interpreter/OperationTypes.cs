@@ -9,7 +9,7 @@ namespace Interpreter
     public enum OperationTypes
     {
         CASE = 1,
-        RUNALA = 2,
+        ASLONGAS = 2,
         NONE
     }
 }
