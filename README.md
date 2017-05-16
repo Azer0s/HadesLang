@@ -1,10 +1,20 @@
-# Hades - Breathing new life into scripting
-*Tired of seeing the same old scripting language over and over again?*
-<br>
-*Hades is a scripting language built from scratch!*
-<br>
+# HadesLang - A simple embedding language built on .Net
+[![Build Status](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)](https://travis-ci.org/Azer0s/HadesLang)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Azer0s/HadesLang/blob/master/LICENSE)
+
+
+*Hades is a scripting/embedding language built from scratch!*
 <br>
 Here are a few examples of the language in action:
+
+## Register a custom function in C#
+```cs
+var interpreter = new Interpreter(new ConsoleOutput());
+interpreter.RegisterFunction(new Function("print", () =>
+{
+    interpreter.GetFunctionValues().ForEach(Console.WriteLine);
+}));
+```
 
 ## Hello world
 ```
@@ -17,16 +27,15 @@ a as num closed = 1
 b as num closed = 1
 
 runala[true]
-out:a
-out:b
+    out:a
+    out:b
 
-a = {a} + {b}
-b = {a} + {b}
+    a = {a} + {b}
+    b = {a} + {b}
 
-case[{a} bigger 10000]
-put a
-endcase
-
+    case[{a} bigger 10000]
+        put a
+    endcase
 endrunala
 ```
 
@@ -40,14 +49,14 @@ b->printA:void
 ### bar.hades
 ```
 func printA[]
-out:a
+    out:a
 endfunc
 ```
 
 ## Conditions
 ```
 case[Sqrt(9) smallerIs 3]
-out:'The squareroot of 9 is smaller/equals 3'
+    out:'The squareroot of 9 is smaller/equals 3'
 endcase
 ```
 
