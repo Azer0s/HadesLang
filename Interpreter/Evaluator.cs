@@ -904,7 +904,7 @@ namespace Interpreter
                 return OperationTypes.NONE;
             }
 
-            switch (operation)
+            switch (operation.ToLower())
             {
                 case "case":
                     return OperationTypes.CASE;
