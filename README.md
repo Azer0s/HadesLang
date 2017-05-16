@@ -26,7 +26,7 @@ out:'Hello world'
 a as num closed = 1
 b as num closed = 1
 
-runala[true]
+asLongAs[true]
     out:a
     out:b
 
@@ -35,8 +35,8 @@ runala[true]
 
     case[{a} bigger 10000]
         put a
-    endcase
-endrunala
+    endCase
+endAsLongAs
 ```
 
 ## Overarching variables
