@@ -57,7 +57,7 @@ namespace Interpreter
                 }
                 else
                 {
-                    Console.WriteLine(returnVar);
+                    if (returnVar != null) Console.WriteLine(returnVar);
                 }
             }
         }
