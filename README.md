@@ -44,7 +44,7 @@ endAsLongAs
 ```
 a as num reachable_all = 18
 load:'bar.hades' as b
-b->printA:void
+b->printA:[]
 ```
 ### bar.hades
 ```
