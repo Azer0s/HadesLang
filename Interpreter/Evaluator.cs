@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using CustomFunctions;
 using Exceptions;
 using NCalc;
 using StringExtension;
@@ -289,7 +288,7 @@ namespace Interpreter
             }
             else
             {
-                throw new AccessDeniedException("You are note allowed to access this variable!");
+                throw new AccessDeniedException("You are note allowed to access this variable or the variable doesn´t exist!");
             }
         }
 
@@ -381,7 +380,6 @@ namespace Interpreter
         /// <returns></returns>
         public string EvaluateOut(string toEvaluate, bool ignoreQuote, string access)
         {
-            //toEvaluate = ReplaceWithVars(toEvaluate, access);
             if (ignoreQuote)
             {
                 toEvaluate = $"'{toEvaluate}'";
@@ -408,6 +406,11 @@ namespace Interpreter
                 {
                     return GetVariable(toEvaluate, access).Value.Value;
                 }
+                var stringWithVars = ReplaceWithVars(toEvaluate, access);
+                if (stringWithVars != toEvaluate)
+                {
+                    return stringWithVars;
+                }
                 else
                 {
                     throw new VariableNotDefinedException("Variable not defined!");
@@ -430,14 +433,7 @@ namespace Interpreter
         /// <returns></returns>
         private bool VariableIsReachableAll(string toEvaluate)
         {
-            foreach (var variable in Cache.Instance.Variables)
-            {
-                if (variable.Value.Access == AccessTypes.REACHABLE_ALL && variable.Key.Item1 == toEvaluate)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return Cache.Instance.Variables.Any(variable => variable.Value.Access == AccessTypes.REACHABLE_ALL && variable.Key.Item1 == toEvaluate);
         }
 
         /// <summary>
@@ -448,7 +444,7 @@ namespace Interpreter
         /// <returns></returns>
         public KeyValuePair<string, bool> EvaluateCall(string[] toEvaluate, string access)
         {
-            bool ignoreCase = false;
+            var ignoreCase = false;
 
             //only one information given
             if (toEvaluate.Length == 1)
@@ -471,7 +467,7 @@ namespace Interpreter
                     toEvaluate[1] = EvaluateCall(parameters, access).Key;
                     ignoreCase = true;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // ignored
                 }
@@ -662,7 +658,7 @@ namespace Interpreter
                             return "\n" + fiL.Return.Value.Value;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         // ignored
                     }                    
