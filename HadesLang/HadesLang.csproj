@@ -59,6 +59,10 @@
       <Project>{ace3e078-2bc8-4c64-a6f3-64d4d00b68ad}</Project>
       <Name>Interpreter</Name>
     </ProjectReference>
+    <ProjectReference Include="..\StringExtension\StringExtension.csproj">
+      <Project>{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}</Project>
+      <Name>StringExtension</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Variables\Variables.csproj">
       <Project>{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}</Project>
       <Name>Variables</Name>

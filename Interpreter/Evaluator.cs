@@ -448,12 +448,32 @@ namespace Interpreter
         /// <returns></returns>
         public KeyValuePair<string, bool> EvaluateCall(string[] toEvaluate, string access)
         {
+            bool ignoreCase = false;
+
             //only one information given
             if (toEvaluate.Length == 1)
             {
                 if (TryEvaluateBool(toEvaluate[0], access, out string tryResult))
                 {
                     return new KeyValuePair<string, bool>(tryResult, false);
+                }
+            }
+
+            //nested commands, eg. out:[type:a]
+            if (toEvaluate[0] != null && Regex.IsMatch(toEvaluate[1], @"\[([^]]*)\]") && (toEvaluate[1].Contains(":") || toEvaluate[1].Contains(":")))
+            {
+                try
+                {
+                    var nested = toEvaluate[1].TrimStart('[').TrimEnd(']');
+
+                    var parameters = nested.Contains(":") ? nested.Split(new[] {':'}, 2) : nested.SplitToTwo( "->" , StringSplitOptions.None);
+
+                    toEvaluate[1] = EvaluateCall(parameters, access).Key;
+                    ignoreCase = true;
+                }
+                catch (Exception e)
+                {
+                    // ignored
                 }
             }
 
@@ -517,7 +537,7 @@ namespace Interpreter
                 switch (toEvaluate[0])
                 {
                     case "out":
-                        callResult = EvaluateOut(toEvaluate[1], false, access);
+                        callResult = EvaluateOut(toEvaluate[1], ignoreCase, access);
                         ForceOut = true;
                         goto returnResult;
                     case "load":

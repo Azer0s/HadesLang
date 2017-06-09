@@ -31,6 +31,21 @@ namespace StringExtension
             return source.Any(s.Contains);
         }
 
+        public static string[] SplitToTwo(this string source, string delimiter, StringSplitOptions options)
+        {
+            var split = source.Split(new[] {delimiter}, options);
+
+            if (split.Length == 2 || split.Length < 2)
+            {
+                return split;
+            }
+
+            var smallerArray = split.ToList().GetRange(1,split.Length-1);
+            var secondPos = string.Empty;
+            smallerArray.ForEach(a => secondPos += (delimiter + a));
+            return new[]{split[1],secondPos.Substring(delimiter.Length)};
+        }
+
         /// <summary>
         /// Checks the order of two substrings in a string
         /// </summary>
