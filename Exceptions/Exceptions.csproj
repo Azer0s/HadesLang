@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessDeniedException.cs" />
-    <Compile Include="DefinationDeniedException.cs" />
+    <Compile Include="DefinitionDeniedException.cs" />
     <Compile Include="InvalidAccessTypeException.cs" />
     <Compile Include="InvalidDataAssignException.cs" />
     <Compile Include="InvalidDataTypeException.cs" />

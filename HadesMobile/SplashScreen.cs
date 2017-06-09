@@ -15,7 +15,7 @@ using Android.Widget;
 
 namespace HadesMobile
 {
-    [Activity(MainLauncher = true, NoHistory = true, Label = "HadesMobile", Icon = "@drawable/icon", ScreenOrientation = ScreenOrientation.Portrait,Theme = "@android:style/Theme.Material.NoActionBar.Fullscreen", ResizeableActivity = true, LaunchMode = LaunchMode.SingleTop)]
+    [Activity(MainLauncher = true, NoHistory = true, Label = "HadesMobile", Icon = "@drawable/icon", ScreenOrientation = ScreenOrientation.Portrait,Theme = "@android:style/Theme.Material.NoActionBar.Fullscreen", /*ResizeableActivity = true,*/ LaunchMode = LaunchMode.SingleTop)]
     public class SplashScreen : Activity
     {
         protected override void OnCreate(Bundle bundle)

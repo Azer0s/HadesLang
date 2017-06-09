@@ -108,7 +108,8 @@ namespace Interpreter
 
                     var e = new Expression(reg).Evaluate().ToString().ToLower();
 
-                    //Library returns 1/0 in some cases, TODO: Try to fix
+                    //Library returns 1/0 in some cases
+                    //TODO: Try to fix
                     if (e.IsNum())
                     {
                         if (e == "1")
@@ -166,7 +167,7 @@ namespace Interpreter
                 if (Exists(new Tuple<string, string>(data[0], access)))
                 {
                     ForceOut = true;
-                    throw new DefinationDeniedException(
+                    throw new DefinitionDeniedException(
                         "Variable has already been defined with acces type: reachable_all");
                 }
                 if (data.Count > 4)
@@ -215,7 +216,7 @@ namespace Interpreter
                     if (operation[0] == "out" && !operation[1].Contains("[") && !operation[1].Contains("]") &&
                         !operation[1].ContainsFromList(OperatorList))
                     {
-                        return AssignValueToVariable($"{data[0]} = '{operation[1]}'", access);
+                        return AssignValueToVariable($"{data[0]} = '{EvaluateCall(operation,access).Key}'", access);
                     }
 
                     data[1] = "'" + EvaluateCall(operation, access).Key + "'";
@@ -339,7 +340,7 @@ namespace Interpreter
                     }
                 }
 
-                string resultString = string.Empty;
+                var resultString = string.Empty;
                 foreach (var variable in data)
                 {
                     resultString += Regex.Match(variable, @"\'([^]]*)\'").Groups[1].Value;
@@ -380,6 +381,7 @@ namespace Interpreter
         /// <returns></returns>
         public string EvaluateOut(string toEvaluate, bool ignoreQuote, string access)
         {
+            //toEvaluate = ReplaceWithVars(toEvaluate, access);
             if (ignoreQuote)
             {
                 toEvaluate = $"'{toEvaluate}'";
@@ -446,69 +448,58 @@ namespace Interpreter
         /// <returns></returns>
         public KeyValuePair<string, bool> EvaluateCall(string[] toEvaluate, string access)
         {
-            //only one information given - invalid
+            //only one information given
             if (toEvaluate.Length == 1)
             {
-                string tryResult;
-                if (TryEvaluateBool(toEvaluate[0], access, out tryResult))
+                if (TryEvaluateBool(toEvaluate[0], access, out string tryResult))
                 {
                     return new KeyValuePair<string, bool>(tryResult, false);
                 }
             }
 
-            if (toEvaluate.Length == 1 && toEvaluate[0].Contains(","))
+            //Checks where and if there is a method call
+            var contains = false;
+            var callIndex = 0;
+            toEvaluate.ToList().ForEach(a =>
             {
-                return new KeyValuePair<string, bool>(toEvaluate[0], false);
-            }
+                if (!string.IsNullOrEmpty(a) && a.Contains("->"))
+                {
+                    contains = true;
+                    callIndex = toEvaluate.ToList().IndexOf(a);
+                }
+            });
 
             try
             {
-                toEvaluate[1] = ReplaceWithVars(toEvaluate[1], access);
-                var isRec = false;
-
-                //if input is a boolean expression
-                if (Regex.IsMatch(toEvaluate[1], @"(\[)([^]]*)(\])"))
-                {
-                    var index = toEvaluate[1].IndexOf("[", StringComparison.Ordinal);
-                    toEvaluate[1] = (index < 0)
-                        ? toEvaluate[1]
-                        : toEvaluate[1].Remove(index, "[".Length);
-                    toEvaluate[1] = toEvaluate[1].Substring(0, toEvaluate[1].LastIndexOf("]", StringComparison.Ordinal));
-
-                    var result = EvaluateCall(toEvaluate[1].Split(new[] {':'}, 2), access);
-
-                    if (!Cache.Instance.Functions.Exists(a => a.Name == toEvaluate[0]))
-                    {
-                        toEvaluate[1] = result.Key;
-                    }
-                    isRec = true;
-                }
-
-                //method call
-                var contains = false;
-                var callIndex = 0;
-                toEvaluate.ToList().ForEach(a =>
-                {
-                    if (a.Contains("->"))
-                    {
-                        contains = true;
-                        callIndex = toEvaluate.ToList().IndexOf(a);
-                    }
-                });
-
+                //Executes method call if there is one
                 if (contains)
                 {
-                    var call = toEvaluate[callIndex].Split(new[] {"->"}, 2, StringSplitOptions.None);
+                    var call = toEvaluate[callIndex].Split(new[] { "->" }, 2, StringSplitOptions.None);
 
                     if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(call[0], access)))
                     {
                         var variable = GetVariable(call[0], access);
                         if (variable.Value.DataType == DataTypes.OBJECT)
                         {
-                            //Todo call method
-                            var data = toEvaluate[callIndex + 1].CsvSplitter().ToArray();
+                            var methodData = call[1].Split(new[]{':'},2);
+                            var method = variable.Value.Methods.Where(a => a.Name == methodData[1]).ToList();
 
-                            var method = variable.Value.Methods.Where(a => a.Name == call[1]);
+                            string[] data;
+                            try
+                            {
+                                data = methodData[1].TrimStart('[').TrimEnd(']').CsvSplitter().ToArray();
+                            }
+                            catch (Exception e)
+                            {
+                                // ignored
+                            }
+
+                            if (!Regex.IsMatch(methodData[1], @"(\[)([^]]*)(\])") || method.Count == 0)
+                            {
+                                throw new InvalidOperationException("Method does not exist or is being called incorrectly!");
+                            }
+
+                            //Todo call method
                         }
                         else
                         {
@@ -519,14 +510,14 @@ namespace Interpreter
                     {
                         throw new VariableNotDefinedException("Variable not defined!");
                     }
-                }
+                }   
 
-                //normal, built in, methods
-                string callResult = null;
+            //built in methods
+            string callResult = null;
                 switch (toEvaluate[0])
                 {
                     case "out":
-                        callResult = EvaluateOut(toEvaluate[1], isRec, access);
+                        callResult = EvaluateOut(toEvaluate[1], false, access);
                         ForceOut = true;
                         goto returnResult;
                     case "load":
@@ -578,17 +569,25 @@ namespace Interpreter
                     default:
                         if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
                         {
-                            if (!toEvaluate[1].Contains(','))
+                            if (Regex.IsMatch(toEvaluate[1], @"\[([^]]*)\]"))
                             {
-                                _vars.Add(toEvaluate[1]);
+                                toEvaluate[1] = toEvaluate[1].TrimStart('[').TrimEnd(']');
+                                if (!toEvaluate[1].Contains(','))
+                                {
+                                    _vars.Add(toEvaluate[1]);
+                                }
+                                else
+                                {
+                                    _vars.AddRange(toEvaluate[1].CsvSplitter());
+                                }
+                                Cache.Instance.Functions.First(a => a.Name == toEvaluate[0]).Execute();
+                                _vars.Clear();
+                                return new KeyValuePair<string, bool>(string.Empty, false);
                             }
                             else
                             {
-                                _vars.AddRange(toEvaluate[1].CsvSplitter());
+                                throw new InvalidOperationException("Method call was invalid!");
                             }
-                            Cache.Instance.Functions.First(a => a.Name == toEvaluate[0]).Execute();
-                            _vars.Clear();
-                            return new KeyValuePair<string, bool>(string.Empty,false);
                         }
                         break;
                 }
@@ -636,10 +635,17 @@ namespace Interpreter
                     Cache.Instance.LoadFiles.Add(s);
                     fiL.LoadAll();
 
-                    if (!string.IsNullOrEmpty(fiL.Return.Value.Value))
+                    try
                     {
-                        return "\n" + fiL.Return.Value.Value;
+                        if (!string.IsNullOrEmpty(fiL.Return.Value.Value))
+                        {
+                            return "\n" + fiL.Return.Value.Value;
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        // ignored
+                    }                    
                 }
                 if (!Regex.IsMatch(s, @"'([^]]*)'")) throw new InvalidFileNameException("Filename is invalid!"); 
                 

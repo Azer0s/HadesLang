@@ -55,7 +55,7 @@ namespace Interpreter
             }
 
             //Method call
-            if (lineToInterprete.Contains(":") || lineToInterprete.Contains("->"))
+            if (lineToInterprete.Contains(":") || lineToInterprete.Contains("->") || lineToInterprete.ContainsFromList(Cache.Instance.Functions.Select(a => a.Name).ToList()))
             {
                 string[] call;
                 if (lineToInterprete.CheckOrder(":", "->"))
