@@ -16,6 +16,18 @@ namespace Interpreter
 {
     public class ShellInterpreter
     {
+        public KeyValuePair<bool, string> StartAsScript;
+
+        public ShellInterpreter()
+        {
+            StartAsScript = new KeyValuePair<bool, string>(false,"");
+        }
+
+        public ShellInterpreter(string path)
+        {
+            StartAsScript = new KeyValuePair<bool, string>(true,path);
+        }
+
         public void Start()
         {
             var interpreter = new Interpreter(new ConsoleOutput());
@@ -24,6 +36,23 @@ namespace Interpreter
                 interpreter.GetFunctionValues().ForEach(Console.WriteLine);
             }));
             Cache.Instance.Variables = new Dictionary<Tuple<string,string>, Types>();
+
+            if (StartAsScript.Key)
+            {
+                var fi = new FileInterpreter(StartAsScript.Value, interpreter.Evaluator.Output);
+                fi.LoadAll();
+                try
+                {
+                    Console.WriteLine(fi.Return.Value.Value);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+                Console.ReadKey();
+                return;
+            }
+
             while (true)
             {
                 Console.Write(">");
