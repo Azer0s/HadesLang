@@ -95,8 +95,9 @@ namespace Interpreter
                 //Boolean comparison
                 if (reg.ContainsFromList(CompOperatorList))
                 {
-                    reg = reg.Replace("smallerIs", "<=");
-                    reg = reg.Replace("biggerIs", ">=");
+                    reg = reg.ToLower();
+                    reg = reg.Replace("smalleris", "<=");
+                    reg = reg.Replace("biggeris", ">=");
                     reg = reg.Replace("xor", "^");
                     reg = reg.Replace("is", "==");
                     reg = reg.Replace("or", "||");

@@ -28,7 +28,12 @@ namespace StringExtension
 
         public static bool ContainsFromList(this string s, List<string> source)
         {
-            return source.Any(s.Contains);
+            return source.Any(a => s.Contains(a,StringComparison.OrdinalIgnoreCase));
+        }
+
+        public static bool Contains(this string source, string toCheck, StringComparison comp)
+        {
+            return source.IndexOf(toCheck, comp) >= 0;
         }
 
         public static string[] SplitToTwo(this string source, string delimiter, StringSplitOptions options)
