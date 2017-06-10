@@ -34,8 +34,8 @@ namespace Variables
                     return DataTypes.DEC;
                 case "word":
                     return DataTypes.WORD;
-                case "binary":
-                    return DataTypes.BINARY;
+                case "bit":
+                    return DataTypes.BIT;
                 default:
                     throw new InvalidDataTypeException("Invalid data type!");
             }

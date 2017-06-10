@@ -16,7 +16,7 @@ namespace Interpreter
         /// <summary>
         /// Regex pattern for var decleration
         /// </summary>
-        public static string VarPattern = @"as (num|dec|word|binary)+ (reachable|reachable_all|closed)+";
+        public static string VarPattern = @"as (num|dec|word|bit)+ (reachable|reachable_all|closed)+";
 
         /// <summary>
         /// Available operators
@@ -66,7 +66,7 @@ namespace Interpreter
         }
 
         /// <summary>
-        /// Evaluates a boolean expression (binary type in Hades)
+        /// Evaluates a boolean expression (bit type in Hades)
         /// </summary>
         /// <param name="toEvaluate">The expression to be evaluated</param>
         /// <param name="access">Delimiter for variable ownership</param>
@@ -873,9 +873,9 @@ namespace Interpreter
                 return DataTypes.NUM;
             }
 
-            if (data.IsBinary())
+            if (data.IsBit())
             {
-                return DataTypes.BINARY;
+                return DataTypes.BIT;
             }
 
             if (data.IsDec())
@@ -906,8 +906,8 @@ namespace Interpreter
                     return DataTypes.NUM;
                 case "dec":
                     return DataTypes.DEC;
-                case "binary":
-                    return DataTypes.BINARY;
+                case "bit":
+                    return DataTypes.BIT;
                 case "object":
                     return DataTypes.OBJECT;
                 default:

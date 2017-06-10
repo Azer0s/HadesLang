@@ -8,7 +8,7 @@ namespace StringExtension
 {
     public static class Extensions
     {
-        public static bool IsBinary(this string s)
+        public static bool IsBit(this string s)
         {
             bool x;
             return bool.TryParse(s,out x);
