@@ -1,0 +1,30 @@
+a as num closed
+b as num closed
+
+c as bit closed
+
+out:'Use custom startvalue? (true/false)'
+in:c
+
+a = 1
+b = 1
+
+case[{c}]
+	out:'Enter first number:'
+	in:a
+	out:'Enter second number:'
+	in:b
+endCase
+
+asLongAs[true]
+	out:a
+	out:b
+
+	a = {a} + {b}
+	b = {a} + {b}
+
+	case[{a} bigger 10000]
+		put a
+	endCase
+
+endAsLongAs

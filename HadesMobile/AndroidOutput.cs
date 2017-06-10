@@ -22,12 +22,18 @@ namespace HadesMobile
         }
         public void Write(string input)
         {
-            throw new NotImplementedException();
+            if (input != null)
+            {
+                _text.Text += input;
+            }
         }
 
         public void WriteLine(string input)
         {
-            _text.Text += input + "\n";
+            if (input != null)
+            {
+                Write(input + "\n");
+            }
         }
 
         public void Clear()
