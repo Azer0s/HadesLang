@@ -233,8 +233,8 @@ namespace Interpreter
                     data[1] = EvaluateBool(data[1], access).Result.ToString().ToLower();
                 }
 
-                if (dt == DataTypeFromData(data[1]) || isOut ||
-                    (dt == DataTypes.DEC && DataTypeFromData(data[1]) == DataTypes.NUM))
+                if (dt == DataTypeFromData(data[1],false) || isOut ||
+                    (dt == DataTypes.DEC && DataTypeFromData(data[1],false) == DataTypes.NUM))
                 {
                     if (dt == DataTypes.WORD)
                     {
@@ -334,7 +334,7 @@ namespace Interpreter
 
                 foreach (var variable in data)
                 {
-                    if (DataTypeFromData(variable) != DataTypes.WORD)
+                    if (DataTypeFromData(variable,false) != DataTypes.WORD)
                     {
                         goto tryNumeric;
                     }
@@ -424,6 +424,33 @@ namespace Interpreter
             catch (Exception e)
             {
                 return e.Message;
+            }
+        }
+
+        /// <summary>
+        /// Gets input from the user
+        /// </summary>
+        /// <param name="varname">Name of the variable the input should be inserted to</param>
+        /// <param name="access">Delimiter for variabel ownership</param>
+        /// <returns></returns>
+        public void GetIn(string varname, string access)
+        {
+            var input = Output.ReadLine();
+            var dt = DataTypeFromData(input,true);
+            var varDt = GetVariable(varname, access).Value.DataType;
+
+            if (varDt == dt || (varDt == DataTypes.DEC && dt == DataTypes.NUM))
+            {
+                if (varDt == DataTypes.DEC)
+                {
+                    input = input.Replace(",", ".");
+                }
+                SetVariable(varname, input, access);
+            }
+            else
+            {
+                throw new InvalidDataAssignException(
+                    "The data type of the variable does not match the assignment type!");
             }
         }
 
@@ -537,6 +564,9 @@ namespace Interpreter
                         callResult = EvaluateOut(toEvaluate[1], ignoreCase, access);
                         ForceOut = true;
                         goto returnResult;
+                    case "in":
+                        GetIn(toEvaluate[1], access);
+                        goto returnResult;
                     case "load":
                         callResult = LoadFile(toEvaluate[1],access);
                         goto returnResult;
@@ -544,7 +574,8 @@ namespace Interpreter
                         callResult = GetVarType(toEvaluate[1], access);
                         goto returnResult;
                     case "dtype":
-                        callResult = DataTypeFromData(toEvaluate[1]).ToString().ToLower();
+                        toEvaluate[1] = ReplaceWithVars(toEvaluate[1], access);
+                        callResult = DataTypeFromData(toEvaluate[1],false).ToString().ToLower();
                         goto returnResult;
                     case "uload":
                         callResult = DeleteVar(toEvaluate[1], access);
@@ -865,8 +896,9 @@ namespace Interpreter
         /// Returns the data type of the data within the input string
         /// </summary>
         /// <param name="data"></param>
+        /// <param name="ignoreQuotes"></param>
         /// <returns></returns>
-        public DataTypes DataTypeFromData(string data)
+        public DataTypes DataTypeFromData(string data, bool ignoreQuotes)
         {
             if (data.IsNum())
             {
@@ -883,7 +915,7 @@ namespace Interpreter
                 return DataTypes.DEC;
             }
 
-            if (Regex.IsMatch(data, @"\'([^]]*)\'"))
+            if (Regex.IsMatch(data, @"\'([^]]*)\'") || ignoreQuotes)
             {
                 return DataTypes.WORD;
             }
