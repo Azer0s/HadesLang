@@ -22,7 +22,7 @@ out:'Hello world'
 ```
 
 ## Fibonacci Numbers
-###fibonacci.hades
+### fibonacci.hades
 ```
 func fib[]
     a as num closed = 1
@@ -41,7 +41,7 @@ func fib[]
     endAsLongAs
 endfunc
 ```
-###main.hades
+### main.hades
 ```
 load:'fibonacci.hades' as a
 b as num reachable = a->fib:[]
