@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Exceptions;
 using Variables;
 
 namespace Interpreter
@@ -15,12 +17,13 @@ namespace Interpreter
         public string FileName { get; set; }
         public List<string> Lines = new List<string>();
         public List<Methods> Methods = new List<Methods>();
+        public KeyValuePair<string, Types> Return;
+        public IScriptOutput Output;
+        public Dictionary<string, string> Parameters;
         private readonly Interpreter _interpreter;
         private bool _stop;
         private readonly List<int> _nextBreak = new List<int>();
         private bool _breakMode;
-        public KeyValuePair<string, Types> Return;
-        public IScriptOutput Output;
 
         public FileInterpreter(string fileName,IScriptOutput output)
         {
@@ -43,12 +46,13 @@ namespace Interpreter
             file.Close();
         }
 
-        public FileInterpreter(List<string> lines, List<Methods> methods, IScriptOutput output)
+        public FileInterpreter(IEnumerable<string> lines, List<Methods> methods, IScriptOutput output)
         {
-            Lines = lines;
+            Lines = new List<string>(lines);
             Methods = methods;
             _interpreter = new Interpreter(output);
             Output = output;
+            Parameters = new Dictionary<string, string>();
         }
 
         public void LoadAll()
@@ -84,6 +88,26 @@ namespace Interpreter
                    break; 
                 }
 
+                //Line contains function parameters
+                if (Lines[i].Contains("param"))
+                {
+                    var param = Regex.Matches(Lines[i], "(param.)+[a-zA-Z 0-9]+");
+
+                    foreach (Match o in param)
+                    {
+                        var paramName = o.Value.Replace("param.", "");
+                        try
+                        {
+                            Lines[i] = Lines[i].Replace(o.Value, Parameters[paramName]);
+                        }
+                        catch (Exception)
+                        {
+                            throw new VariableNotDefinedException("Parameter was not found!");
+                        }
+                    }
+                }
+
+                //return
                 if (Lines[i].StartsWith("put"))
                 {
                     var returnVar = Lines[i].Split(' ');
@@ -91,6 +115,7 @@ namespace Interpreter
                     _stop = true;
                 }
 
+                //stop loop or case
                 if (Lines[i] == "break")
                 {
                     if (!firstLevel)
@@ -101,6 +126,7 @@ namespace Interpreter
                     return;
                 }
 
+                //skip function
                 if (Lines[i].StartsWith("func"))
                 {
                     var func = GetLineToLine(i, "func");
@@ -108,6 +134,7 @@ namespace Interpreter
                     continue;
                 }
 
+                //stop execution of script
                 if (Lines[i] == "stopExec")
                 {
                     _stop = true;
@@ -127,6 +154,7 @@ namespace Interpreter
                     Output.Clear();
                 }
 
+                //case operation
                 if (_interpreter.Evaluator.EvaluateOperation(operation) == OperationTypes.CASE)
                 {
                     var LineToLine = GetLineToLine(i, "case");
@@ -142,6 +170,7 @@ namespace Interpreter
                     }
                 }
 
+                //Loop operation
                 if (_interpreter.Evaluator.EvaluateOperation(operation) == OperationTypes.ASLONGAS)
                 {
                     var lineToLine = GetLineToLine(i, "aslongas");
@@ -211,12 +240,29 @@ namespace Interpreter
 
         public void LoadFunctions()
         {
-            //TODO input parameters
             for (var i = 0; i < Lines.Count; i++)
             {
                 if (!Lines[i].StartsWith("func")) continue;
                 var func = GetLineToLine(i,"func");
-                Methods.Add(new Methods(Lines[i].Split(' ')[1],func));
+
+                var parameters = new List<Tuple<string, DataTypes>>();
+                Regex.Match(Lines[i], @"(\[)([^]]*)(\])").Value.TrimStart('[').TrimEnd(']').Split(',').ToList().ForEach(
+                    a =>
+                    {
+                        try
+                        {
+                            var splitParam = a.TrimStart(' ').Split(' ');
+                            var name = splitParam[1].Replace(" ", "");
+                            var type = TypeParser.ParseDataType(splitParam[0].Replace(" ", ""));
+                            parameters.Add(new Tuple<string, DataTypes>(name, type));
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }  
+                    });
+
+                Methods.Add(new Methods(Lines[i].Split(' ')[1],func,parameters));
                 i = func.Item2;
             }
         }

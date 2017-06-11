@@ -509,11 +509,12 @@ namespace Interpreter
             //nested commands, eg. out:[type:a]
             if (toEvaluate[0] != null && Regex.IsMatch(toEvaluate[1], @"\[([^]]*)\]") && (toEvaluate[1].Contains(":") || toEvaluate[1].Contains(":")))
             {
+                //TODO: Support objects and method calls
                 try
                 {
                     var nested = toEvaluate[1].TrimStart('[').TrimEnd(']');
 
-                    var parameters = nested.Contains(":") ? nested.Split(new[] {':'}, 2) : nested.SplitToTwo( "->" , StringSplitOptions.None);
+                    var parameters = nested.Contains(":") ? nested.Split(new[] { ':' }, 2) : nested.SplitToTwo("->", StringSplitOptions.None);
 
                     toEvaluate[1] = EvaluateCall(parameters, access).Key;
                     ignoreCase = true;
@@ -552,12 +553,21 @@ namespace Interpreter
                             var methodData = call[1].Split(new[]{':'},2);
                             var method = variable.Value.Methods.Where(a => a.Name == methodData[0]).ToList();
 
-                            string[] data;
+                            var parameters = new Dictionary<string, string>();
                             try
                             {
-                                data = methodData[1].TrimStart('[').TrimEnd(']').CsvSplitter().ToArray();
+                                var data = methodData[1].TrimStart('[').TrimEnd(']').CsvSplitter().ToArray();
+
+                                if (data.Length != method.First().Parameters.Count)
+                                {
+                                    throw new InvalidOperationException("Method is being called incorrectly!");
+                                }
+                                for (var i = 0; i < data.Length; i++)
+                                {
+                                    parameters.Add(method.First().Parameters[i].Item1,data[i]);
+                                }
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 // ignored
                             }
@@ -567,7 +577,11 @@ namespace Interpreter
                                 throw new InvalidOperationException("Method does not exist or is being called incorrectly!");
                             }
 
-                            var fi = new FileInterpreter(variable.Value.Lines,variable.Value.Methods,Output);
+                            var fi = new FileInterpreter(variable.Value.Lines, variable.Value.Methods, Output)
+                            {
+                                Parameters = parameters,
+                                FileName = call[0] + "->" + methodData[0]
+                            };
                             fi.ExecuteFromLineToLine(new Tuple<int, int>(method.First().Postition.Item1, method.First().Postition.Item2), true, out _);
                             callResult = fi.Return.Value.Value;
                             fi.Collect();
