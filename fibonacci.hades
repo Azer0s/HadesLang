@@ -10,7 +10,9 @@ a = 1
 b = 1
 
 case[{c}]
+	out:'Enter first number:'
 	in:a
+	out:'Enter second number:'
 	in:b
 endCase
 
