@@ -25,20 +25,20 @@ out:'Hello world'
 ###fibonacci.hades
 ```
 func fib[]
-	a as num closed = 1
-	b as num closed = 1
+    a as num closed = 1
+    b as num closed = 1
 
-	asLongAs[true]
-		out:a
-		out:b
+    asLongAs[true]
+        out:a
+        out:b
 
-		a = {a} + {b}
-		b = {a} + {b}
+        a = {a} + {b}
+        b = {a} + {b}
 
-		case[{a} bigger 10000]
-			put a
-		endCase
-	endAsLongAs
+        case[{a} bigger 10000]
+	    put a
+        endCase
+    endAsLongAs
 endfunc
 ```
 ###main.hades
