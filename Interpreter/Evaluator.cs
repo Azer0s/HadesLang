@@ -203,6 +203,7 @@ namespace Interpreter
             try
             {
                 var data = toEvaluate.Split('=');
+                data[1] = data[1].TrimStart(' ').TrimEnd(' ');
                 var index = data[0].Replace(" ", "");
                 var dt = GetVariable(index, access).Value.DataType;
                 data[1] = ReplaceWithVars(data[1], access);
@@ -210,13 +211,34 @@ namespace Interpreter
 
                 if (data[1].Contains(":"))
                 {
-                    var operation = data[1].Split(new[] {':'}, 2);
+                    string[] operation;
+
+                    string AssignWithMethod(string[] op,string Access,bool quot)
+                    {
+                        try
+                        {
+                            var evaluated = EvaluateCall(op, access).Key;
+                            return AssignValueToVariable(quot ? $"{data[0]} = '{evaluated}'" : $"{data[0]} = {evaluated}", Access);
+                        }
+                        catch (Exception e)
+                        {
+                            throw e;
+                        }
+                    }
+
+                    if (data[1].Contains("->"))
+                    {
+                        operation = new[] {null, data[1]};
+                        return AssignWithMethod(operation,access,false);
+                    }
+
+                    operation = data[1].Split(new[] {':'}, 2);
                     operation[0] = operation[0].Replace(" ", "");
 
                     if (operation[0] == "out" && !operation[1].Contains("[") && !operation[1].Contains("]") &&
                         !operation[1].ContainsFromList(OperatorList))
                     {
-                        return AssignValueToVariable($"{data[0]} = '{EvaluateCall(operation,access).Key}'", access);
+                        return AssignWithMethod(operation,access,true);
                     }
 
                     data[1] = "'" + EvaluateCall(operation, access).Key + "'";
@@ -473,6 +495,7 @@ namespace Interpreter
         public KeyValuePair<string, bool> EvaluateCall(string[] toEvaluate, string access)
         {
             var ignoreCase = false;
+            string callResult = null;
 
             //only one information given
             if (toEvaluate.Length == 1)
@@ -519,6 +542,7 @@ namespace Interpreter
                 if (contains)
                 {
                     var call = toEvaluate[callIndex].Split(new[] { "->" }, 2, StringSplitOptions.None);
+                    call[0] = call[0].Replace(" ", "");
 
                     if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(call[0], access)))
                     {
@@ -526,7 +550,7 @@ namespace Interpreter
                         if (variable.Value.DataType == DataTypes.OBJECT)
                         {
                             var methodData = call[1].Split(new[]{':'},2);
-                            var method = variable.Value.Methods.Where(a => a.Name == methodData[1]).ToList();
+                            var method = variable.Value.Methods.Where(a => a.Name == methodData[0]).ToList();
 
                             string[] data;
                             try
@@ -543,7 +567,11 @@ namespace Interpreter
                                 throw new InvalidOperationException("Method does not exist or is being called incorrectly!");
                             }
 
-                            //Todo call method
+                            var fi = new FileInterpreter(variable.Value.Lines,variable.Value.Methods,Output);
+                            fi.ExecuteFromLineToLine(new Tuple<int, int>(method.First().Postition.Item1, method.First().Postition.Item2), true, out _);
+                            callResult = fi.Return.Value.Value;
+                            fi.Collect();
+                            goto returnResult;
                         }
                         else
                         {
@@ -557,7 +585,6 @@ namespace Interpreter
                 }   
 
             //built in methods
-            string callResult = null;
                 switch (toEvaluate[0])
                 {
                     case "out":

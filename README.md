@@ -22,23 +22,32 @@ out:'Hello world'
 ```
 
 ## Fibonacci Numbers
+###fibonacci.hades
 ```
-a as num closed = 1
-b as num closed = 1
+func fib[]
+	a as num closed = 1
+	b as num closed = 1
 
-asLongAs[true]
-    out:a
-    out:b
+	asLongAs[true]
+		out:a
+		out:b
 
-    a = {a} + {b}
-    b = {a} + {b}
+		a = {a} + {b}
+		b = {a} + {b}
 
-    case[{a} bigger 10000]
-        put a
-    endCase
-endAsLongAs
+		case[{a} bigger 10000]
+			put a
+		endCase
+	endAsLongAs
+endfunc
 ```
-
+###main.hades
+```
+load:'fibonacci.hades' as a
+b as num reachable = a->fib:[]
+out:' '
+out:b
+```
 ## Overarching variables
 ### foo.hades
 ```

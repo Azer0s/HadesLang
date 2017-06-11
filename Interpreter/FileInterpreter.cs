@@ -22,13 +22,13 @@ namespace Interpreter
         public KeyValuePair<string, Types> Return;
         public IScriptOutput Output;
 
-        public FileInterpreter(string fileName,IScriptOutput outp)
+        public FileInterpreter(string fileName,IScriptOutput output)
         {
             fileName = fileName.Replace("'", "");
             FileName = fileName;
-            Output = outp;
+            Output = output;
 
-            _interpreter = new Interpreter(outp);
+            _interpreter = new Interpreter(output);
 
             int counter = 0;
             string line;
@@ -43,10 +43,23 @@ namespace Interpreter
             file.Close();
         }
 
+        public FileInterpreter(List<string> lines, List<Methods> methods, IScriptOutput output)
+        {
+            Lines = lines;
+            Methods = methods;
+            _interpreter = new Interpreter(output);
+            Output = output;
+        }
+
         public void LoadAll()
         {
             LoadFunctions();
             ExecuteFromLineToLine(new Tuple<int, int>(-1, Lines.Count),true,out Return);
+            Collect();      
+        }
+
+        public void Collect()
+        {
             if (Cache.Instance.EraseVars)
             {
                 foreach (var variable in Cache.Instance.Variables.ToList())
@@ -56,10 +69,10 @@ namespace Interpreter
                         Cache.Instance.Variables.Remove(variable.Key);
                     }
                 }
-            }        
+            }
         }
 
-        private void ExecuteFromLineToLine(Tuple<int, int> fromTo,bool firstLevel,out KeyValuePair<string, Types> returnVal)
+        public void ExecuteFromLineToLine(Tuple<int, int> fromTo,bool firstLevel,out KeyValuePair<string, Types> returnVal)
         {
             returnVal = new KeyValuePair<string, Types>();
             for (int i = fromTo.Item1 + 1; i <= fromTo.Item2; i++)
