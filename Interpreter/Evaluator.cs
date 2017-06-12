@@ -260,12 +260,12 @@ namespace Interpreter
                 {
                     if (dt == DataTypes.WORD)
                     {
-                        data[1] = Regex.Match(data[1], @"\'([^]]*)\'").Groups[1].Value;
+                        data[1] = Regex.Match(data[1], @"\'([^]]*)\'").Groups[1].Value.TrimStart('\n');
                     }
 
                     if (dt != DataTypes.WORD)
                     {
-                        data[1] = data[1].Replace(" ", "");
+                        data[1] = data[1].Replace(" ", "").Replace("\n","").Replace("\t","").Replace("'","");
                     }
 
                     if (dt == DataTypes.DEC)
