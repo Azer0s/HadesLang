@@ -39,11 +39,16 @@ namespace Interpreter
             var file = new System.IO.StreamReader(fileName);
             while ((line = file.ReadLine()) != null)
             {
-                Lines.Add(line.TrimStart().Replace("\t",""));
+                Lines.Add(StripComments(line).TrimStart().Replace("\t",""));
                 counter++;
             }
 
             file.Close();
+        }
+
+        private static string StripComments(string code)
+        {
+            return Regex.Replace(code, @"(@(?:""[^""]*"")+|""(?:[^""\n\\]+|\\.)*""|'(?:[^'\n\\]+|\\.)*')|//.*|/\*(?s:.*?)\*/", "$1");
         }
 
         public FileInterpreter(IEnumerable<string> lines, List<Methods> methods, IScriptOutput output)
