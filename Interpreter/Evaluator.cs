@@ -255,7 +255,7 @@ namespace Interpreter
                     data[1] = EvaluateBool(data[1], access).Result.ToString().ToLower();
                 }
 
-                if (dt == DataTypeFromData(data[1],false) || (isOut && dt == DataTypes.WORD) ||
+                if (dt == DataTypeFromData(data[1],false) || isOut ||
                     (dt == DataTypes.DEC && DataTypeFromData(data[1],false) == DataTypes.NUM))
                 {
                     if (dt == DataTypes.WORD)
@@ -656,21 +656,7 @@ namespace Interpreter
                         }
                         break;
                     default:
-                        if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>($"'{access}'", $"'{access}'")))
-                        {
-                            var obj = Cache.Instance.Variables[new Tuple<string, string>($"'{access}'", $"'{access}'")];
-                            var method = obj.Methods.First(a => a.Name == toEvaluate[0]);
-                            if (method != null)
-                            {
-                                //TODO: Call and fix assign from call
-                                //var fi = new FileInterpreter(obj.Lines.GetRange(method.Postition.Item1,method.Postition.Item2-1),obj.Methods,Output);
-                                //fi.ExecuteFromLineToLine(new Tuple<int, int>(0,fi.Lines.Count), false, out _);
-                                //callResult = fi.Return.Value.Value;
-                                //fi.Collect();
-                                //ForceOut = true;
-                            }
-                        }
-                        else if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
+                        if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
                         {
                             if (Regex.IsMatch(toEvaluate[1], @"\[([^]]*)\]"))
                             {
@@ -709,15 +695,6 @@ namespace Interpreter
             }
         }
 
-        public void SaveObject(string varname, string access, FileInterpreter fi)
-        {
-            var kwp = new KeyValuePair<Tuple<string, string>, Types>(new Tuple<string, string>(varname, access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
-            kwp.Value.Lines = fi.Lines;
-            kwp.Value.Methods = fi.Methods;
-
-            Cache.Instance.Variables.Add(kwp.Key, kwp.Value);
-        }
-
         private string LoadFile(string s,string access)
         {
             try
@@ -735,13 +712,16 @@ namespace Interpreter
                     fiW.LoadFunctions();
                     fiW.LoadReachableVars();
 
-                    SaveObject(varName,access,fiW);
+                    var kwp = new KeyValuePair<Tuple<string,string>,Types>(new Tuple<string, string>(varName,access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
+                    kwp.Value.Lines = fiW.Lines;
+                    kwp.Value.Methods = fiW.Methods;
+
+                    Cache.Instance.Variables.Add(kwp.Key,kwp.Value);
                 }
                 else
                 {
                     var fiL = new FileInterpreter(s,Output);
                     Cache.Instance.LoadFiles.Add(s);
-                    SaveObject(s,s,fiL);
                     fiL.LoadAll();
 
                     try

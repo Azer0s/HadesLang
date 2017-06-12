@@ -1,4 +1,3 @@
-fib:[]
 
 func fib []
 	a as num closed
