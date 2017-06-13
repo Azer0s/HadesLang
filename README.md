@@ -17,13 +17,13 @@ interpreter.RegisterFunction(new Function("print", () =>
 ```
 
 ## Hello world
-```
+```vb
 out:'Hello world'
 ```
 
 ## Fibonacci Numbers
 ### fibonacci.hades
-```
+```vb
 func fib[]
     a as num closed = 1
     b as num closed = 1
@@ -42,7 +42,7 @@ func fib[]
 endfunc
 ```
 ### main.hades
-```
+```vb
 load:'fibonacci.hades' as a
 b as num reachable = a->fib:[]
 out:' '
@@ -50,27 +50,27 @@ out:b
 ```
 ## Overarching variables
 ### foo.hades
-```
+```vb
 a as num reachable_all = 18
 load:'bar.hades' as b
 b->printA:[]
 ```
 ### bar.hades
-```
+```vb
 func printA[]
     out:a
 endfunc
 ```
 
 ## Conditions
-```
+```vb
 case[Sqrt(9) smallerIs 3]
     out:'The squareroot of 9 is smaller/equals 3'
 endcase
 ```
 
 ## Unloading
-```
+```vb
 a as num reachable = 18
 uload:a
 ```
