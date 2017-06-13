@@ -255,8 +255,21 @@ namespace Interpreter
                     data[1] = EvaluateBool(data[1], access).Result.ToString().ToLower();
                 }
 
-                if (dt == DataTypeFromData(data[1],false) || isOut ||
-                    (dt == DataTypes.DEC && DataTypeFromData(data[1],false) == DataTypes.NUM))
+                //Used in method calls and self calls - dynamic casting 
+                try
+                {
+                    if (dt != DataTypes.WORD && DataTypeFromData(data[1].Replace("'", ""), false) != DataTypes.WORD)
+                    {
+                        data[1] = data[1].Replace("'", "");
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidDataAssignException(
+                        "The data type of the variable does not match the assignment type!");
+                }
+
+                if (dt == DataTypeFromData(data[1],false) || (dt == DataTypes.DEC && DataTypeFromData(data[1],false) == DataTypes.NUM))
                 {
                     if (dt == DataTypes.WORD)
                     {
@@ -272,6 +285,9 @@ namespace Interpreter
                     {
                         data[1] = data[1].Replace(",", ".");
                     }
+                    SetVariable(index, data[1], access);
+                }else if(isOut && dt == DataTypes.WORD)
+                {
                     SetVariable(index, data[1], access);
                 }
                 else
@@ -656,7 +672,22 @@ namespace Interpreter
                         }
                         break;
                     default:
-                        if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
+                        //Check if Cache contains previously loaded file
+                        if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>($"'{access}'", $"'{access}'")))
+                        {
+                            //Get method and object
+                            var obj = Cache.Instance.Variables[new Tuple<string, string>($"'{access}'", $"'{access}'")];
+                            var method = obj.Methods.First(a => a.Name == toEvaluate[0]);
+                            if (method != null)
+                            {
+                                //TODO: Add data to call toEvaluate[1]
+                                var fi = new FileInterpreter(obj.Lines.GetRange(method.Postition.Item1, method.Postition.Item2 - 1), obj.Methods, Output);
+                                fi.ExecuteFromLineToLine(new Tuple<int, int>(0, fi.Lines.Count), false, out _);
+                                callResult = fi.Return.Value.Value;
+                                fi.Collect();
+                            }
+                        }
+                        else if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
                         {
                             if (Regex.IsMatch(toEvaluate[1], @"\[([^]]*)\]"))
                             {
@@ -695,6 +726,15 @@ namespace Interpreter
             }
         }
 
+        public void SaveObject(string varname, string access, FileInterpreter fi)
+        {
+            var kwp = new KeyValuePair<Tuple<string, string>, Types>(new Tuple<string, string>(varname, access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
+            kwp.Value.Lines = fi.Lines;
+            kwp.Value.Methods = fi.Methods;
+
+            Cache.Instance.Variables.Add(kwp.Key, kwp.Value);
+        }
+
         private string LoadFile(string s,string access)
         {
             try
@@ -712,23 +752,22 @@ namespace Interpreter
                     fiW.LoadFunctions();
                     fiW.LoadReachableVars();
 
-                    var kwp = new KeyValuePair<Tuple<string,string>,Types>(new Tuple<string, string>(varName,access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
-                    kwp.Value.Lines = fiW.Lines;
-                    kwp.Value.Methods = fiW.Methods;
-
-                    Cache.Instance.Variables.Add(kwp.Key,kwp.Value);
+                    SaveObject(varName, access, fiW);
                 }
                 else
                 {
                     var fiL = new FileInterpreter(s,Output);
                     Cache.Instance.LoadFiles.Add(s);
+                    SaveObject(s, s, fiL);
+                    fiL.LoadFunctions();
                     fiL.LoadAll();
+                    var returnVal = fiL.Return.Value.Value;
 
                     try
                     {
-                        if (!string.IsNullOrEmpty(fiL.Return.Value.Value))
+                        if (!string.IsNullOrEmpty(returnVal))
                         {
-                            return "\n" + fiL.Return.Value.Value;
+                            return returnVal;
                         }
                     }
                     catch (Exception)
@@ -742,6 +781,14 @@ namespace Interpreter
             }
             catch (Exception e)
             {
+                try
+                {
+                    RemoveVariable(s, s);
+                }
+                catch (Exception exception)
+                {
+                    // ignored
+                }
                 return e.Message;
             }
         }

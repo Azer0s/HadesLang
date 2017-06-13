@@ -52,7 +52,9 @@
     <None Include="fibonacci.hades">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="main.hades" />
+    <None Include="main.hades">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cache\Cache.csproj">

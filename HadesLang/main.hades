@@ -1,4 +1,3 @@
 load:'fibonacci.hades' as a
 b as num reachable = a->fib:[]
-out:' '
-out:b
+put b

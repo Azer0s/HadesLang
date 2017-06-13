@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Exceptions;
+using StringExtension;
 using Variables;
 
 namespace Interpreter
@@ -116,7 +117,16 @@ namespace Interpreter
                 if (Lines[i].StartsWith("put"))
                 {
                     var returnVar = Lines[i].Split(' ');
-                    returnVal = _interpreter.Evaluator.GetVariable(returnVar[1], FileName);
+
+                    if (returnVar[1].Contains(':') || returnVar[1].Contains("->",StringComparison.Ordinal))
+                    {
+                        var val = returnVar[1].Contains(':') ? _interpreter.Evaluator.EvaluateCall(returnVar[1].Split(':'), FileName).Key : _interpreter.Evaluator.EvaluateCall(returnVar[1].Split(new[] { "->" }, StringSplitOptions.None), FileName).Key;
+                        returnVal = new KeyValuePair<string, Types>("",new Types(AccessTypes.REACHABLE, _interpreter.Evaluator.DataTypeFromData(val,false), val)); 
+                    }
+                    else
+                    {
+                        returnVal = _interpreter.Evaluator.GetVariable(returnVar[1], FileName);
+                    }
                     _stop = true;
                 }
 
