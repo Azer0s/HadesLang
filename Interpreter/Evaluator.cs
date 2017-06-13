@@ -599,7 +599,14 @@ namespace Interpreter
                                 FileName = call[0] + "->" + methodData[0]
                             };
                             fi.ExecuteFromLineToLine(new Tuple<int, int>(method.First().Postition.Item1, method.First().Postition.Item2), true, out _);
-                            callResult = fi.Return.Value.Value;
+                            try
+                            {
+                                callResult = fi.Return.Value.Value;
+                            }
+                            catch (Exception )
+                            {
+                                // ignored
+                            }
                             fi.Collect();
                             goto returnResult;
                         }
@@ -672,19 +679,61 @@ namespace Interpreter
                         }
                         break;
                     default:
-                        //Check if Cache contains previously loaded file
-                        if (Cache.Instance.Variables.ContainsKey(new Tuple<string, string>($"'{access}'", $"'{access}'")))
+                        var containsFromFileName =
+                            Cache.Instance.Variables.ContainsKey(
+                                new Tuple<string, string>($"'{access}'", $"'{access}'"));
+                        var containsAsMethodCall = false;
+                        try
+                        {
+                            containsAsMethodCall =
+                                Cache.Instance.Variables.ContainsKey(new Tuple<string, string>(
+                                    $"{access.Split(new[] { "->" }, StringSplitOptions.None)[0]}", $"{access.Split('@')[1]}"));
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
+
+                        if (containsFromFileName || containsAsMethodCall)
                         {
                             //Get method and object
-                            var obj = Cache.Instance.Variables[new Tuple<string, string>($"'{access}'", $"'{access}'")];
+                            Types obj = null;
+                            Tuple<string, string> objAccess = null;
+                            if (containsFromFileName)
+                            {
+                                objAccess = new Tuple<string, string>($"'{access}'", $"'{access}'");
+                                obj = Cache.Instance.Variables[objAccess];
+                            }
+                            if (containsAsMethodCall)
+                            {
+                                objAccess = new Tuple<string, string>(
+                                    $"{access.Split(new[] { "->" }, StringSplitOptions.None)[0]}",
+                                    $"{access.Split('@')[1]}");
+                                obj = Cache.Instance.Variables[objAccess];
+                            }
+
+                            if (obj == null)
+                            {
+                                throw new InvalidOperationException("Method call was invalid!");
+                            }
                             var method = obj.Methods.First(a => a.Name == toEvaluate[0]);
                             if (method != null)
                             {
                                 //TODO: Add data to call toEvaluate[1]
-                                var fi = new FileInterpreter(obj.Lines.GetRange(method.Postition.Item1, method.Postition.Item2 - 1), obj.Methods, Output);
+                                var lines = new List<string> { "" };
+
+                                //TODO: Change range (for print method in fibonacci.hades)
+                                lines.AddRange(obj.Lines.GetRange(method.Postition.Item1 + 1, method.Postition.Item2 - method.Postition.Item1 - 1));
+                                var fi = new FileInterpreter(lines, obj.Methods, Output);
                                 fi.ExecuteFromLineToLine(new Tuple<int, int>(0, fi.Lines.Count), false, out _);
-                                callResult = fi.Return.Value.Value;
-                                fi.Collect();
+                                try
+                                {
+                                    callResult = fi.Return.Value.Value;
+                                }
+                                catch (Exception)
+                                {
+                                    // ignored
+                                }
                             }
                         }
                         else if (Cache.Instance.Functions.Count(a => a.Name == toEvaluate[0]) != 0)
@@ -728,11 +777,14 @@ namespace Interpreter
 
         public void SaveObject(string varname, string access, FileInterpreter fi)
         {
-            var kwp = new KeyValuePair<Tuple<string, string>, Types>(new Tuple<string, string>(varname, access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
-            kwp.Value.Lines = fi.Lines;
-            kwp.Value.Methods = fi.Methods;
+            if (!Exists(new Tuple<string, string>(varname, access)))
+            {
+                var kwp = new KeyValuePair<Tuple<string, string>, Types>(new Tuple<string, string>(varname, access), new Types(AccessTypes.CLOSED, DataTypes.OBJECT, ""));
+                kwp.Value.Lines = fi.Lines;
+                kwp.Value.Methods = fi.Methods;
 
-            Cache.Instance.Variables.Add(kwp.Key, kwp.Value);
+                Cache.Instance.Variables.Add(kwp.Key, kwp.Value);
+            }
         }
 
         private string LoadFile(string s,string access)
