@@ -36,7 +36,7 @@ public class RegexCollection
     /// </summary>
     public Regex With { get; set; } = new Regex("with *\'(\\w*)\' *as *(\\w*)", RegexOptions.Compiled);
     /// <summary>
-    /// Regex for matching functions
+    /// Regex for matching built-in functions
     /// </summary>
     public Regex Function { get; set; } = new Regex("(.*):\\[?([^\\[\\]\\n]+)\\]?",RegexOptions.Compiled);
     /// <summary>

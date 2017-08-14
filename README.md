@@ -10,9 +10,9 @@ Here are a few examples of the language in action:
 ## Register a custom function in C#
 ```cs
 var interpreter = new Interpreter(new ConsoleOutput());
-interpreter.RegisterFunction(new Function("print", () =>
+interpreter.RegisterFunction(new Function("print", a =>
 {
-    interpreter.GetFunctionValues().ForEach(Console.WriteLine);
+	a.ToList().ForEach(Console.WriteLine);
 }));
 ```
 
