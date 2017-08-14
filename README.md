@@ -12,7 +12,7 @@ Here are a few examples of the language in action:
 var interpreter = new Interpreter(new ConsoleOutput());
 interpreter.RegisterFunction(new Function("print", a =>
 {
-	a.ToList().ForEach(Console.WriteLine);
+    a.ToList().ForEach(Console.WriteLine);
 }));
 ```
 
