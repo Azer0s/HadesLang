@@ -28,9 +28,21 @@ public class RegexCollection
     /// </summary>
     public Regex Assignment { get; set; } = new Regex("(\\w*) *= *(.*)", RegexOptions.Compiled);
     /// <summary>
+    /// Checks if a string contains or is of type word
+    /// </summary>
+    public Regex IsWord { get; set; } = new Regex("\'[\\w ]*\'",RegexOptions.Compiled);
+    /// <summary>
     /// Regex for including a library
     /// </summary>
     public Regex With { get; set; } = new Regex("with *\'(\\w*)\' *as *(\\w*)", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for matching functions
+    /// </summary>
+    public Regex Function { get; set; } = new Regex("(.*):\\[?([^\\[\\]\\n]+)\\]?",RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for halting the program
+    /// </summary>
+    public Regex Exit { get; set; } = new Regex("exit:(\\d)",RegexOptions.Compiled);
 
     private RegexCollection()
     {

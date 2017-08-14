@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Hades.Output;
@@ -35,25 +36,6 @@ namespace Hades.Interpreter
                 return Empty;
             }
 
-            //ScriptOutput
-            if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
-            {
-                switch (RegexCollection.Store.ScriptOutput.Match(lineToInterprete).Groups[1].Value)
-                {
-                    case "0":
-                        _evaluator.ScriptOutput = new NoOutput();
-                        Output.WriteLine("Script output disabled!");
-                        return Empty;
-                    case "1":
-                        _evaluator.ScriptOutput = _fileOutput;
-                        Output.WriteLine("Script output enabled!");
-                        return Empty;
-                    default:
-                        Output.WriteLine("Invalid setting!");
-                        break;
-                }
-            }
-
             //Clear console
             if (lineToInterprete.ToLower().Replace(" ","") == "clear")
             {
@@ -76,62 +58,73 @@ namespace Hades.Interpreter
                 return Empty;
             }
 
-            //Dumpvars
-            if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))
+            //Function
+            if (RegexCollection.Store.Function.IsMatch(lineToInterprete))
             {
-                var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
-                Output.WriteLine(_evaluator.DumpVars(dataTypeAsString == "all" ? DataTypes.NONE : TypeParser.ParseDataType(dataTypeAsString)));
+                //Exit
+                if (RegexCollection.Store.Exit.IsMatch(lineToInterprete))
+                {
+                    Environment.Exit(int.Parse(RegexCollection.Store.Exit.Match(lineToInterprete).Groups[1].Value));
+                }
+
+                var groups = RegexCollection.Store.Function.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
+
+                if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
+                {
+                    var firstOrDefault = Cache.Instance.Functions.FirstOrDefault(a => a.Name == groups[1].Value);
+                    firstOrDefault?.Execute(groups[2].Value.StringSplit(',').Select(a => a.Replace("'","")));
+                }
+
+                //TODO Method calls
+
+                #region Console-Specific
+
+                //ScriptOutput
+                if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
+                {
+                    switch (RegexCollection.Store.ScriptOutput.Match(lineToInterprete).Groups[1].Value)
+                    {
+                        case "0":
+                            _evaluator.ScriptOutput = new NoOutput();
+                            Output.WriteLine("Script output disabled!");
+                            return Empty;
+                        case "1":
+                            _evaluator.ScriptOutput = _fileOutput;
+                            Output.WriteLine("Script output enabled!");
+                            return Empty;
+                        default:
+                            Output.WriteLine("Invalid setting!");
+                            break;
+                    }
+                }
+
+                //Dumpvars
+                if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))
+                {
+                    var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
+                    Output.WriteLine(_evaluator.DumpVars(dataTypeAsString == "all" ? DataTypes.NONE : TypeParser.ParseDataType(dataTypeAsString)));
+                    return Empty;
+                }
+
+                #endregion
+
                 return Empty;
             }
 
-
             //Calculation
-            if (lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys))
+            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
                 var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete, access);
                 Output.WriteLine(calculationResult.Result);
                 return calculationResult.Result;
             }
 
-            //Method call
-            //if (lineToInterprete.Contains(":") || lineToInterprete.Contains("->") || lineToInterprete.ContainsFromList(Cache.Instance.Functions.Select(a => a.Name).ToList()))
-            //{
-            //    string[] call;
-            //    if (lineToInterprete.CheckOrder(":", "->"))
-            //    {
-            //        call = lineToInterprete.Split(new[] { ':' }, 2);
-            //    }
-            //    else
-            //    {
-            //        call = new string[2];
-            //        call[1] = lineToInterprete;
-            //    }
-
-            //    return Evaluator.EvaluateCall(call, access);
-            //}
-            //else
-            //{
-            //    //Function call 
-            //    try
-            //    {
-            //        if (Regex.IsMatch(lineToInterprete, @"\[([^]]*)\]"))
-            //        {
-            //            var boolRes = Evaluator.EvaluateBool(lineToInterprete, access);
-            //            operation = boolRes.OperationType.ToString().ToLower();
-            //            return new KeyValuePair<string, bool>(boolRes.Result.ToString().ToLower(), false);
-            //        }
-
-            //        if (lineToInterprete.ContainsFromList(Evaluator.OperatorList))
-            //        {
-            //            return new KeyValuePair<string, bool>(Evaluator.EvaluateCalculation(lineToInterprete), false);
-            //        }
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        return new KeyValuePair<string, bool>(e.Message, true);
-            //    }
-            //}
-
+            //String concat
+            if (lineToInterprete.Contains('+') && RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
+            {
+                //TODO Make string concat, replace with vars
+            }
+            
             return Empty;
         }
 
