@@ -9,7 +9,7 @@ namespace Interpreter
     {
         public ShellInterpreter(string path = null)
         {
-            var interpreter = new global::Interpreter.Interpreter(new ConsoleOutput(),new ConsoleOutput());
+            var interpreter = new Interpreter(new ConsoleOutput(),new ConsoleOutput(),new ConsoleOutput());
             interpreter.RegisterFunction(new Function("print", a =>
             {
                 a.ToList().ForEach(Console.WriteLine);

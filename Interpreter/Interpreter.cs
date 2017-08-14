@@ -12,15 +12,17 @@ namespace Interpreter
     public class Interpreter
     {
         public IScriptOutput Output;
+        public IScriptOutput ExplicitOutput;
         private readonly IScriptOutput _fileOutput;
         private readonly Evaluator _evaluator;
 
 
-        public Interpreter(IScriptOutput output, IScriptOutput fileOutput)
+        public Interpreter(IScriptOutput output, IScriptOutput fileOutput,IScriptOutput explicitOutput)
         {
             Output = output;
+            ExplicitOutput = explicitOutput;
             _fileOutput = fileOutput;
-            _evaluator = new Evaluator(_fileOutput,this);
+            _evaluator = new Evaluator(_fileOutput);
             Cache.Instance.Variables = new Dictionary<Meta, IVariable>();
             Cache.Instance.Functions = new List<Function>();
             Cache.Instance.LoadFiles = new List<string>();
@@ -29,31 +31,16 @@ namespace Interpreter
         public string InterpretLine(string lineToInterprete, string access)
         {
             //Variable decleration
-            if (RegexCollection.Store.Variables.IsMatch(lineToInterprete))
+            if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))
             {
-                Output.WriteLine(_evaluator.CreateVariable(lineToInterprete, access));
-                return Empty;
-            }
-
-            //Clear console
-            if (lineToInterprete.ToLower().Replace(" ","") == "clear")
-            {
-                Output.Clear();
-                return Empty;
-            }
-
-            //Include library
-            if (RegexCollection.Store.With.IsMatch(lineToInterprete))
-            {
-                var groups = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
-                Output.WriteLine(_evaluator.IncludeLib(lineToInterprete,access));
+                Output.WriteLine(_evaluator.CreateVariable(lineToInterprete, access,this));
                 return Empty;
             }
 
             //Variable assignment
             if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
             {
-                Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete,access));
+                Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete,access,true,this));
                 return Empty;
             }
 
@@ -74,15 +61,22 @@ namespace Interpreter
                     return Empty;
                 }
 
-                //TODO Method calls
+                //Out
+                if (RegexCollection.Store.Output.IsMatch(lineToInterprete))
+                {
+                    var result = _evaluator.EvaluateOut(lineToInterprete, access,this);
+                    ExplicitOutput.WriteLine(result.TrimStart('\'').TrimEnd('\''));
+                    return result;
+                }
 
                 #region Console-Specific
 
                 //Input
                 if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
                 {
-                    Output.WriteLine(_evaluator.Input(lineToInterprete,access,Output));
-                    return Empty;
+                    var result = _evaluator.Input(lineToInterprete, access, Output,this);
+                    Output.WriteLine(result.Message);
+                    return result.Value;
                 }
 
                 //ScriptOutput
@@ -117,6 +111,29 @@ namespace Interpreter
                 return Empty;
             }
 
+            //Method calls
+            if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
+            {
+                var result = _evaluator.CallMethod(lineToInterprete, access);
+                Output.WriteLine(result);
+                return result;
+            }
+
+            //Clear console
+            if (lineToInterprete.ToLower().Replace(" ", "") == "clear")
+            {
+                Output.Clear();
+                return Empty;
+            }
+
+            //Include library
+            if (RegexCollection.Store.With.IsMatch(lineToInterprete))
+            {
+                var groups = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
+                Output.WriteLine(_evaluator.IncludeLib(lineToInterprete, access));
+                return Empty;
+            }
+
             //Calculation
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
@@ -134,7 +151,13 @@ namespace Interpreter
             {
                 //TODO Make string concat, replace with vars
             }
-            
+
+            //Return string
+            if (RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
+            {
+                return RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value;
+            }
+
             return lineToInterprete;
         }
 

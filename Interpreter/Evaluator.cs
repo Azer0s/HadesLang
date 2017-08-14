@@ -15,18 +15,16 @@ namespace Interpreter
     public class Evaluator
     {
         public IScriptOutput ScriptOutput;
-        private Interpreter _interpreter;
-        public Evaluator(IScriptOutput scriptOutput,Interpreter interpreter)
+        public Evaluator(IScriptOutput scriptOutput)
         {
             ScriptOutput = scriptOutput;
-            _interpreter = interpreter;
         }
 
         #region Variables
 
-        public string CreateVariable(string lineToInterprete, string access)
+        public string CreateVariable(string lineToInterprete, string access,Interpreter interpreter)
         {
-            var groups = RegexCollection.Store.Variables.Match(lineToInterprete).Groups.OfType<Group>()
+            var groups = RegexCollection.Store.CreateVariable.Match(lineToInterprete).Groups.OfType<Group>()
                 .Where(a => !string.IsNullOrEmpty(a.Value)).Select(a => a.Value).ToList();
 
             var exist = Exists(groups[1], access);
@@ -36,7 +34,7 @@ namespace Interpreter
             }
 
             Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = access }, new Variable { Access = TypeParser.ParseAccessType(groups[3]), DataType = TypeParser.ParseDataType(groups[2]) });
-            return groups.Count == 5 ? AssignToVariable($"{groups[1]} = {groups[4]}", access) : $"{groups[1]} is undefined";
+            return groups.Count == 5 ? AssignToVariable($"{groups[1]} = {groups[4]}", access,true,interpreter) : $"{groups[1]} is undefined";
         }
 
         private (bool Exists,string Message) Exists(string name, string access)
@@ -51,11 +49,6 @@ namespace Interpreter
                 return (true, "Variable already exists!");
             }
 
-            if (Cache.Instance.Variables.Any(a => a.Key.Name == name) && TypeParser.ParseAccessType(access) == AccessTypes.REACHABLE_ALL)
-            {
-                return (true,"Variable with the same name already exists!");
-            }
-
             return (false, "Variable does not exist!");
         }
 
@@ -64,21 +57,122 @@ namespace Interpreter
             return Cache.Instance.Variables.Any(a => a.Key.Name == varname && a.Value.Access == AccessTypes.REACHABLE_ALL);
         }
 
-        public string AssignToVariable(string lineToInterprete, string access)
+        private string ReplaceWithVars(string lineToInterprete, string access)
+        {
+            var matches = RegexCollection.Store.Variable.Matches(lineToInterprete);
+
+            var result = lineToInterprete;
+            foreach (Match match in matches)
+            {
+                var variable = GetVariable(match.Value.TrimStart('$'), access);
+
+                if (variable is Variable)
+                {
+                    result = result.Replace(match.Value,(variable as Variable).Value);
+                }
+                else
+                { 
+                    throw new Exception($"Variable {match.Value} is an object!");
+                }
+            }
+            return result;
+        }
+
+        private IVariable GetVariable(string variable, string access)
+        {
+            if (Exists(variable,access).Exists)
+            {
+                return Cache.Instance.Variables[new Meta {Name = variable, Owner = access}];
+            }
+            throw new Exception($"Variable {variable} does not exist!");
+        }
+
+        public string AssignToVariable(string lineToInterprete, string access, bool hardCompare,Interpreter interpreter)
         {
             //TODO: Replace vars
             var groups = RegexCollection.Store.Assignment.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
-            var output = _interpreter.Output;
-            _interpreter.Output = new NoOutput();
-            var result =_interpreter.InterpretLine(groups[2].Value, access);
-            _interpreter.Output = output;
+            var output = interpreter.Output;
+            var eOutput = interpreter.ExplicitOutput;
+            interpreter.Output = new NoOutput();
+            interpreter.ExplicitOutput = new NoOutput();
 
-            //TODO: Assign to variable, check datatype
+            var result =interpreter.InterpretLine(groups[2].Value, access);
+            interpreter.Output = output;
+            interpreter.ExplicitOutput = eOutput;
+
+            //TODO: Assign to variable
+
+            if (Exists(groups[1].Value,access).Exists)
+            {
+                var variable = GetVariable(groups[1].Value, access);
+
+                if (variable is Variable)
+                {
+                    var datatypeFromVariable = variable.DataType;
+                    var datatypeFromData = DataTypeFromData(result,hardCompare);
+
+                    if (datatypeFromVariable == DataTypes.WORD)
+                    {
+                        //TrimStart/End('\'') then add ' in start and back
+                    }
+                    else if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
+                    {
+                        //Add .0
+                    }
+                    else if (datatypeFromData == datatypeFromVariable)
+                    {
+                        //Just set
+                    }
+                }
+                else
+                {
+                    throw new Exception("Cant assign to variable of type object!");
+                }
+            }
+
             return $"{groups[1]} is {result}";
         }
-        
-        //TODO: uload,load,out,in
+
+        private DataTypes DataTypeFromData(string result, bool hardCompare)
+        {
+            if (!hardCompare)
+            {
+                result = result.TrimStart('\'').TrimEnd('\'');
+                if (RegexCollection.Store.IsNum.IsMatch(result))
+                {
+                    return DataTypes.NUM;
+                }
+                if (RegexCollection.Store.IsDec.IsMatch(result))
+                {
+                    return DataTypes.DEC;
+                }
+                if (RegexCollection.Store.IsBit.IsMatch(result.ToLower()))
+                {
+                    return DataTypes.BIT;
+                }
+                return DataTypes.WORD;
+            }
+            if (RegexCollection.Store.IsNum.IsMatch(result))
+            {
+                return DataTypes.NUM;
+            }
+            if (RegexCollection.Store.IsDec.IsMatch(result))
+            {
+                return DataTypes.DEC;
+            }
+            if (RegexCollection.Store.IsBit.IsMatch(result.ToLower()))
+            {
+                return DataTypes.BIT;
+            }
+            if (RegexCollection.Store.IsWord.IsMatch(result))
+            {
+                return DataTypes.WORD;
+            }
+            return DataTypes.NONE;
+        }
+
+        //TODO: uload,load
 
         public string DumpVars(DataTypes dt)
         {
@@ -153,6 +247,15 @@ namespace Interpreter
         public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access)
         {
             //TODO: Replace vars
+            try
+            {
+                lineToInterprete = ReplaceWithVars(lineToInterprete, access);
+            }
+            catch (Exception e)
+            {
+                return (false, e.Message);
+            }
+
             lineToInterprete = Cache.Instance.CharList.Aggregate(lineToInterprete, (current, s) => current.Replace(s, $" {s} "));
 
             var args = lineToInterprete.StringSplit(' ').ToArray();
@@ -186,7 +289,7 @@ namespace Interpreter
 
             expression.Length -= 1;
 
-            var result = String.Empty;
+            var result = string.Empty;
             var ex = new Expression(expression.ToString());
 
             var calc = ex.calculate();
@@ -204,12 +307,12 @@ namespace Interpreter
                     }
                     else
                     {
-                        return (false, "Mixed types in boolean comparison is invalid!");
+                        return (false, "Mixed types in boolean comparison are invalid!");
                     }
                 }
                 catch (Exception e)
                 {
-                    return (false, "Mixed types in boolean comparison is invalid!");
+                    return (false, "Mixed types in boolean comparison are invalid!");
                 }
             }
             else
@@ -229,12 +332,26 @@ namespace Interpreter
             Environment.Exit(int.Parse(RegexCollection.Store.Exit.Match(lineToInterprete).Groups[1].Value));
         }
 
-        public string Input(string lineToInterprete,string access, IScriptOutput output)
+        public (string Value,string Message) Input(string lineToInterprete,string access, IScriptOutput output,Interpreter interpreter)
         {
             var varname = RegexCollection.Store.Input.Match(lineToInterprete).Groups[1].Value;
             var input = output.ReadLine();
-            return AssignToVariable($"{varname} = {input}", access);
+            return (input,AssignToVariable($"{varname} = '{input}'", access,false,interpreter));
         }
+
+        public string EvaluateOut(string lineToInterprete, string access, Interpreter interpreter)
+        {
+            var groups = RegexCollection.Store.Output.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
+
+            var output = interpreter.Output;
+            interpreter.Output = new NoOutput();
+
+            var result =  interpreter.InterpretLine(groups[1].Value, access);
+            interpreter.Output = output;
+
+            return $"'{result}'";
+        }
+
         #endregion
 
         #region Custom functions
@@ -246,6 +363,10 @@ namespace Interpreter
         }
 
         #endregion
-        
+
+        public string CallMethod(string lineToInterprete, string access)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
