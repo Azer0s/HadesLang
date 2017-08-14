@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Output;
 using StringExtension;
 using Variables;
+using static System.String;
 using Function = Variables.Function;
 
 namespace Interpreter
@@ -32,14 +32,14 @@ namespace Interpreter
             if (RegexCollection.Store.Variables.IsMatch(lineToInterprete))
             {
                 Output.WriteLine(_evaluator.CreateVariable(lineToInterprete, access));
-                return String.Empty;
+                return Empty;
             }
 
             //Clear console
             if (lineToInterprete.ToLower().Replace(" ","") == "clear")
             {
                 Output.Clear();
-                return String.Empty;
+                return Empty;
             }
 
             //Include library
@@ -47,14 +47,14 @@ namespace Interpreter
             {
                 var groups = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
                 Output.WriteLine(_evaluator.IncludeLib(lineToInterprete,access));
-                return String.Empty;
+                return Empty;
             }
 
             //Variable assignment
             if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
             {
                 Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete,access));
-                return String.Empty;
+                return Empty;
             }
 
             //Function
@@ -63,20 +63,27 @@ namespace Interpreter
                 //Exit
                 if (RegexCollection.Store.Exit.IsMatch(lineToInterprete))
                 {
-                    Environment.Exit(int.Parse(RegexCollection.Store.Exit.Match(lineToInterprete).Groups[1].Value));
+                    _evaluator.Exit(lineToInterprete);
                 }
 
                 var groups = RegexCollection.Store.Function.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
                 if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
                 {
-                    var firstOrDefault = Cache.Instance.Functions.FirstOrDefault(a => a.Name == groups[1].Value);
-                    firstOrDefault?.Execute(groups[2].Value.StringSplit(',').Select(a => a.Replace("'","")));
+                    _evaluator.CallCustomFunction(groups);
+                    return Empty;
                 }
 
                 //TODO Method calls
 
                 #region Console-Specific
+
+                //Input
+                if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
+                {
+                    Output.WriteLine(_evaluator.Input(lineToInterprete,access,Output));
+                    return Empty;
+                }
 
                 //ScriptOutput
                 if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
@@ -86,14 +93,14 @@ namespace Interpreter
                         case "0":
                             _evaluator.ScriptOutput = new NoOutput();
                             Output.WriteLine("Script output disabled!");
-                            return String.Empty;
+                            return Empty;
                         case "1":
                             _evaluator.ScriptOutput = _fileOutput;
                             Output.WriteLine("Script output enabled!");
-                            return String.Empty;
+                            return Empty;
                         default:
                             Output.WriteLine("Invalid setting!");
-                            break;
+                            return Empty;
                     }
                 }
 
@@ -102,12 +109,12 @@ namespace Interpreter
                 {
                     var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
                     Output.WriteLine(_evaluator.DumpVars(dataTypeAsString == "all" ? DataTypes.NONE : TypeParser.ParseDataType(dataTypeAsString)));
-                    return String.Empty;
+                    return Empty;
                 }
 
                 #endregion
 
-                return String.Empty;
+                return Empty;
             }
 
             //Calculation
@@ -115,7 +122,11 @@ namespace Interpreter
             {
                 var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete, access);
                 Output.WriteLine(calculationResult.Result);
-                return calculationResult.Result;
+
+                if (calculationResult.Result != "NaN")
+                {
+                    return calculationResult.Result;
+                }
             }
 
             //String concat
@@ -124,7 +135,7 @@ namespace Interpreter
                 //TODO Make string concat, replace with vars
             }
             
-            return String.Empty;
+            return lineToInterprete;
         }
 
         /// <summary>

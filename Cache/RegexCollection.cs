@@ -43,6 +43,10 @@ public class RegexCollection
     /// Regex for halting the program
     /// </summary>
     public Regex Exit { get; set; } = new Regex("exit:(\\d)",RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for input
+    /// </summary>
+    public Regex Input { get; set; } = new Regex("in:(\\w*)");
 
     private RegexCollection()
     {

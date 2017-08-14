@@ -67,12 +67,14 @@ namespace Interpreter
         public string AssignToVariable(string lineToInterprete, string access)
         {
             //TODO: Replace vars
-            var output = _interpreter.Output;
             var groups = RegexCollection.Store.Assignment.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
+
+            var output = _interpreter.Output;
             _interpreter.Output = new NoOutput();
             var result =_interpreter.InterpretLine(groups[2].Value, access);
             _interpreter.Output = output;
-            //TODO: Assign to variable
+
+            //TODO: Assign to variable, check datatype
             return $"{groups[1]} is {result}";
         }
         
@@ -146,7 +148,9 @@ namespace Interpreter
 
         #endregion
 
-        public (bool Success,string Result) EvaluateCalculation(string lineToInterprete, string access)
+        #region Calculations
+
+        public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access)
         {
             //TODO: Replace vars
             lineToInterprete = Cache.Instance.CharList.Aggregate(lineToInterprete, (current, s) => current.Replace(s, $" {s} "));
@@ -200,12 +204,12 @@ namespace Interpreter
                     }
                     else
                     {
-                        return (false,"Mixed types in boolean comparison is invalid!");
+                        return (false, "Mixed types in boolean comparison is invalid!");
                     }
                 }
                 catch (Exception e)
                 {
-                    return (false,"Mixed types in boolean comparison is invalid!");
+                    return (false, "Mixed types in boolean comparison is invalid!");
                 }
             }
             else
@@ -213,7 +217,35 @@ namespace Interpreter
                 result = calc.ToString(CultureInfo.InvariantCulture);
             }
 
-            return (true,result);
+            return (true, result);
         }
+
+        #endregion
+
+        #region System functions
+
+        public void Exit(string lineToInterprete)
+        {
+            Environment.Exit(int.Parse(RegexCollection.Store.Exit.Match(lineToInterprete).Groups[1].Value));
+        }
+
+        public string Input(string lineToInterprete,string access, IScriptOutput output)
+        {
+            var varname = RegexCollection.Store.Input.Match(lineToInterprete).Groups[1].Value;
+            var input = output.ReadLine();
+            return AssignToVariable($"{varname} = {input}", access);
+        }
+        #endregion
+
+        #region Custom functions
+
+        public void CallCustomFunction(Group[] groups)
+        {
+            var firstOrDefault = Cache.Instance.Functions.FirstOrDefault(a => a.Name == groups[1].Value);
+            firstOrDefault?.Execute(groups[2].Value.StringSplit(',').Select(a => a.Replace("'", "")));
+        }
+
+        #endregion
+        
     }
 }
