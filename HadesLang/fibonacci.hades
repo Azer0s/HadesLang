@@ -1,3 +1,8 @@
+put fib:[]
+
+func print []
+out:'Hello world'
+endfunc
 
 func fib []
 	a as num closed
