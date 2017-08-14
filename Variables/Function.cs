@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace Hades.Variables
+namespace Variables
 {
     public class Function
     {

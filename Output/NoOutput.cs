@@ -1,4 +1,4 @@
-﻿namespace Hades.Output
+﻿namespace Output
 {
     public class NoOutput : IScriptOutput
     {

@@ -1,4 +1,4 @@
-﻿namespace Hades.Output
+﻿namespace Output
 {
     /// <summary>
     /// Interface for IO - Can be implemented for custom IO

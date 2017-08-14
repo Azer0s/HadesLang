@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Hades.StringExtension
+namespace StringExtension
 {
     public static class Extensions
     {

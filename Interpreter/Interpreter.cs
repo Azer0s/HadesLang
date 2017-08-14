@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Hades.Output;
-using Hades.StringExtension;
-using Hades.Variables;
-using static System.String;
-using Function = Hades.Variables.Function;
+using Output;
+using StringExtension;
+using Variables;
+using Function = Variables.Function;
 
-namespace Hades.Interpreter
+namespace Interpreter
 {
     public class Interpreter
     {
@@ -33,14 +32,14 @@ namespace Hades.Interpreter
             if (RegexCollection.Store.Variables.IsMatch(lineToInterprete))
             {
                 Output.WriteLine(_evaluator.CreateVariable(lineToInterprete, access));
-                return Empty;
+                return String.Empty;
             }
 
             //Clear console
             if (lineToInterprete.ToLower().Replace(" ","") == "clear")
             {
                 Output.Clear();
-                return Empty;
+                return String.Empty;
             }
 
             //Include library
@@ -48,14 +47,14 @@ namespace Hades.Interpreter
             {
                 var groups = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
                 Output.WriteLine(_evaluator.IncludeLib(lineToInterprete,access));
-                return Empty;
+                return String.Empty;
             }
 
             //Variable assignment
             if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
             {
                 Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete,access));
-                return Empty;
+                return String.Empty;
             }
 
             //Function
@@ -87,11 +86,11 @@ namespace Hades.Interpreter
                         case "0":
                             _evaluator.ScriptOutput = new NoOutput();
                             Output.WriteLine("Script output disabled!");
-                            return Empty;
+                            return String.Empty;
                         case "1":
                             _evaluator.ScriptOutput = _fileOutput;
                             Output.WriteLine("Script output enabled!");
-                            return Empty;
+                            return String.Empty;
                         default:
                             Output.WriteLine("Invalid setting!");
                             break;
@@ -103,12 +102,12 @@ namespace Hades.Interpreter
                 {
                     var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
                     Output.WriteLine(_evaluator.DumpVars(dataTypeAsString == "all" ? DataTypes.NONE : TypeParser.ParseDataType(dataTypeAsString)));
-                    return Empty;
+                    return String.Empty;
                 }
 
                 #endregion
 
-                return Empty;
+                return String.Empty;
             }
 
             //Calculation
@@ -125,7 +124,7 @@ namespace Hades.Interpreter
                 //TODO Make string concat, replace with vars
             }
             
-            return Empty;
+            return String.Empty;
         }
 
         /// <summary>

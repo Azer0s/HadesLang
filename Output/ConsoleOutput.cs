@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hades.Output
+namespace Output
 {
     /// <summary>
     /// Console IO

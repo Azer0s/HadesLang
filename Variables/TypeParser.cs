@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hades.Variables
+namespace Variables
 {
     public class TypeParser
     {

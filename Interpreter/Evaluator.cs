@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Hades.Output;
-using Hades.StringExtension;
-using Hades.Variables;
-using static System.String;
 using org.mariuszgromada.math.mxparser;
+using Output;
+using StringExtension;
+using Variables;
 
-namespace Hades.Interpreter
+namespace Interpreter
 {
     public class Evaluator
     {
@@ -184,7 +182,7 @@ namespace Hades.Interpreter
 
             expression.Length -= 1;
 
-            var result = Empty;
+            var result = String.Empty;
             var ex = new Expression(expression.ToString());
 
             var calc = ex.calculate();

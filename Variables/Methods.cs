@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Hades.Variables
+namespace Variables
 {
     public class Methods
     {

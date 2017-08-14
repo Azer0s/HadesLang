@@ -1,4 +1,4 @@
-﻿namespace Hades.Variables
+﻿namespace Variables
 {
     public enum DataTypes
     {

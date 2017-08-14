@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Hades.Output;
-using Hades.Variables;
+using Output;
+using Variables;
 
-namespace Hades.Interpreter
+namespace Interpreter
 {
     public class ShellInterpreter
     {
         public ShellInterpreter(string path = null)
         {
-            var interpreter = new Interpreter(new ConsoleOutput(),new ConsoleOutput());
+            var interpreter = new global::Interpreter.Interpreter(new ConsoleOutput(),new ConsoleOutput());
             interpreter.RegisterFunction(new Function("print", a =>
             {
                 a.ToList().ForEach(Console.WriteLine);

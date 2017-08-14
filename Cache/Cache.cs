@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Hades.Variables;
+using Variables;
 
 /// <summary>
 /// Storage for shared runtime data
