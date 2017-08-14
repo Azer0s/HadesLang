@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CustomFunctions;
-using Variables;
+using System.Text.RegularExpressions;
+using Hades.Variables;
 
 /// <summary>
 /// Storage for shared runtime data
@@ -22,7 +19,7 @@ public sealed class Cache
     /// <summary>
     /// Var store
     /// </summary>
-    public Dictionary<Tuple<string,string>, Types> Variables { get; set; }
+    public Dictionary<Meta,IVariable> Variables { get; set; }
     /// <summary>
     /// Determines whether the Hades garbage collector is enabled
     /// </summary>
@@ -31,6 +28,25 @@ public sealed class Cache
     /// A list of custom functions
     /// </summary>
     public List<Function> Functions { get; set; } = new List<Function>();
+    /// <summary>
+    /// List of operators
+    /// </summary>
+    public List<string> CharList { get; set; } = new List<string> { "+", "-", "*", "/", "&&", "||", "-->", "~&&", "~||", "<--", "(+)", "-/>", "</-", "(", ")" };
+    /// <summary>
+    /// Dictionary for replacing operators as string to operator as sign
+    /// </summary>
+    public Dictionary<string, string> Replacement { get; set; } = new Dictionary<string, string>
+    {
+        {"AND","&"},
+        {"OR","|"},
+        {"IMP","-->"},
+        {"NAND","~&"},
+        {"NOR","~|"},
+        {"CIMP","<--"},
+        {"XOR","(+)" },
+        {"NIMP","-/>" },
+        {"CNIMP","</-" }
+    };
     /// <summary>
     /// List of loaded files 
     /// </summary>

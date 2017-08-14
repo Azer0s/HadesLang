@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Interfaces
+namespace Hades.Variables
 {
-    public interface IInterpreter
+    public class Library : IVariable
     {
-        bool Interprate(string toInterprate);
+        public dynamic LibObject;
     }
 }

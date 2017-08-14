@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Variables
+﻿namespace Hades.Variables
 {
     public enum AccessTypes
     {

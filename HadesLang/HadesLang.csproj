@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1111A8CF-8D05-4914-88EB-AD6CAA7AD6FB}</ProjectGuid>
+    <ProjectGuid>{22C5F327-6C7C-416F-8886-8080CD4F2F5A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HadesLang</RootNamespace>
     <AssemblyName>HadesLang</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -22,7 +22,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\HadesLang.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,38 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="fibonacci.hades">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="main.hades" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Cache\Cache.csproj">
-      <Project>{8D612C08-A3D3-4E2F-BD66-FBB7533CAD1E}</Project>
-      <Name>Cache</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Interpreter\Interpreter.csproj">
-      <Project>{ace3e078-2bc8-4c64-a6f3-64d4d00b68ad}</Project>
+      <Project>{79602591-8999-4C48-9685-B48564F1EA95}</Project>
       <Name>Interpreter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\StringExtension\StringExtension.csproj">
-      <Project>{2E9D4D79-7B7F-4C82-91D9-DAFB2CC37557}</Project>
-      <Name>StringExtension</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Variables\Variables.csproj">
-      <Project>{AAA81CDD-082C-4D3C-B2B4-88BCE35D96A5}</Project>
-      <Name>Variables</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Interpreter;
+using System.Threading.Tasks;
+using Hades.Interpreter;
 
 namespace HadesLang
 {
@@ -11,11 +13,10 @@ namespace HadesLang
     {
         static void Main(string[] args)
         {
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
             Console.OutputEncoding = Encoding.UTF8;
 
             var s = args.ToList().Count != 0 ? new ShellInterpreter(args.First()) : new ShellInterpreter();
-            s.Start();
         }
     }
 }

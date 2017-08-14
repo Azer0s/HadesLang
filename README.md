@@ -32,10 +32,10 @@ func fib[]
         out:a
         out:b
 
-        a = {a} + {b}
-        b = {a} + {b}
+        a = $a + $b
+        b = $a + $b
 
-        case[{a} bigger 10000]
+        case[$a bigger 10000]
 	    put a
         endCase
     endAsLongAs
@@ -44,7 +44,7 @@ endfunc
 ### main.hades
 ```
 load:'fibonacci.hades' as a
-b as num reachable = a->fib:[]
+b as num reachable = $a->fib:[]
 out:' '
 out:b
 ```
@@ -53,7 +53,7 @@ out:b
 ```
 a as num reachable_all = 18
 load:'bar.hades' as b
-b->printA:[]
+$b->printA:[]
 ```
 ### bar.hades
 ```

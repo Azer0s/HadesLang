@@ -1,98 +1,138 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using CustomFunctions;
-using StringExtension;
+using Hades.Output;
+using Hades.StringExtension;
+using Hades.Variables;
+using static System.String;
+using Function = Hades.Variables.Function;
 
-namespace Interpreter
+namespace Hades.Interpreter
 {
     public class Interpreter
     {
-        public Evaluator Evaluator;
-        public bool Clear { get; set; } = false;
+        public IScriptOutput Output;
+        private readonly IScriptOutput _fileOutput;
+        private readonly Evaluator _evaluator;
 
-        public Interpreter(IScriptOutput output)
+
+        public Interpreter(IScriptOutput output, IScriptOutput fileOutput)
         {
-            Evaluator = new Evaluator(output);
+            Output = output;
+            _fileOutput = fileOutput;
+            _evaluator = new Evaluator(_fileOutput,this);
+            Cache.Instance.Variables = new Dictionary<Meta, IVariable>();
+            Cache.Instance.Functions = new List<Function>();
+            Cache.Instance.LoadFiles = new List<string>();
         }
 
-        /// <summary>
-        /// Interpretes a code line
-        /// </summary>
-        /// <param name="lineToInterprete">Expression to interprete</param>
-        /// <param name="access">Delimiter for variabel ownership</param>
-        /// <param name="operation">Outputs the bool operation if available</param>
-        /// <returns></returns>
-        public KeyValuePair<string, bool> InterpretLine(string lineToInterprete, string access, out string operation)
+        public string InterpretLine(string lineToInterprete, string access)
         {
-            operation = "";
             //Variable decleration
-            if (Regex.IsMatch(lineToInterprete, Evaluator.VarPattern))
+            if (RegexCollection.Store.Variables.IsMatch(lineToInterprete))
             {
-                var createResult = Evaluator.CreateVariable(lineToInterprete, access);
-
-                if (Evaluator.ForceOut)
-                {
-                    Evaluator.ForceOut = false;
-                    return new KeyValuePair<string, bool>(createResult, true);
-                }
-                return new KeyValuePair<string, bool>(createResult, false);
+                Output.WriteLine(_evaluator.CreateVariable(lineToInterprete, access));
+                return Empty;
             }
 
-            if (lineToInterprete == "clear")
+            //ScriptOutput
+            if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
             {
-                Clear = true;
-                return new KeyValuePair<string, bool>(string.Empty, false);
+                switch (RegexCollection.Store.ScriptOutput.Match(lineToInterprete).Groups[1].Value)
+                {
+                    case "0":
+                        _evaluator.ScriptOutput = new NoOutput();
+                        Output.WriteLine("Script output disabled!");
+                        return Empty;
+                    case "1":
+                        _evaluator.ScriptOutput = _fileOutput;
+                        Output.WriteLine("Script output enabled!");
+                        return Empty;
+                    default:
+                        Output.WriteLine("Invalid setting!");
+                        break;
+                }
+            }
+
+            //Clear console
+            if (lineToInterprete.ToLower().Replace(" ","") == "clear")
+            {
+                Output.Clear();
+                return Empty;
+            }
+
+            //Include library
+            if (RegexCollection.Store.With.IsMatch(lineToInterprete))
+            {
+                var groups = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
+                Output.WriteLine(_evaluator.IncludeLib(lineToInterprete,access));
+                return Empty;
             }
 
             //Variable assignment
-            if (lineToInterprete.Contains("="))
+            if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
             {
-                return new KeyValuePair<string, bool>(Evaluator.AssignValueToVariable(lineToInterprete, access), false);
+                Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete,access));
+                return Empty;
+            }
+
+            //Dumpvars
+            if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))
+            {
+                var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
+                Output.WriteLine(_evaluator.DumpVars(dataTypeAsString == "all" ? DataTypes.NONE : TypeParser.ParseDataType(dataTypeAsString)));
+                return Empty;
+            }
+
+
+            //Calculation
+            if (lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys))
+            {
+                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete, access);
+                Output.WriteLine(calculationResult.Result);
+                return calculationResult.Result;
             }
 
             //Method call
-            if (lineToInterprete.Contains(":") || lineToInterprete.Contains("->") || lineToInterprete.ContainsFromList(Cache.Instance.Functions.Select(a => a.Name).ToList()))
-            {
-                string[] call;
-                if (lineToInterprete.CheckOrder(":", "->"))
-                {
-                    call = lineToInterprete.Split(new[] { ':' }, 2);
-                }
-                else
-                {
-                    call = new string[2];
-                    call[1] = lineToInterprete;
-                }
+            //if (lineToInterprete.Contains(":") || lineToInterprete.Contains("->") || lineToInterprete.ContainsFromList(Cache.Instance.Functions.Select(a => a.Name).ToList()))
+            //{
+            //    string[] call;
+            //    if (lineToInterprete.CheckOrder(":", "->"))
+            //    {
+            //        call = lineToInterprete.Split(new[] { ':' }, 2);
+            //    }
+            //    else
+            //    {
+            //        call = new string[2];
+            //        call[1] = lineToInterprete;
+            //    }
 
-                return Evaluator.EvaluateCall(call, access);
-            }
-            else
-            {
-                //Function call 
-                try
-                {
-                    if (Regex.IsMatch(lineToInterprete, @"\[([^]]*)\]"))
-                    {
-                        var boolRes = Evaluator.EvaluateBool(lineToInterprete, access);
-                        operation = boolRes.OperationType.ToString().ToLower();
-                        return new KeyValuePair<string, bool>(boolRes.Result.ToString().ToLower(), false);
-                    }
+            //    return Evaluator.EvaluateCall(call, access);
+            //}
+            //else
+            //{
+            //    //Function call 
+            //    try
+            //    {
+            //        if (Regex.IsMatch(lineToInterprete, @"\[([^]]*)\]"))
+            //        {
+            //            var boolRes = Evaluator.EvaluateBool(lineToInterprete, access);
+            //            operation = boolRes.OperationType.ToString().ToLower();
+            //            return new KeyValuePair<string, bool>(boolRes.Result.ToString().ToLower(), false);
+            //        }
 
-                    if (lineToInterprete.ContainsFromList(Evaluator.OperatorList))
-                    {
-                        return new KeyValuePair<string, bool>(Evaluator.EvaluateCalculation(lineToInterprete), false);
-                    }
-                }
-                catch (Exception e)
-                {
-                    return new KeyValuePair<string, bool>(e.Message, true);
-                }
-            }
-            return new KeyValuePair<string, bool>(null, false);
+            //        if (lineToInterprete.ContainsFromList(Evaluator.OperatorList))
+            //        {
+            //            return new KeyValuePair<string, bool>(Evaluator.EvaluateCalculation(lineToInterprete), false);
+            //        }
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        return new KeyValuePair<string, bool>(e.Message, true);
+            //    }
+            //}
+
+            return Empty;
         }
 
         /// <summary>
@@ -105,11 +145,6 @@ namespace Interpreter
             if (Cache.Instance.Functions.Contains(f)) return false;
             Cache.Instance.Functions.Add(f);
             return true;
-        }
-
-        public List<string> GetFunctionValues()
-        {
-            return Evaluator.GetFunctionValues();
         }
     }
 }

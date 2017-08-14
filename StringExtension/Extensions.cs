@@ -1,32 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace StringExtension
+namespace Hades.StringExtension
 {
     public static class Extensions
     {
-        public static bool IsBit(this string s)
-        {
-            bool x;
-            return bool.TryParse(s,out x);
-        }
-
-        public static bool IsNum(this string s)
-        {
-            int x;
-            return int.TryParse(s, out x);
-        }
-
-        public static bool IsDec(this string s)
-        {
-            double x;
-            return double.TryParse(s, out x);
-        }
-
-        public static bool ContainsFromList(this string s, List<string> source)
+        public static bool ContainsFromList(this string s, IEnumerable<string> source)
         {
             return source.Any(a => s.Contains(a,StringComparison.OrdinalIgnoreCase));
         }
@@ -51,38 +31,17 @@ namespace StringExtension
             return new[]{split[1],secondPos.Substring(delimiter.Length)};
         }
 
-        /// <summary>
-        /// Checks the order of two substrings in a string
-        /// </summary>
-        /// <param name="s">String to be checked</param>
-        /// <param name="toCheck"></param>
-        /// <param name="toCheck2"></param>
-        /// <returns>True if a comes before b or b is not included in the string</returns>
-        public static bool CheckOrder(this string s, string toCheck, string toCheck2)
+        public static bool EqualsFromList(this string source, IEnumerable<string> list)
         {
-            var a = s.IndexOf(toCheck);
-            var b = s.IndexOf(toCheck2);
-
-            if (a == -1)
+            var equals = false;
+            foreach (var s in list)
             {
-                return false;
+                if (s == source)
+                {
+                    equals = true;
+                }
             }
-
-            if (b == -1)
-            {
-                return true;
-            }
-
-            if (a < b)
-            {
-                return true;
-            }
-
-            if (a > b)
-            {
-                return false;
-            }
-            return false;
+            return equals;
         }
 
         /// <summary>
@@ -90,7 +49,7 @@ namespace StringExtension
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static IEnumerable<string> CsvSplitter(this string source)
+        public static IEnumerable<string> StringSplit(this string source,char delimiter)
         {
             if (string.IsNullOrEmpty(source))
             {
@@ -115,7 +74,7 @@ namespace StringExtension
                 {
                     inQuot = true;
                 }
-                else if (c == ',')
+                else if (c == delimiter)
                 {
                     yield return source.Substring(lastIndex, i - lastIndex);
                     lastIndex = i + 1;

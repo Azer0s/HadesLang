@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Exceptions;
 
-namespace Variables
+namespace Hades.Variables
 {
     public class TypeParser
     {
@@ -20,7 +15,7 @@ namespace Variables
                 case "closed":
                     return AccessTypes.CLOSED;
                 default:
-                    throw new InvalidAccessTypeException("Invalid access operator!");
+                    throw new Exception("Invalid access operator!");
             }
         }
 
@@ -37,7 +32,7 @@ namespace Variables
                 case "bit":
                     return DataTypes.BIT;
                 default:
-                    throw new InvalidDataTypeException("Invalid data type!");
+                    throw new Exception("Invalid data type!");
             }
         }
     }
