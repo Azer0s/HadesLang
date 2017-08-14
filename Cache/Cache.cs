@@ -45,7 +45,13 @@ public sealed class Cache
         {"CIMP","<--"},
         {"XOR","(+)" },
         {"NIMP","-/>" },
-        {"CNIMP","</-" }
+        {"CNIMP","</-" },
+        {"SMALLER","<"},
+        {"BIGGER",">" },
+        {"SMALLERIS","<="},
+        {"BIGGERIS",">="},
+        {"EQUALS","=="},
+        {"NEQUALS","!="}
     };
     /// <summary>
     /// List of loaded files 

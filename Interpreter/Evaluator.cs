@@ -267,6 +267,7 @@ namespace Interpreter
                 if (args[i].ToUpper().EqualsFromList(Cache.Instance.Replacement.Keys))
                 {
                     args[i] = Cache.Instance.Replacement[args[i].ToUpper()];
+                    isBool = true;
                 }
                 if (args[i].ToLower() == "true")
                 {
