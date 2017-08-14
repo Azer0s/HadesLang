@@ -1,4 +1,7 @@
-# HadesLang - A simple embedding language built on .Net
+<img src="https://raw.githubusercontent.com/Azer0s/HadesLang/master/HadesLang/IconLong.png" /> 
+
+***
+
 [![Build Status](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)](https://travis-ci.org/Azer0s/HadesLang)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Azer0s/HadesLang/blob/master/LICENSE)
 
