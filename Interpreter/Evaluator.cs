@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -179,7 +180,7 @@ namespace Interpreter
             throw new Exception($"Variable {name} does not exist or the access was denied!");
         }
 
-        private DataTypes DataTypeFromData(string result, bool hardCompare)
+        public DataTypes DataTypeFromData(string result, bool hardCompare)
         {
             if (!hardCompare)
             {
@@ -304,7 +305,7 @@ namespace Interpreter
 
         #region Calculations
 
-        public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access)
+        public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access, Interpreter interpreter)
         {
             //TODO: Replace vars
             try
@@ -317,6 +318,32 @@ namespace Interpreter
             }
 
             lineToInterprete = Cache.Instance.CharList.Aggregate(lineToInterprete, (current, s) => current.Replace(s, $" {s} "));
+
+            if (lineToInterprete.ContainsFromList(new List<string> { ":", "->" }))
+            {
+                var split = lineToInterprete.StringSplit(' ', new[] { '\'', '[', ']' }).ToArray();
+
+                lineToInterprete = Empty;
+
+                foreach (var t in split)
+                {
+                    if (!(RegexCollection.Store.IsNum.IsMatch(t) || RegexCollection.Store.IsDec.IsMatch(t) || t.EqualsFromList(Cache.Instance.CharList)))
+                    {
+                        lineToInterprete += interpreter.InterpretLine(t, access);
+                    }
+                    else
+                    {
+                        if (t.EqualsFromList(Cache.Instance.CharList))
+                        {
+                            lineToInterprete += $" {t} ";
+                        }
+                        else
+                        {
+                            lineToInterprete += t;
+                        }
+                    }
+                }
+            }
 
             var args = lineToInterprete.StringSplit(' ').ToArray();
 

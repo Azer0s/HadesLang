@@ -72,6 +72,14 @@ namespace Interpreter
                 return Empty;
             }
 
+            //Method calls
+            if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
+            {
+                var result = _evaluator.CallMethod(lineToInterprete, access);
+                Output.WriteLine(result);
+                return result;
+            }    
+
             //Function
             if (RegexCollection.Store.Function.IsMatch(lineToInterprete))
             {
@@ -123,12 +131,27 @@ namespace Interpreter
                     return result.Value;
                 }
 
-                //Type
+                //Random number
+                if (RegexCollection.Store.RandomNum.IsMatch(lineToInterprete))
+                {
+                    return new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value)).ToString();
+                }
+
+                //Type/dtype
                 if (RegexCollection.Store.Type.IsMatch(lineToInterprete))
                 {
-                    var result = _evaluator
-                        .GetVariable(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access)
-                        .DataType.ToString();
+                    string result;
+                    if (lineToInterprete.StartsWith("d"))
+                    {
+                        result = _evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value,access), true).ToString();
+                    }
+                    else
+                    {
+                        result = _evaluator
+                            .GetVariable(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access)
+                            .DataType.ToString();
+                    }
+
                     Output.WriteLine(result);
                     return result;
                 }
@@ -184,12 +207,16 @@ namespace Interpreter
                 return Empty;
             }
 
-            //Method calls
-            if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
+            //Calculation
+            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
-                var result = _evaluator.CallMethod(lineToInterprete, access);
-                Output.WriteLine(result);
-                return result;
+                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete, access, this);
+                Output.WriteLine(calculationResult.Result);
+
+                if (calculationResult.Result != "NaN")
+                {
+                    return calculationResult.Result;
+                }
             }
 
             //Clear console
@@ -205,18 +232,6 @@ namespace Interpreter
                 var groups = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
                 Output.WriteLine(_evaluator.IncludeLib(lineToInterprete, access));
                 return Empty;
-            }
-
-            //Calculation
-            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
-            {
-                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete, access);
-                Output.WriteLine(calculationResult.Result);
-
-                if (calculationResult.Result != "NaN")
-                {
-                    return calculationResult.Result;
-                }
             }
 
             //String concat

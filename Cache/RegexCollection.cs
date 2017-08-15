@@ -14,11 +14,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for toggling scriptOutput
     /// </summary>
-    public Regex ScriptOutput { get; set; } = new Regex("scriptOutput:(\\d)", RegexOptions.Compiled);
+    public Regex ScriptOutput { get; set; } = new Regex("^scriptOutput:(\\d)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for dumping variables
     /// </summary>
-    public Regex DumpVars { get; set; } = new Regex("dumpVars:(all|num|dec|word|bit)", RegexOptions.Compiled);
+    public Regex DumpVars { get; set; } = new Regex("^dumpVars:(all|num|dec|word|bit)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for creating new variables
     /// </summary>
@@ -46,27 +46,27 @@ public class RegexCollection
     /// <summary>
     /// Regex for including a library
     /// </summary>
-    public Regex With { get; set; } = new Regex("with *\'(\\w*)\' *as *(\\w*)", RegexOptions.Compiled);
+    public Regex With { get; set; } = new Regex("^with *\'(\\w*)\' *as *(\\w*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for matching built-in functions
     /// </summary>
-    public Regex Function { get; set; } = new Regex("(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
+    public Regex Function { get; set; } = new Regex("^(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
     /// <summary>
     /// Regex for matching method calls
     /// </summary>
-    public Regex MethodCall { get; set; } = new Regex("\\$(\\w*) *-> *(\\w*):(?:\\[?(.*)\\]|(.*))",RegexOptions.Compiled);
+    public Regex MethodCall { get; set; } = new Regex("^\\$(\\w*) *-> *(\\w*):(?:\\[?(.*)\\]|(.*))",RegexOptions.Compiled);
     /// <summary>
     /// Regex for halting the program
     /// </summary>
-    public Regex Exit { get; set; } = new Regex("exit:(\\d)",RegexOptions.Compiled);
+    public Regex Exit { get; set; } = new Regex("^exit:(\\d)",RegexOptions.Compiled);
     /// <summary>
     /// Regex for input
     /// </summary>
-    public Regex Input { get; set; } = new Regex("in:(\\w*)",RegexOptions.Compiled);
+    public Regex Input { get; set; } = new Regex("^in:(\\w*)",RegexOptions.Compiled);
     /// <summary>
     /// Regex for output/conversion to word datatype
     /// </summary>
-    public Regex Output { get; set; } = new Regex("out:(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
+    public Regex Output { get; set; } = new Regex("^out:(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
     /// <summary>
     /// Regex for detecting variables
     /// </summary>
@@ -78,15 +78,19 @@ public class RegexCollection
     /// <summary>
     /// Regex for uload keyword
     /// </summary>
-    public Regex Unload { get; set; } = new Regex("uload:(\\w*)",RegexOptions.Compiled);
+    public Regex Unload { get; set; } = new Regex("^uload:(\\w*)",RegexOptions.Compiled);
     /// <summary>
     /// Regex for type keyword
     /// </summary>
-    public Regex Type { get; set; } = new Regex("type:(\\w*)", RegexOptions.Compiled);
+    public Regex Type { get; set; } = new Regex("^d?type:(\\w*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collecter
     /// </summary>
-    public Regex EraseVars { get; set; } = new Regex("eraseVars:(\\d)", RegexOptions.Compiled);
+    public Regex EraseVars { get; set; } = new Regex("^eraseVars:(\\d)", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for random number function
+    /// </summary>
+    public Regex RandomNum { get; set; } = new Regex("^rand:\\[ *(\\d*) *\\]", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

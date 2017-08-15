@@ -49,8 +49,13 @@ namespace StringExtension
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static IEnumerable<string> StringSplit(this string source,char delimiter)
+        public static IEnumerable<string> StringSplit(this string source,char delimiter, char[] escape = null)
         {
+            if (escape == null)
+            {
+                escape = new[] {'\''};
+            }
+
             if (string.IsNullOrEmpty(source))
             {
                 yield break;
@@ -65,12 +70,12 @@ namespace StringExtension
 
                 if (inQuot)
                 {
-                    if (c == '\'')
+                    if (escape.Contains(c))
                     {
                         inQuot = false;
                     }
                 }
-                else if (c == '\'')
+                else if (escape.Contains(c))
                 {
                     inQuot = true;
                 }
