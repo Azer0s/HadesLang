@@ -47,6 +47,210 @@ namespace Interpreter
             }
         }
 
+        public string CreateArray(string lineToInterprete, string access, Interpreter interpreter)
+        {
+            var groups = RegexCollection.Store.CreateArray.Match(lineToInterprete).Groups.OfType<Group>()
+                .Where(a => !string.IsNullOrEmpty(a.Value)).Select(a => a.Value).ToList();
+
+            var exist = Exists(groups[1], access);
+            if (exist.Exists)
+            {
+                return exist.Message;
+            }
+
+            Cache.Instance.Variables.Add(new Meta {Name = groups[1], Owner = access},
+                groups[3] == "*"
+                    ? new Variables.Array
+                    {
+                        Access = TypeParser.ParseAccessType(groups[4]),
+                        DataType = TypeParser.ParseDataType(groups[2]),
+                        Values = new Dictionary<int, string>()
+                    }
+                    : new Variables.Array
+                    {
+                        Access = TypeParser.ParseAccessType(groups[4]),
+                        DataType = TypeParser.ParseDataType(groups[2]),
+                        Values = new Dictionary<int, string>(int.Parse(groups[3])),
+                        Capacity = int.Parse(groups[3])
+                    });
+
+            try
+            {
+                return groups.Count == 6 ? AssignToArray($"{groups[1]} = {groups[5]}", access, interpreter) : $"{groups[1]} is undefined";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
+
+        private string AssignToArray(string s, string access, Interpreter interpreter)
+        {
+            var output = interpreter.Output;
+            var eOutput = interpreter.ExplicitOutput;
+            interpreter.Output = new NoOutput();
+            interpreter.ExplicitOutput = new NoOutput();
+
+            var groups = RegexCollection.Store.Assignment.Match(s).Groups.OfType<Group>().Select(a => a.Value).ToList();
+            var split = RegexCollection.Store.ArrayValues.Match(groups[2]).Groups[1].Value.StringSplit(',').ToList();
+
+            var success = false;
+            if (Exists(groups[1], access).Exists)
+            {
+                var variable = GetVariable(groups[1], access);
+                var datatypeFromVariable = variable.DataType;
+
+                var index = 0;
+                var list = split.Select(group =>
+                {
+                    var interpreted = DataTypeFromData(group,true) != DataTypes.NONE ? group : interpreter.InterpretLine(group, access);
+                    var datatypeFromData = DataTypeFromData(group, false);
+                    if (datatypeFromVariable == DataTypes.WORD)
+                    {
+                        index++;
+                        return new KeyValuePair<int, string>(index - 1,$"'{interpreted.TrimStart('\'').TrimEnd('\'')}'");
+                    }
+                    if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
+                    {
+                        index++;
+                        return new KeyValuePair<int, string>(index - 1, $"{interpreted.Replace(" ", "")}.0");
+                    }
+                    if (datatypeFromData == datatypeFromVariable)
+                    {
+                        index++;
+                        return new KeyValuePair<int, string>(index-1,interpreted);
+                    }
+
+                    interpreter.Output = output;
+                    interpreter.ExplicitOutput = eOutput;
+                    throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
+                }).ToList();
+
+                success = SetArray(groups[1], access, list.ToDictionary(pair => pair.Key, pair => pair.Value));
+            }
+
+            interpreter.Output = output;
+            interpreter.ExplicitOutput = eOutput;
+            if (success)
+            {
+                return $"{groups[1]} is {groups[2]}";
+            }
+            throw new Exception($"{groups[1]} could not be set!");
+        }
+
+        public string AssignToArrayAtPos(string lineToInterprete, string access, Interpreter interpreter)
+        {
+            var output = interpreter.Output;
+            var eOutput = interpreter.ExplicitOutput;
+            interpreter.Output = new NoOutput();
+            interpreter.ExplicitOutput = new NoOutput();
+            var groups = RegexCollection.Store.ArrayAssignment.Match(lineToInterprete).Groups.OfType<Group>()
+                .Select(a => a.Value).ToList();
+
+            if (Exists(groups[1], access).Exists)
+            {
+                var variable = GetVariable(groups[1], access);
+                var datatypeFromVariable = variable.DataType;
+                var datatypeFromData = DataTypeFromData(groups[3], false);
+
+                if (datatypeFromData != DataTypes.NONE)
+                {
+                    groups[3] = groups[3];
+                }
+                else
+                {
+                    groups[3] = interpreter.InterpretLine(groups[3], access);
+                }
+
+                if (datatypeFromVariable == DataTypes.WORD)
+                {
+                    SetArrayAtPos(groups[1],access,$"'{groups[3].TrimStart('\'').TrimEnd('\'')}'",int.Parse(groups[2]));
+                }
+                else if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
+                {
+                    SetArrayAtPos(groups[1], access, $"{groups[3].Replace(" ", "")}.0", int.Parse(groups[2]));
+                }
+                else if (datatypeFromData == datatypeFromVariable)
+                {
+                    SetArrayAtPos(groups[1], access, groups[3], int.Parse(groups[2]));
+                }
+                else
+                {
+                    interpreter.Output = output;
+                    interpreter.ExplicitOutput = eOutput;
+
+                    throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
+                }
+            }
+
+            interpreter.Output = output;
+            interpreter.ExplicitOutput = eOutput;
+
+            return $"{groups[1]}[{groups[2]}] is {groups[3]}";
+        }
+
+        private void SetArrayAtPos(string name, string access, string value, int position)
+        {
+            Variables.Array variable;
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
+            {
+                var reachableAllVar =
+                    Cache.Instance.Variables.First(a => a.Key.Name == name &&
+                                                        a.Value.Access == AccessTypes.REACHABLE_ALL);
+                variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
+            }
+            else if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == access))
+            {
+                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = access }] as Variables.Array;
+            }
+            else
+            {
+                throw new Exception($"Variable {name} does not exist or the access was denied!");
+
+            }
+
+            if (variable != null && position < variable.Capacity)
+            {
+                try
+                {
+                    variable.Values[position] = value;
+                }
+                catch (Exception)
+                {
+                    variable.Values.Add(position, value);
+                }
+            }
+            else
+            {
+                throw new Exception($"Index {position} in array {name} is out of bounds!");
+            }
+        }
+
+        private bool SetArray(string name, string access, Dictionary<int,string> values)
+        {
+            Variables.Array variable = null;
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
+            {
+                var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL);
+                variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
+            }
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == access))
+            {
+                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = access }] as Variables.Array;
+            }
+
+            if (variable != null)
+            {
+                if (values.Count <= variable.Capacity)
+                {
+                    variable.Values = values;
+                    return true;
+                }
+                throw new Exception($"Array is bigger than capacity!");
+            }
+            throw new Exception($"Variable {name} does not exist or the access was denied!");
+        }
+
         private (bool Exists,string Message) Exists(string name, string access)
         {
             if (VariableIsReachableAll(name))
@@ -74,11 +278,22 @@ namespace Interpreter
             var result = lineToInterprete;
             foreach (Match match in matches)
             {
-                var variable = GetVariable(match.Value.TrimStart('$'), access);
+                var variable = GetVariable(match.Groups[1].Value.TrimStart('$'), access);
 
                 if (variable is Variable)
                 {
                     result = result.Replace(match.Value,(variable as Variable).Value);
+                }
+                else if(variable is Variables.Array)
+                {
+                    if (RegexCollection.Store.ArrayVariable.IsMatch(lineToInterprete))
+                    {
+                        result = result.Replace(match.Value, GetArrayValue(match.Value, access));
+                    }
+                    else
+                    {
+                        throw new Exception($"Variable {match.Value} is not an array!");
+                    }
                 }
                 else
                 { 
@@ -86,6 +301,26 @@ namespace Interpreter
                 }
             }
             return result;
+        }
+
+        public string GetArrayValue(string name, string access)
+        {
+            var groups = RegexCollection.Store.ArrayVariable.Match(name).Groups;
+            var variable = GetVariable(groups[1].Value.TrimStart('$'), access);
+
+            if (variable is Variables.Array)
+            {
+                try
+                {
+                    return (variable as Variables.Array).Values[int.Parse(groups[2].Value)];
+                }
+                catch (Exception)
+                {
+                    throw new Exception($"Index {groups[2]} in array {name} is out of bounds!");
+                }
+            }
+
+            throw new Exception($"Could not get value of idex {groups[2]} in array {name}!");
         }
 
         public IVariable GetVariable(string variable, string access)
@@ -105,12 +340,17 @@ namespace Interpreter
         {
             var groups = RegexCollection.Store.Assignment.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
+            if (RegexCollection.Store.ArrayValues.IsMatch(groups[2].Value))
+            {
+                return AssignToArray(lineToInterprete, access, interpreter);
+            }
+
             var output = interpreter.Output;
             var eOutput = interpreter.ExplicitOutput;
             interpreter.Output = new NoOutput();
             interpreter.ExplicitOutput = new NoOutput();
 
-            var result =interpreter.InterpretLine(groups[2].Value, access);
+            var result = interpreter.InterpretLine(groups[2].Value, access);
             interpreter.Output = output;
             interpreter.ExplicitOutput = eOutput;
 
@@ -159,23 +399,23 @@ namespace Interpreter
 
         private bool SetVariable(string name,string value, string access)
         {
+            Variable variable = null;
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
             {
                 var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL);
-                var variable = Cache.Instance.Variables[reachableAllVar.Key] as Variable;
-                if (variable != null)
-                    variable.Value = value;
-
-                return true;
+                variable = Cache.Instance.Variables[reachableAllVar.Key] as Variable;
             }
             if (Cache.Instance.Variables.Any(a => a.Key.Name== name && a.Key.Owner == access))
             {
-                var variable = Cache.Instance.Variables[new Meta {Name = name, Owner = access}] as Variable;
-                if (variable != null)
-                    variable.Value = value;
+                variable = Cache.Instance.Variables[new Meta {Name = name, Owner = access}] as Variable;
+            }
 
+            if (variable != null)
+            {
+                variable.Value = value;
                 return true;
             }
+
 
             throw new Exception($"Variable {name} does not exist or the access was denied!");
         }
@@ -244,7 +484,7 @@ namespace Interpreter
                 if (keyValuePair.Value is Variable)
                 {
                     var kvpAsVar = (Variable) keyValuePair.Value;
-                    sb.Append(string.IsNullOrEmpty(kvpAsVar.Value)
+                    sb.Append(IsNullOrEmpty(kvpAsVar.Value)
                         ? $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=undefined\n"
                         : $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}={kvpAsVar.Value}\n");
                 }
@@ -307,7 +547,6 @@ namespace Interpreter
 
         public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access, Interpreter interpreter)
         {
-            //TODO: Replace vars
             try
             {
                 lineToInterprete = ReplaceWithVars(lineToInterprete, access);
@@ -377,7 +616,7 @@ namespace Interpreter
 
             expression.Length -= 1;
 
-            var result = string.Empty;
+            var result = Empty;
             var ex = new Expression(expression.ToString());
 
             var calc = ex.calculate();

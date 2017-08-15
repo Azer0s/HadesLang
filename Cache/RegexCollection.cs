@@ -24,9 +24,17 @@ public class RegexCollection
     /// </summary>
     public Regex CreateVariable { get; set; } = new Regex("(\\w*) *as *(num|dec|word|bit) *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
     /// <summary>
+    /// Regex for creating new arrays
+    /// </summary>
+    public Regex CreateArray { get; set; } = new Regex("(\\w*) *as *(num|dec|word|bit)\\[([\\d]*|\\*)\\] *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
+    /// <summary>
     /// Regex for assigning data to variables
     /// </summary>
     public Regex Assignment { get; set; } = new Regex("(\\w*) *= *(.*)", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for assigning data to specific positions in an array
+    /// </summary>
+    public Regex ArrayAssignment { get; set; } = new Regex("(\\w*)\\[(\\d*)\\] *= *(.*)",RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type word
     /// </summary>
@@ -42,7 +50,7 @@ public class RegexCollection
     /// <summary>
     /// Checks if a string contains or is of type bit
     /// </summary>
-    public Regex IsBit { get; set; } = new Regex("^true|false");
+    public Regex IsBit { get; set; } = new Regex("^true|false",RegexOptions.Compiled);
     /// <summary>
     /// Regex for including a library
     /// </summary>
@@ -70,7 +78,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for detecting variables
     /// </summary>
-    public Regex Variable { get; set; } = new Regex("(\\$\\w*)",RegexOptions.Compiled);
+    public Regex Variable { get; set; } = new Regex("(\\$\\w*)\\[?\\d*\\]?", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for detecting array values
+    /// </summary>
+    public Regex ArrayValues { get; set; } = new Regex("{(.*)}",RegexOptions.Compiled);
     /// <summary>
     /// Regex for detecting single varnames
     /// </summary>
@@ -91,6 +103,10 @@ public class RegexCollection
     /// Regex for random number function
     /// </summary>
     public Regex RandomNum { get; set; } = new Regex("^rand:\\[ *(\\d*) *\\]", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for array access
+    /// </summary>
+    public Regex ArrayVariable { get; set; } = new Regex("(\\$\\w*)\\[(\\d*)\\]",RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

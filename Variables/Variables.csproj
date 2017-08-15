@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessTypes.cs" />
+    <Compile Include="Array.cs" />
     <Compile Include="DataTypes.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="IVariable.cs" />

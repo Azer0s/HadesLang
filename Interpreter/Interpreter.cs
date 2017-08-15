@@ -58,6 +58,27 @@ namespace Interpreter
                 return Empty;
             }
 
+            //Array decleration
+            if (RegexCollection.Store.CreateArray.IsMatch(lineToInterprete))
+            {
+                Output.WriteLine(_evaluator.CreateArray(lineToInterprete,access,this));
+                return Empty;
+            }
+
+            //Array assignment
+            if (RegexCollection.Store.ArrayAssignment.IsMatch(lineToInterprete))
+            {
+                try
+                {
+                    Output.WriteLine(_evaluator.AssignToArrayAtPos(lineToInterprete, access, this));
+                }
+                catch (Exception e)
+                {
+                    Output.WriteLine(e.Message);
+                }
+                return Empty;
+            }
+
             //Variable assignment
             if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
             {
@@ -250,6 +271,14 @@ namespace Interpreter
             if (RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
                 return RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value;
+            }
+
+            //Return array value
+            if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}"))
+            {
+                var value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access);
+                Output.WriteLine(value);
+                return value;
             }
 
             //Return var value
