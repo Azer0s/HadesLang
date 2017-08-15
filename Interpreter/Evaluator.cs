@@ -488,6 +488,13 @@ namespace Interpreter
                         ? $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=undefined\n"
                         : $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}={kvpAsVar.Value}\n");
                 }
+                else if (keyValuePair.Value is Variables.Array)
+                {
+                    var kvpAsArray = (Variables.Array) keyValuePair.Value;
+                    sb.Append(kvpAsArray.Values.Count == 0
+                        ? $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=undefined\n"
+                        : $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}={kvpAsArray.Values.Select(a => $"\n    [{a.Key}]:{a.Value}").Aggregate(Empty, (current, s) => current + s)}\n");
+                }
                 else
                 {
                     sb.Append($"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=Object\n");

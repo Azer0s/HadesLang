@@ -277,7 +277,7 @@ namespace Interpreter
             if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}"))
             {
                 var value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access);
-                Output.WriteLine(value);
+                Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
                 return value;
             }
 
