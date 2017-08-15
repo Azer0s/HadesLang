@@ -55,7 +55,7 @@ public sealed class Cache
         {"SMALLERIS","<="},
         {"BIGGERIS",">="},
         {"IS","=="},
-        {"NEQUALS","!="}
+        {"NOT","!="}
     };
     /// <summary>
     /// List of loaded files 

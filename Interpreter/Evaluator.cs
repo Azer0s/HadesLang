@@ -633,11 +633,11 @@ namespace Interpreter
                 {
                     if ((int)calc == 1)
                     {
-                        result = bool.TrueString;
+                        result = "true";
                     }
                     else if ((int)calc == 0)
                     {
-                        result = bool.FalseString;
+                        result = "false";
                     }
                     else
                     {
