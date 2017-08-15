@@ -92,6 +92,10 @@ public class RegexCollection
     /// </summary>
     public Regex Unload { get; set; } = new Regex("^uload:(\\w*)",RegexOptions.Compiled);
     /// <summary>
+    /// Regex for exists keyword
+    /// </summary>
+    public Regex Exists { get; set; } = new Regex("^exists:(\\w*)",RegexOptions.Compiled);
+    /// <summary>
     /// Regex for type keyword
     /// </summary>
     public Regex Type { get; set; } = new Regex("^d?type:(\\w*)", RegexOptions.Compiled);

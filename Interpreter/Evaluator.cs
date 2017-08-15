@@ -251,7 +251,7 @@ namespace Interpreter
             throw new Exception($"Variable {name} does not exist or the access was denied!");
         }
 
-        private (bool Exists,string Message) Exists(string name, string access)
+        public (bool Exists,string Message) Exists(string name, string access)
         {
             if (VariableIsReachableAll(name))
             {

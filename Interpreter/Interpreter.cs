@@ -178,6 +178,14 @@ namespace Interpreter
                     return result;
                 }
 
+                //Exists
+                if (RegexCollection.Store.Exists.IsMatch(lineToInterprete))
+                {
+                    var result = _evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value,access).Exists.ToString().ToLower();
+                    Output.WriteLine(result);
+                    return result;
+                }
+
                 //ScriptOutput
                 if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
                 {
