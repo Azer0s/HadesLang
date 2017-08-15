@@ -35,7 +35,7 @@ public sealed class Cache
     /// <summary>
     /// List of operators
     /// </summary>
-    public List<string> CharList { get; set; } = new List<string> { "+", "-", "*", "/", "&&", "||", "-->", "~&&", "~||", "<--", "(+)", "-/>", "</-", "(", ")" };
+    public List<string> CharList { get; set; } = new List<string> { "+", "-", "*", "/", "^","%","!","&&", "||", "-->", "~&&", "~||", "<--", "(+)", "-/>", "</-", "(", ")", "sin", "cos","tan","sqrt","integ"};
     /// <summary>
     /// Dictionary for replacing operators as string to operator as sign
     /// </summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -231,7 +232,7 @@ namespace Interpreter
             //Calculation
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
-                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete, access, this);
+                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete.Replace("integ","int").Replace("%","#"), access, this);
                 Output.WriteLine(calculationResult.Result);
 
                 if (calculationResult.Result != "NaN")
@@ -281,18 +282,37 @@ namespace Interpreter
                 return value;
             }
 
+            //Constants
+            switch (lineToInterprete)
+            {
+                case "e":
+                    Output.WriteLine(Math.E.ToString(CultureInfo.InvariantCulture));
+                    return Math.E.ToString(CultureInfo.InvariantCulture);
+                case "pi":
+                    Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
+                    return Math.PI.ToString(CultureInfo.InvariantCulture);
+            }
+
             //Return var value
             if (RegexCollection.Store.Variable.IsMatch(lineToInterprete) || RegexCollection.Store.SingleName.IsMatch(lineToInterprete))
             {
-                var variable = _evaluator.GetVariable(lineToInterprete.TrimStart('$'), access);
-                if (!(variable is Object))
+                IVariable variable = null;
+                try
+                {
+                    variable = _evaluator.GetVariable(lineToInterprete.TrimStart('$'), access);
+                }
+                catch (Exception e)
+                {
+                    Output.WriteLine(e.Message);
+                }
+                if (variable != null && !(variable is Object))
                 {
                     var o = variable as Variable;
                     if (o != null) return o.Value;
                 }
                 else
                 {
-                    throw new Exception("Variable is an object!");
+                    Output.WriteLine("Variable is an object!");
                 }
             }
 
