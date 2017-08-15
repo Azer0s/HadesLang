@@ -61,7 +61,14 @@ namespace Interpreter
             //Variable assignment
             if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
             {
-                Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete,access,true,this));
+                try
+                {
+                    Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete, access, true, this));
+                }
+                catch (Exception e)
+                {
+                    Output.WriteLine(e.Message);
+                }
                 return Empty;
             }
 

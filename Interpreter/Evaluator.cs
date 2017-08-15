@@ -35,7 +35,15 @@ namespace Interpreter
             }
 
             Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = access }, new Variable { Access = TypeParser.ParseAccessType(groups[3]), DataType = TypeParser.ParseDataType(groups[2]) });
-            return groups.Count == 5 ? AssignToVariable($"{groups[1]} = {groups[4]}", access,true,interpreter) : $"{groups[1]} is undefined";
+
+            try
+            {
+                return groups.Count == 5 ? AssignToVariable($"{groups[1]} = {groups[4]}", access, true, interpreter) : $"{groups[1]} is undefined";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
         }
 
         private (bool Exists,string Message) Exists(string name, string access)
@@ -389,7 +397,14 @@ namespace Interpreter
         {
             var varname = RegexCollection.Store.Input.Match(lineToInterprete).Groups[1].Value;
             var input = output.ReadLine();
-            return (input,AssignToVariable($"{varname} = '{input}'", access,false,interpreter));
+            try
+            {
+                return (input, AssignToVariable($"{varname} = '{input}'", access, false, interpreter));
+            }
+            catch (Exception e)
+            {
+                return (null,e.Message);
+            }
         }
 
         public string EvaluateOut(string lineToInterprete, string access, Interpreter interpreter)
@@ -399,10 +414,10 @@ namespace Interpreter
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
 
-            var result = Empty;
+            string result;
             try
             {
-                result = interpreter.InterpretLine(groups[1].Value, access);
+                result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value, access);
             }
             catch (Exception e)
             {

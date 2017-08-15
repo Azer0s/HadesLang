@@ -54,7 +54,7 @@ public sealed class Cache
         {"BIGGER",">" },
         {"SMALLERIS","<="},
         {"BIGGERIS",">="},
-        {"EQUALS","=="},
+        {"IS","=="},
         {"NEQUALS","!="}
     };
     /// <summary>
