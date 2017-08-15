@@ -38,11 +38,11 @@ public class RegexCollection
     /// <summary>
     /// Checks if a string contains or is of type dec
     /// </summary>
-    public Regex IsDec { get; set; } = new Regex("\\d*.\\d*",RegexOptions.Compiled);
+    public Regex IsDec { get; set; } = new Regex("^\\d*\\.\\d*",RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type bit
     /// </summary>
-    public Regex IsBit { get; set; } = new Regex("true|false");
+    public Regex IsBit { get; set; } = new Regex("^true|false");
     /// <summary>
     /// Regex for including a library
     /// </summary>
@@ -71,7 +71,18 @@ public class RegexCollection
     /// Regex for detecting variables
     /// </summary>
     public Regex Variable { get; set; } = new Regex("(\\$\\w*)",RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for detecting single varnames
+    /// </summary>
+    public Regex SingleName { get; set; } = new Regex("^[a-zA-Z]*$",RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for unloading
+    /// </summary>
+    public Regex Unload { get; set; } = new Regex("uload:(\\w*)",RegexOptions.Compiled);
 
+    /// <summary>
+    /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
+    /// </summary>
     private RegexCollection()
     {
     }

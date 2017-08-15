@@ -9,6 +9,7 @@ using org.mariuszgromada.math.mxparser;
 using Output;
 using StringExtension;
 using Variables;
+using static System.String;
 
 namespace Interpreter
 {
@@ -49,7 +50,7 @@ namespace Interpreter
                 return (true, "Variable already exists!");
             }
 
-            return (false, "Variable does not exist!");
+            return (false, $"Variable {name} does not exist or the access was denied!");
         }
 
         private bool VariableIsReachableAll(string varname)
@@ -78,18 +79,21 @@ namespace Interpreter
             return result;
         }
 
-        private IVariable GetVariable(string variable, string access)
+        public IVariable GetVariable(string variable, string access)
         {
+            if (VariableIsReachableAll(variable))
+            {
+                return Cache.Instance.Variables.First(a => a.Key.Name == variable).Value;
+            }
             if (Exists(variable,access).Exists)
             {
                 return Cache.Instance.Variables[new Meta {Name = variable, Owner = access}];
             }
-            throw new Exception($"Variable {variable} does not exist!");
+            throw new Exception($"Variable {variable} does not exist or the access was denied!");
         }
 
         public string AssignToVariable(string lineToInterprete, string access, bool hardCompare,Interpreter interpreter)
         {
-            //TODO: Replace vars
             var groups = RegexCollection.Store.Assignment.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
             var output = interpreter.Output;
@@ -101,7 +105,7 @@ namespace Interpreter
             interpreter.Output = output;
             interpreter.ExplicitOutput = eOutput;
 
-            //TODO: Assign to variable
+            var success = false;
 
             if (Exists(groups[1].Value,access).Exists)
             {
@@ -114,15 +118,21 @@ namespace Interpreter
 
                     if (datatypeFromVariable == DataTypes.WORD)
                     {
-                        //TrimStart/End('\'') then add ' in start and back
+                        result = $"'{result.TrimStart('\'').TrimEnd('\'')}'";
+                        success = SetVariable(groups[1].Value,result, access);
                     }
                     else if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
                     {
-                        //Add .0
+                        result = $"{result.Replace(" ", "")}.0";
+                        success = SetVariable(groups[1].Value,result, access);
                     }
                     else if (datatypeFromData == datatypeFromVariable)
                     {
-                        //Just set
+                        success = SetVariable(groups[1].Value,result, access);
+                    }
+                    else
+                    {
+                        throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                     }
                 }
                 else
@@ -131,7 +141,34 @@ namespace Interpreter
                 }
             }
 
-            return $"{groups[1]} is {result}";
+            if (success)
+            {
+                return $"{groups[1]} is {result}";
+            }
+            throw new Exception($"{groups[1]} could not be set!");
+        }
+
+        private bool SetVariable(string name,string value, string access)
+        {
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
+            {
+                var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL);
+                var variable = Cache.Instance.Variables[reachableAllVar.Key] as Variable;
+                if (variable != null)
+                    variable.Value = value;
+
+                return true;
+            }
+            if (Cache.Instance.Variables.Any(a => a.Key.Name== name && a.Key.Owner == access))
+            {
+                var variable = Cache.Instance.Variables[new Meta {Name = name, Owner = access}] as Variable;
+                if (variable != null)
+                    variable.Value = value;
+
+                return true;
+            }
+
+            throw new Exception($"Variable {name} does not exist or the access was denied!");
         }
 
         private DataTypes DataTypeFromData(string result, bool hardCompare)
@@ -172,7 +209,22 @@ namespace Interpreter
             return DataTypes.NONE;
         }
 
-        //TODO: uload,load
+        //TODO: load
+
+        public string Unload(string variable, string access)
+        {
+            if (VariableIsReachableAll(variable))
+            {
+                Cache.Instance.Variables.Remove(Cache.Instance.Variables.First(a => a.Key.Name == variable).Key);
+                return $"Unloaded variable {variable}!";
+            }
+            if (Exists(variable, access).Exists)
+            {
+                Cache.Instance.Variables.Remove(new Meta { Name = variable, Owner = access });
+                return $"Unloaded variable {variable}!";
+            }
+            throw new Exception($"Variable {variable} does not exist or the access was denied!");
+        }
 
         public string DumpVars(DataTypes dt)
         {
@@ -347,7 +399,15 @@ namespace Interpreter
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
 
-            var result =  interpreter.InterpretLine(groups[1].Value, access);
+            var result = Empty;
+            try
+            {
+                result = interpreter.InterpretLine(groups[1].Value, access);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
             interpreter.Output = output;
 
             return $"'{result}'";

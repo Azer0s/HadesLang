@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using Output;
 using StringExtension;
 using Variables;
 using static System.String;
 using Function = Variables.Function;
+using Object = Variables.Object;
 
 namespace Interpreter
 {
@@ -64,9 +67,25 @@ namespace Interpreter
                 //Out
                 if (RegexCollection.Store.Output.IsMatch(lineToInterprete))
                 {
-                    var result = _evaluator.EvaluateOut(lineToInterprete, access,this);
+                    string result;
+                    try
+                    {
+                        result = _evaluator.EvaluateOut(lineToInterprete, access, this);
+                    }
+                    catch (Exception e)
+                    {
+                        Output.WriteLine(e.Message);
+                        return Empty;
+                    }
                     ExplicitOutput.WriteLine(result.TrimStart('\'').TrimEnd('\''));
                     return result;
+                }
+
+                //Unload
+                if (RegexCollection.Store.Unload.IsMatch(lineToInterprete))
+                {
+                    Output.WriteLine(_evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, access));
+                    return Empty;
                 }
 
                 #region Console-Specific
@@ -152,10 +171,31 @@ namespace Interpreter
                 //TODO Make string concat, replace with vars
             }
 
+            //Bool type
+            if (RegexCollection.Store.IsBit.IsMatch(lineToInterprete.ToLower()))
+            {
+                return lineToInterprete.ToLower();
+            }
+
             //Return string
             if (RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
                 return RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value;
+            }
+
+            //Return var value
+            if (RegexCollection.Store.Variable.IsMatch(lineToInterprete) || RegexCollection.Store.SingleName.IsMatch(lineToInterprete))
+            {
+                var variable = _evaluator.GetVariable(lineToInterprete.TrimStart('$'), access);
+                if (!(variable is Object))
+                {
+                    var o = variable as Variable;
+                    if (o != null) return o.Value;
+                }
+                else
+                {
+                    throw new Exception("Variable is an object!");
+                }
             }
 
             return lineToInterprete;
