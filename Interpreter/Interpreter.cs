@@ -33,6 +33,11 @@ namespace Interpreter
 
         public string InterpretLine(string lineToInterprete, string access)
         {
+            if (IsNullOrEmpty(lineToInterprete))
+            {
+                return Empty;
+            }
+
             //Variable decleration
             if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))
             {
@@ -96,6 +101,16 @@ namespace Interpreter
                     var result = _evaluator.Input(lineToInterprete, access, Output,this);
                     Output.WriteLine(result.Message);
                     return result.Value;
+                }
+
+                //Type
+                if (RegexCollection.Store.Type.IsMatch(lineToInterprete))
+                {
+                    var result = _evaluator
+                        .GetVariable(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access)
+                        .DataType.ToString();
+                    Output.WriteLine(result);
+                    return result;
                 }
 
                 //ScriptOutput

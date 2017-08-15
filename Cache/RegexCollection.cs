@@ -66,7 +66,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for output/conversion to word datatype
     /// </summary>
-    public Regex Output { get; set; } = new Regex("out:(.*)", RegexOptions.Compiled);
+    public Regex Output { get; set; } = new Regex("out:(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
     /// <summary>
     /// Regex for detecting variables
     /// </summary>
@@ -76,9 +76,14 @@ public class RegexCollection
     /// </summary>
     public Regex SingleName { get; set; } = new Regex("^[a-zA-Z]*$",RegexOptions.Compiled);
     /// <summary>
-    /// Regex for unloading
+    /// Regex for uload keyword
     /// </summary>
     public Regex Unload { get; set; } = new Regex("uload:(\\w*)",RegexOptions.Compiled);
+
+    /// <summary>
+    /// Regex for type keyword
+    /// </summary>
+    public Regex Type { get; set; } = new Regex("type:(\\w*)", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
