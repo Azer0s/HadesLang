@@ -263,7 +263,7 @@ namespace Interpreter
             {
                 return exist.Message;
             }
-            var path = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{group[1]}.dll";
+            var path = $"{Cache.Instance.LibraryLocation}\\{group[1]}.dll";
 
             if (!File.Exists(path))
             {

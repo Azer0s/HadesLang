@@ -25,6 +25,10 @@ public sealed class Cache
     /// </summary>
     public bool EraseVars { get; set; } = true;
     /// <summary>
+    /// Gets or sets the library location
+    /// </summary>
+    public string LibraryLocation { get; set; }
+    /// <summary>
     /// A list of custom functions
     /// </summary>
     public List<Function> Functions { get; set; } = new List<Function>();

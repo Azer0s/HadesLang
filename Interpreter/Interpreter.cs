@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using Output;
@@ -26,6 +28,17 @@ namespace Interpreter
             ExplicitOutput = explicitOutput;
             _fileOutput = fileOutput;
             _evaluator = new Evaluator(_fileOutput);
+
+            //Custom default library location
+            Cache.Instance.LibraryLocation = File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib") ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib") : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            if (!Directory.Exists(Cache.Instance.LibraryLocation))
+            {
+                Output.WriteLine("Default-library location does not exist! Aborting!");
+                Output.ReadLine();
+                Environment.Exit(-1);
+            }
+
             Cache.Instance.Variables = new Dictionary<Meta, IVariable>();
             Cache.Instance.Functions = new List<Function>();
             Cache.Instance.LoadFiles = new List<string>();
@@ -125,6 +138,25 @@ namespace Interpreter
                         case "1":
                             _evaluator.ScriptOutput = _fileOutput;
                             Output.WriteLine("Script output enabled!");
+                            return Empty;
+                        default:
+                            Output.WriteLine("Invalid setting!");
+                            return Empty;
+                    }
+                }
+
+                //EraseVars
+                if (RegexCollection.Store.EraseVars.IsMatch(lineToInterprete))
+                {
+                    switch (RegexCollection.Store.EraseVars.Match(lineToInterprete).Groups[1].Value)
+                    {
+                        case "0":
+                            Cache.Instance.EraseVars = false;
+                            Output.WriteLine("Garbage collection disabled!");
+                            return Empty;
+                        case "1":
+                            Cache.Instance.EraseVars = true;
+                            Output.WriteLine("Garbage collection enabled!");
                             return Empty;
                         default:
                             Output.WriteLine("Invalid setting!");

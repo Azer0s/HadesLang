@@ -79,11 +79,14 @@ public class RegexCollection
     /// Regex for uload keyword
     /// </summary>
     public Regex Unload { get; set; } = new Regex("uload:(\\w*)",RegexOptions.Compiled);
-
     /// <summary>
     /// Regex for type keyword
     /// </summary>
     public Regex Type { get; set; } = new Regex("type:(\\w*)", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for toggling the Hades garbage collecter
+    /// </summary>
+    public Regex EraseVars { get; set; } = new Regex("eraseVars:(\\d)", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
