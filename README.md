@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Azer0s/HadesLang/blob/master/LICENSE)
 
 
-*Hades is a scripting/embedding language built from scratch!*
+*Hades is a embedded scripting language built from scratch!*
 <br>
 Here are a few examples of the language in action:
 
