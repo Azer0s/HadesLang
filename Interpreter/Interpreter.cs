@@ -224,6 +224,25 @@ namespace Interpreter
                     }
                 }
 
+                //Cache calculations
+                if (RegexCollection.Store.CacheCalculations.IsMatch(lineToInterprete))
+                {
+                    switch (RegexCollection.Store.CacheCalculations.Match(lineToInterprete).Groups[1].Value)
+                    {
+                        case "0":
+                            Cache.Instance.CacheCalculation = false;
+                            Output.WriteLine("Caching disabled!");
+                            return Empty;
+                        case "1":
+                            Cache.Instance.CacheCalculation = true;
+                            Output.WriteLine("Caching enabled!");
+                            return Empty;
+                        default:
+                            Output.WriteLine("Invalid setting!");
+                            return Empty;
+                    }
+                }
+
                 //Dumpvars
                 if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))
                 {
@@ -240,7 +259,7 @@ namespace Interpreter
             //Calculation
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
-                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete.Replace("integ","int").Replace("%","#"), access, this);
+                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(","int(").Replace("%","#"), access, this);
                 Output.WriteLine(calculationResult.Result);
 
                 if (calculationResult.Result != "NaN")
@@ -322,6 +341,18 @@ namespace Interpreter
                 {
                     Output.WriteLine("Variable is an object!");
                 }
+            }
+
+            //Force through
+            if (RegexCollection.Store.ForceThrough.IsMatch(lineToInterprete))
+            {
+                var output = Output;
+                var eOutput = ExplicitOutput;
+                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,access).TrimStart('\'').TrimEnd('\'');
+                Output = output;
+                ExplicitOutput = eOutput;
+
+                return InterpretLine(valueToInterpret, access);
             }
 
             return lineToInterprete;

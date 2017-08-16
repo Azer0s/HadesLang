@@ -62,6 +62,14 @@ public sealed class Cache
     /// </summary>
     public List<string> LoadFiles { get; set; } = new List<string>();
     /// <summary>
+    /// Cache for calculations
+    /// </summary>
+    public Dictionary<string, string> CachedCalculations { get; set; } = new Dictionary<string, string>();
+    /// <summary>
+    /// Delimiter wether to cache calculations
+    /// </summary>
+    public bool CacheCalculation { get; set; } = true;
+    /// <summary>
     /// Singleton constructor
     /// </summary>
     private Cache()

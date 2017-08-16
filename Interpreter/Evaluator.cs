@@ -622,9 +622,18 @@ namespace Interpreter
             }
 
             expression.Length -= 1;
+            var expressionAsString = expression.ToString();
+
+            if (Cache.Instance.CacheCalculation)
+            {
+                if (Cache.Instance.CachedCalculations.ContainsKey(expressionAsString))
+                {
+                    return (true, Cache.Instance.CachedCalculations[expressionAsString]);
+                }
+            }
 
             var result = Empty;
-            var ex = new Expression(expression.ToString());
+            var ex = new Expression(expressionAsString);
 
             var calc = ex.calculate();
             if (isBool)
@@ -652,6 +661,11 @@ namespace Interpreter
             else
             {
                 result = calc.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (Cache.Instance.CacheCalculation)
+            {
+                Cache.Instance.CachedCalculations.Add(expressionAsString,result);
             }
 
             return (true, result);

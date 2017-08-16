@@ -16,6 +16,10 @@ public class RegexCollection
     /// </summary>
     public Regex ScriptOutput { get; set; } = new Regex("^scriptOutput:(\\d)", RegexOptions.Compiled);
     /// <summary>
+    /// Regex for toggling scriptOutput
+    /// </summary>
+    public Regex CacheCalculations { get; set; } = new Regex("^cacheCalculations:(\\d)", RegexOptions.Compiled);
+    /// <summary>
     /// Regex for dumping variables
     /// </summary>
     public Regex DumpVars { get; set; } = new Regex("^dumpVars:(all|num|dec|word|bit)", RegexOptions.Compiled);
@@ -111,6 +115,10 @@ public class RegexCollection
     /// Regex for array access
     /// </summary>
     public Regex ArrayVariable { get; set; } = new Regex("(\\$\\w*)\\[(\\d*)\\]",RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for forcing var values to interpreter
+    /// </summary>
+    public Regex ForceThrough { get; set; } = new Regex("^#(.*)",RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
