@@ -51,6 +51,15 @@ b as num reachable = $a->fib:[]
 out:' '
 out:b
 ```
+## Force value through interpreter 
+
+```vb
+a as word closed = 'out:b'
+b as word closed = 'Hello world'
+#a
+```
+Output will be Hello world
+
 ## Overarching variables
 ### foo.hades
 ```vb
@@ -63,6 +72,18 @@ $b->printA:[]
 func printA[]
     out:a
 endfunc
+```
+
+## Tasking
+```vb
+task as t
+    a as num closed = 0
+    asLongAs [true]
+        out:'Hello world'+$a
+    endAsLongAs
+endTask
+
+startTask:t
 ```
 
 ## Conditions
