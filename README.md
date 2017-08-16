@@ -88,7 +88,7 @@ startTask:t
 
 ## Conditions
 ```vb
-case[Sqrt(9) smallerIs 3]
+case[sqrt(9) smallerIs 3]
     out:'The squareroot of 9 is smaller/equals 3'
 endcase
 ```
