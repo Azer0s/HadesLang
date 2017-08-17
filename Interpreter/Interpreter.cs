@@ -257,7 +257,7 @@ namespace Interpreter
             }
 
             //Calculation
-            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
+            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete) && !lineToInterprete.StartsWith("#"))
             {
                 var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(","int(").Replace("%","#"), access, this);
                 Output.WriteLine(calculationResult.Result);
@@ -348,6 +348,8 @@ namespace Interpreter
             {
                 var output = Output;
                 var eOutput = ExplicitOutput;
+                Output = new NoOutput();
+                ExplicitOutput = new NoOutput();
                 var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,access).TrimStart('\'').TrimEnd('\'');
                 Output = output;
                 ExplicitOutput = eOutput;
