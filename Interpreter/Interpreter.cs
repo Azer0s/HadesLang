@@ -62,7 +62,14 @@ namespace Interpreter
             //Array decleration
             if (RegexCollection.Store.CreateArray.IsMatch(lineToInterprete))
             {
-                Output.WriteLine(_evaluator.CreateArray(lineToInterprete,access,this));
+                try
+                {
+                    Output.WriteLine(_evaluator.CreateArray(lineToInterprete, access, this));
+                }
+                catch (Exception e)
+                {
+                    ExplicitOutput.WriteLine(e.Message);
+                }
                 return Empty;
             }
 
@@ -75,7 +82,7 @@ namespace Interpreter
                 }
                 catch (Exception e)
                 {
-                    Output.WriteLine(e.Message);
+                    ExplicitOutput.WriteLine(e.Message);
                 }
                 return Empty;
             }
@@ -89,7 +96,7 @@ namespace Interpreter
                 }
                 catch (Exception e)
                 {
-                    Output.WriteLine(e.Message);
+                    ExplicitOutput.WriteLine(e.Message);
                 }
                 return Empty;
             }
@@ -139,17 +146,24 @@ namespace Interpreter
                     }
                     catch (Exception e)
                     {
-                        Output.WriteLine(e.Message);
+                        ExplicitOutput.WriteLine(e.Message);
                         return Empty;
                     }
                     ExplicitOutput.WriteLine(result.TrimStart('\'').TrimEnd('\''));
-                    return result;
+                    return $"'{result.TrimStart('\'').TrimEnd('\'')}'";
                 }
 
                 //Unload
                 if (RegexCollection.Store.Unload.IsMatch(lineToInterprete))
                 {
-                    Output.WriteLine(_evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, access));
+                    try
+                    {
+                        Output.WriteLine(_evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, access));
+                    }
+                    catch (Exception e)
+                    {
+                        ExplicitOutput.WriteLine(e.Message);
+                    }
                     return Empty;
                 }
 
@@ -175,6 +189,10 @@ namespace Interpreter
                     string result;
                     if (lineToInterprete.StartsWith("d"))
                     {
+                        if (_evaluator.DataTypeFromData(lineToInterprete,true) == DataTypes.WORD)
+                        {
+                            return DataTypes.WORD.ToString();
+                        }
                         result = _evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value,access), true).ToString();
                     }
                     else
@@ -314,7 +332,16 @@ namespace Interpreter
             //Return array value
             if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}"))
             {
-                var value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access);
+                var value = Empty;
+                try
+                {
+                    value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access);
+                }
+                catch (Exception e)
+                {
+                    ExplicitOutput.WriteLine(e.Message);
+                    return value;
+                }
                 Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
                 return value;
             }

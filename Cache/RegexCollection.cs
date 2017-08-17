@@ -106,7 +106,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for type keyword
     /// </summary>
-    public Regex Type { get; set; } = new Regex("^d?type:(\\w*)", RegexOptions.Compiled);
+    public Regex Type { get; set; } = new Regex("^d?type:([\\w' .]*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collecter
     /// </summary>

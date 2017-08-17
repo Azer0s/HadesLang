@@ -95,6 +95,13 @@ namespace Interpreter
             var result = RegexCollection.Store.ArrayValues.IsMatch(groups[2])
                 ? groups[2]
                 : interpreter.InterpretLine(groups[2], access);
+            if (!RegexCollection.Store.ArrayValues.IsMatch(result))
+            {
+                interpreter.Output = output;
+                interpreter.ExplicitOutput = eOutput;
+                throw new Exception("Invalid array format!");
+            }
+
             var split = RegexCollection.Store.ArrayValues.Match(result).Groups[1].Value.StringSplit(',').ToList();
 
             var success = false;
@@ -129,7 +136,16 @@ namespace Interpreter
                     throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                 }).ToList();
 
-                success = SetArray(groups[1], access, list.ToDictionary(pair => pair.Key, pair => pair.Value));
+                try
+                {
+                    success = SetArray(groups[1], access, list.ToDictionary(pair => pair.Key, pair => pair.Value));
+                }
+                catch (Exception e)
+                {
+                    interpreter.Output = output;
+                    interpreter.ExplicitOutput = eOutput;
+                    throw;
+                }
             }
 
             interpreter.Output = output;
@@ -319,7 +335,7 @@ namespace Interpreter
                 }
                 catch (Exception)
                 {
-                    throw new Exception($"Index {groups[2]} in array {name} is out of bounds!");
+                    throw new Exception($"Index {groups[2]} in array {groups[1].Value} is out of bounds!");
                 }
             }
 
@@ -386,6 +402,10 @@ namespace Interpreter
                     {
                         throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                     }
+                }
+                else if (variable is Variables.Array)
+                {
+                    return AssignToArray(lineToInterprete, access, interpreter);
                 }
                 else
                 {
