@@ -42,7 +42,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for assigning data to specific positions in an array
     /// </summary>
-    public Regex ArrayAssignment { get; set; } = new Regex("(\\w*)\\[(\\d*)\\] *= *(.*)",RegexOptions.Compiled);
+    public Regex ArrayAssignment { get; set; } = new Regex("(\\w*)\\[(.*)\\] *= *(.*)",RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type word
     /// </summary>
@@ -118,7 +118,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for array access
     /// </summary>
-    public Regex ArrayVariable { get; set; } = new Regex("(\\$\\w*)\\[(\\d*)\\]",RegexOptions.Compiled);
+    public Regex ArrayVariable { get; set; } = new Regex("(\\$\\w*)\\[(.*)\\]",RegexOptions.Compiled);
     /// <summary>
     /// Regex for forcing var values to interpreter
     /// </summary>

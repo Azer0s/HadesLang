@@ -344,7 +344,7 @@ namespace Interpreter
                 var value = Empty;
                 try
                 {
-                    value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access);
+                    value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access,this);
                 }
                 catch (Exception e)
                 {

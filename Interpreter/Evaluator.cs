@@ -166,11 +166,24 @@ namespace Interpreter
             var groups = RegexCollection.Store.ArrayAssignment.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
 
-            if (Exists(groups[1], access).Exists)
+            var exists = Exists(groups[1], access);
+            if (exists.Exists)
             {
                 var variable = GetVariable(groups[1], access);
                 var datatypeFromVariable = variable.DataType;
                 var datatypeFromData = DataTypeFromData(groups[3], false);
+                int position;
+                try
+                {
+                    position = int.Parse(interpreter.InterpretLine(groups[2], access));
+                }
+                catch (Exception e)
+                {
+                    interpreter.Output = output;
+                    interpreter.ExplicitOutput = eOutput;
+
+                    throw e;
+                }
 
                 if (datatypeFromData != DataTypes.NONE)
                 {
@@ -183,15 +196,45 @@ namespace Interpreter
 
                 if (datatypeFromVariable == DataTypes.WORD)
                 {
-                    SetArrayAtPos(groups[1],access,$"'{groups[3].TrimStart('\'').TrimEnd('\'')}'",int.Parse(groups[2]));
+                    try
+                    {
+                        SetArrayAtPos(groups[1], access, $"'{groups[3].TrimStart('\'').TrimEnd('\'')}'", position);
+                    }
+                    catch (Exception e)
+                    {
+                        interpreter.Output = output;
+                        interpreter.ExplicitOutput = eOutput;
+
+                        throw e;
+                    }
                 }
                 else if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
                 {
-                    SetArrayAtPos(groups[1], access, $"{groups[3].Replace(" ", "")}.0", int.Parse(groups[2]));
+                    try
+                    {
+                        SetArrayAtPos(groups[1], access, $"{groups[3].Replace(" ", "")}.0", position);
+                    }
+                    catch (Exception e)
+                    {
+                        interpreter.Output = output;
+                        interpreter.ExplicitOutput = eOutput;
+
+                        throw e;
+                    }
                 }
                 else if (datatypeFromData == datatypeFromVariable)
                 {
-                    SetArrayAtPos(groups[1], access, groups[3], int.Parse(groups[2]));
+                    try
+                    {
+                        SetArrayAtPos(groups[1], access, groups[3], position);
+                    }
+                    catch (Exception e)
+                    {
+                        interpreter.Output = output;
+                        interpreter.ExplicitOutput = eOutput;
+
+                        throw e;
+                    }
                 }
                 else
                 {
@@ -200,12 +243,17 @@ namespace Interpreter
 
                     throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                 }
+
+                interpreter.Output = output;
+                interpreter.ExplicitOutput = eOutput;
+
+                return $"{groups[1]}[{position}] is {groups[3]}";
             }
 
             interpreter.Output = output;
             interpreter.ExplicitOutput = eOutput;
 
-            return $"{groups[1]}[{groups[2]}] is {groups[3]}";
+            throw new Exception($"{exists.Message}");
         }
 
         private void SetArrayAtPos(string name, string access, string value, int position)
@@ -290,7 +338,7 @@ namespace Interpreter
             return Cache.Instance.Variables.Any(a => a.Key.Name == varname && a.Value.Access == AccessTypes.REACHABLE_ALL);
         }
 
-        private string ReplaceWithVars(string lineToInterprete, string access)
+        private string ReplaceWithVars(string lineToInterprete, string access,Interpreter interpreter)
         {
             var matches = RegexCollection.Store.Variable.Matches(lineToInterprete);
 
@@ -307,7 +355,7 @@ namespace Interpreter
                 {
                     if (RegexCollection.Store.ArrayVariable.IsMatch(lineToInterprete))
                     {
-                        result = result.Replace(match.Value, GetArrayValue(match.Value, access));
+                        result = result.Replace(match.Value, GetArrayValue(match.Value, access,interpreter));
                     }
                     else
                     {
@@ -322,7 +370,7 @@ namespace Interpreter
             return result;
         }
 
-        public string GetArrayValue(string name, string access)
+        public string GetArrayValue(string name, string access,Interpreter interpreter)
         {
             var groups = RegexCollection.Store.ArrayVariable.Match(name).Groups;
             var variable = GetVariable(groups[1].Value.TrimStart('$'), access);
@@ -331,7 +379,16 @@ namespace Interpreter
             {
                 try
                 {
-                    return (variable as Variables.Array).Values[int.Parse(groups[2].Value)];
+                    var output = interpreter.Output;
+                    var eOutput = interpreter.ExplicitOutput;
+                    interpreter.Output = new NoOutput();
+                    interpreter.ExplicitOutput = new NoOutput();
+
+                    var value = (variable as Variables.Array).Values[int.Parse(interpreter.InterpretLine(groups[2].Value, access))];
+                    interpreter.Output = output;
+                    interpreter.ExplicitOutput = eOutput;
+
+                    return value;
                 }
                 catch (Exception)
                 {
@@ -579,7 +636,7 @@ namespace Interpreter
         {
             try
             {
-                lineToInterprete = ReplaceWithVars(lineToInterprete, access);
+                lineToInterprete = ReplaceWithVars(lineToInterprete, access,interpreter);
             }
             catch (Exception e)
             {
