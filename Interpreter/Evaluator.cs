@@ -598,7 +598,13 @@ namespace Interpreter
                 {
                     if (!(RegexCollection.Store.IsNum.IsMatch(t) || RegexCollection.Store.IsDec.IsMatch(t) || t.EqualsFromList(Cache.Instance.CharList)))
                     {
+                        var output = interpreter.Output;
+                        var eOutput = interpreter.ExplicitOutput;
+                        interpreter.Output = new NoOutput();
+                        interpreter.ExplicitOutput = new NoOutput();
                         lineToInterprete += interpreter.InterpretLine(t, access);
+                        interpreter.Output = output;
+                        interpreter.ExplicitOutput = eOutput;
                     }
                     else
                     {

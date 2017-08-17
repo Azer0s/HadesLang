@@ -114,7 +114,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for random number function
     /// </summary>
-    public Regex RandomNum { get; set; } = new Regex("^rand:\\[ *(\\d*) *\\]", RegexOptions.Compiled);
+    public Regex RandomNum { get; set; } = new Regex("^rand:\\[? *(\\d*) *\\]?", RegexOptions.Compiled);
     /// <summary>
     /// Regex for array access
     /// </summary>

@@ -187,7 +187,9 @@ namespace Interpreter
                 //Random number
                 if (RegexCollection.Store.RandomNum.IsMatch(lineToInterprete))
                 {
-                    return new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value)).ToString();
+                    var result = new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value)).ToString();
+                    Output.WriteLine(result);
+                    return result;
                 }
 
                 //Type/dtype
@@ -374,7 +376,8 @@ namespace Interpreter
                 }
                 catch (Exception e)
                 {
-                    Output.WriteLine(e.Message);
+                    ExplicitOutput.WriteLine(e.Message);
+                    return Empty;
                 }
                 if (variable is Variable)
                 {
@@ -390,7 +393,12 @@ namespace Interpreter
                     Output.WriteLine(result);
                     return result;
                 }
-                Output.WriteLine("Variable is an object!");
+                if (variable is Object)
+                {
+                    Output.WriteLine($"Variable {lineToInterprete} is an object!");
+                    return Empty;
+                }
+                Output.WriteLine($"Invalid operation {lineToInterprete}");
             }
 
             //Force through
