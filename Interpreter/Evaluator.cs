@@ -92,7 +92,10 @@ namespace Interpreter
             interpreter.ExplicitOutput = new NoOutput();
 
             var groups = RegexCollection.Store.Assignment.Match(s).Groups.OfType<Group>().Select(a => a.Value).ToList();
-            var split = RegexCollection.Store.ArrayValues.Match(groups[2]).Groups[1].Value.StringSplit(',').ToList();
+            var result = RegexCollection.Store.ArrayValues.IsMatch(groups[2])
+                ? groups[2]
+                : interpreter.InterpretLine(groups[2], access);
+            var split = RegexCollection.Store.ArrayValues.Match(result).Groups[1].Value.StringSplit(',').ToList();
 
             var success = false;
             if (Exists(groups[1], access).Exists)
@@ -133,7 +136,7 @@ namespace Interpreter
             interpreter.ExplicitOutput = eOutput;
             if (success)
             {
-                return $"{groups[1]} is {groups[2]}";
+                return $"{groups[1]} is {result}";
             }
             throw new Exception($"{groups[1]} could not be set!");
         }

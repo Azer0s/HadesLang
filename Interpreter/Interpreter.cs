@@ -94,6 +94,16 @@ namespace Interpreter
                 return Empty;
             }
 
+            //Operator assignment
+            if (RegexCollection.Store.OpAssignment.IsMatch(lineToInterprete))
+            {
+                var groups = RegexCollection.Store.OpAssignment.Match(lineToInterprete).Groups.OfType<Group>()
+                    .Select(a => a.Value).ToArray();
+
+                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {groups[3]}";
+                return InterpretLine(lineToInterprete, access);
+            }
+
             //Method calls
             if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
             {
@@ -332,15 +342,21 @@ namespace Interpreter
                 {
                     Output.WriteLine(e.Message);
                 }
-                if (variable != null && !(variable is Object))
+                if (variable is Variable)
                 {
                     var o = variable as Variable;
-                    if (o != null) return o.Value;
+                    Output.WriteLine(o.Value);
+                    return o.Value;
                 }
-                else
+                if(variable is Variables.Array)
                 {
-                    Output.WriteLine("Variable is an object!");
+                    var o = variable as Variables.Array;
+                    var result = o.Values.Aggregate("{", (current, keyValuePair) => current + $"{keyValuePair.Value},")
+                                     .TrimEnd(',') + "}";
+                    Output.WriteLine(result);
+                    return result;
                 }
+                Output.WriteLine("Variable is an object!");
             }
 
             //Force through

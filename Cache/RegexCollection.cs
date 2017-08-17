@@ -34,7 +34,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for assigning data to variables
     /// </summary>
-    public Regex Assignment { get; set; } = new Regex("(\\w*) *= *(.*)", RegexOptions.Compiled);
+    public Regex Assignment { get; set; } = new Regex("^(\\w*) *= *(.*)", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for assigning data to variables with an operation
+    /// </summary>
+    public Regex OpAssignment { get; set; } = new Regex("^(\\w*) *(\\+|-|\\*|\\/)= *(.*)",RegexOptions.Compiled);
     /// <summary>
     /// Regex for assigning data to specific positions in an array
     /// </summary>
@@ -119,7 +123,6 @@ public class RegexCollection
     /// Regex for forcing var values to interpreter
     /// </summary>
     public Regex ForceThrough { get; set; } = new Regex("^#(.*)",RegexOptions.Compiled);
-
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
     /// </summary>
