@@ -107,7 +107,14 @@ namespace Interpreter
                 var groups = RegexCollection.Store.OpAssignment.Match(lineToInterprete).Groups.OfType<Group>()
                     .Select(a => a.Value).ToArray();
 
-                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {groups[3]}";
+                var output = Output;
+                var eOutput = ExplicitOutput;
+                Output = new NoOutput();
+                ExplicitOutput = new NoOutput();
+                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {InterpretLine(groups[3],access)}";
+                Output = output;
+                ExplicitOutput = eOutput;
+
                 return InterpretLine(lineToInterprete, access);
             }
 
