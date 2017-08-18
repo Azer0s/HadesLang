@@ -293,6 +293,23 @@ namespace Interpreter
                 return Empty;
             }
 
+            //Return array value
+            if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}"))
+            {
+                var value = Empty;
+                try
+                {
+                    value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access, this);
+                }
+                catch (Exception e)
+                {
+                    ExplicitOutput.WriteLine(e.Message);
+                    return value;
+                }
+                Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
+                return value;
+            }
+
             //Calculation
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete) && !lineToInterprete.StartsWith("#"))
             {
@@ -336,23 +353,6 @@ namespace Interpreter
             if (RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
                 return RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value;
-            }
-
-            //Return array value
-            if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}"))
-            {
-                var value = Empty;
-                try
-                {
-                    value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access,this);
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                    return value;
-                }
-                Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
-                return value;
             }
 
             //Constants

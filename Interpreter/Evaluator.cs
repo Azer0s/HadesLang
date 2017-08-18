@@ -377,14 +377,15 @@ namespace Interpreter
 
             if (variable is Variables.Array)
             {
+                var output = interpreter.Output;
+                var eOutput = interpreter.ExplicitOutput;
+                var index = -1;
                 try
                 {
-                    var output = interpreter.Output;
-                    var eOutput = interpreter.ExplicitOutput;
                     interpreter.Output = new NoOutput();
                     interpreter.ExplicitOutput = new NoOutput();
-
-                    var value = (variable as Variables.Array).Values[int.Parse(interpreter.InterpretLine(groups[2].Value, access))];
+                    index = int.Parse(interpreter.InterpretLine(groups[2].Value, access));
+                    var value = (variable as Variables.Array).Values[index];
                     interpreter.Output = output;
                     interpreter.ExplicitOutput = eOutput;
 
@@ -392,7 +393,9 @@ namespace Interpreter
                 }
                 catch (Exception)
                 {
-                    throw new Exception($"Index {groups[2]} in array {groups[1].Value} is out of bounds!");
+                    interpreter.Output = output;
+                    interpreter.ExplicitOutput = eOutput;
+                    throw new Exception($"Index {index} in array {groups[1].Value} is out of bounds!");
                 }
             }
 
@@ -581,7 +584,10 @@ namespace Interpreter
                 }
             }
 
-            sb.Length -= 1;
+            if (sb.Length >= 1)
+            {
+                sb.Length -= 1;
+            }
 
             return sb.ToString();
         }
