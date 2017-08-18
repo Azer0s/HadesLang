@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Evaluator.cs" />
     <Compile Include="Interpreter.cs" />
+    <Compile Include="InterpreterResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShellInterpreter.cs" />
   </ItemGroup>
