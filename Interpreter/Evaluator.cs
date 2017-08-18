@@ -402,6 +402,13 @@ namespace Interpreter
             throw new Exception($"Could not get value of idex {groups[2]} in array {name}!");
         }
 
+        public string InDeCrease(string lineToInterprete, string access, Interpreter interpreter)
+        {
+            var groups = RegexCollection.Store.InDeCrease.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToArray();
+            lineToInterprete = $"{groups[1]} = ${groups[1]} {groups[2]} 1";
+            return interpreter.InterpretLine(lineToInterprete, access);
+        }
+
         public IVariable GetVariable(string variable, string access)
         {
             if (VariableIsReachableAll(variable))

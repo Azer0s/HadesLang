@@ -311,6 +311,13 @@ namespace Interpreter
                 return value;
             }
 
+            //In/Decrease
+            if (RegexCollection.Store.InDeCrease.IsMatch(lineToInterprete))
+            {
+                _evaluator.InDeCrease(lineToInterprete, access, this);
+                return Empty;
+            }
+
             //Calculation
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete) && !lineToInterprete.StartsWith("#"))
             {

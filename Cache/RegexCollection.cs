@@ -40,6 +40,10 @@ public class RegexCollection
     /// </summary>
     public Regex OpAssignment { get; set; } = new Regex("^(\\w*) *(\\+|-|\\*|\\/)= *(.*)",RegexOptions.Compiled);
     /// <summary>
+    /// Regex for increase/decrease by one
+    /// </summary>
+    public Regex InDeCrease { get; set; } = new Regex("^(\\w*)(?:-|\\+)(-|\\+)",RegexOptions.Compiled);
+    /// <summary>
     /// Regex for assigning data to specific positions in an array
     /// </summary>
     public Regex ArrayAssignment { get; set; } = new Regex("(\\w*)\\[(.*)\\] *= *(.*)",RegexOptions.Compiled);
@@ -50,11 +54,11 @@ public class RegexCollection
     /// <summary>
     /// Checks if a string contains or is of type num
     /// </summary>
-    public Regex IsNum { get; set; } = new Regex("(?<=\\s|^)\\d+(?=\\s|$)", RegexOptions.Compiled);
+    public Regex IsNum { get; set; } = new Regex("(?<=\\s|^)-?\\d+(?=\\s|$)", RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type dec
     /// </summary>
-    public Regex IsDec { get; set; } = new Regex("^\\d*\\.\\d*",RegexOptions.Compiled);
+    public Regex IsDec { get; set; } = new Regex("^-?\\d*\\.\\d*", RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type bit
     /// </summary>
