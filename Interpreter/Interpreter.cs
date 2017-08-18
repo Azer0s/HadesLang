@@ -200,6 +200,7 @@ namespace Interpreter
                     {
                         if (_evaluator.DataTypeFromData(lineToInterprete,true) == DataTypes.WORD)
                         {
+                            Output.WriteLine(DataTypes.WORD.ToString());
                             return DataTypes.WORD.ToString();
                         }
                         result = _evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value,access), true).ToString();
