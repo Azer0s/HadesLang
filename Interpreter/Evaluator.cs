@@ -94,7 +94,7 @@ namespace Interpreter
             var groups = RegexCollection.Store.Assignment.Match(s).Groups.OfType<Group>().Select(a => a.Value).ToList();
             var result = RegexCollection.Store.ArrayValues.IsMatch(groups[2])
                 ? groups[2]
-                : interpreter.InterpretLine(groups[2], access);
+                : interpreter.InterpretLine(groups[2], access).Message;
             if (!RegexCollection.Store.ArrayValues.IsMatch(result))
             {
                 interpreter.Output = output;
@@ -118,7 +118,7 @@ namespace Interpreter
                 var index = 0;
                 var list = split.Select(group =>
                 {
-                    var interpreted = DataTypeFromData(group,true) != DataTypes.NONE ? group : interpreter.InterpretLine(group, access);
+                    var interpreted = DataTypeFromData(group,true) != DataTypes.NONE ? group : interpreter.InterpretLine(group, access).Message;
                     var datatypeFromData = DataTypeFromData(group, false);
                     if (datatypeFromVariable == DataTypes.WORD)
                     {
@@ -180,7 +180,7 @@ namespace Interpreter
                 int position;
                 try
                 {
-                    position = int.Parse(interpreter.InterpretLine(groups[2], access));
+                    position = int.Parse(interpreter.InterpretLine(groups[2], access).Message);
                 }
                 catch (Exception e)
                 {
@@ -196,7 +196,7 @@ namespace Interpreter
                 }
                 else
                 {
-                    groups[3] = interpreter.InterpretLine(groups[3], access);
+                    groups[3] = interpreter.InterpretLine(groups[3], access).Message;
                 }
 
                 if (datatypeFromVariable == DataTypes.WORD)
@@ -389,7 +389,7 @@ namespace Interpreter
                 {
                     interpreter.Output = new NoOutput();
                     interpreter.ExplicitOutput = new NoOutput();
-                    index = int.Parse(interpreter.InterpretLine(groups[2].Value, access));
+                    index = int.Parse(interpreter.InterpretLine(groups[2].Value, access).Message);
                     var value = (variable as Variables.Array).Values[index];
                     interpreter.Output = output;
                     interpreter.ExplicitOutput = eOutput;
@@ -411,7 +411,7 @@ namespace Interpreter
         {
             var groups = RegexCollection.Store.InDeCrease.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToArray();
             lineToInterprete = $"{groups[1]} = ${groups[1]} {groups[2]} 1";
-            return interpreter.InterpretLine(lineToInterprete, access);
+            return interpreter.InterpretLine(lineToInterprete, access).Message;
         }
 
         public IVariable GetVariable(string variable, string access)
@@ -441,7 +441,7 @@ namespace Interpreter
             interpreter.Output = new NoOutput();
             interpreter.ExplicitOutput = new NoOutput();
 
-            var result = interpreter.InterpretLine(groups[2].Value, access);
+            var result = interpreter.InterpretLine(groups[2].Value, access).Message;
             interpreter.Output = output;
             interpreter.ExplicitOutput = eOutput;
 
@@ -808,7 +808,7 @@ namespace Interpreter
             string result;
             try
             {
-                result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value, access);
+                result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value, access).Message;
             }
             catch (Exception e)
             {

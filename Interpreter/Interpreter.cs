@@ -45,18 +45,18 @@ namespace Interpreter
             Cache.Instance.LoadFiles = new List<string>();
         }
 
-        public string InterpretLine(string lineToInterprete, string access)
+        public (string Message,bool shouldPrint) InterpretLine(string lineToInterprete, string access)
         {
             if (IsNullOrEmpty(lineToInterprete))
             {
-                return Empty;
+                return (Empty,false);
             }
 
             //Variable decleration
             if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))
             {
                 Output.WriteLine(_evaluator.CreateVariable(lineToInterprete, access,this));
-                return Empty;
+                return (Empty, false);
             }
 
             //Array decleration
@@ -70,7 +70,7 @@ namespace Interpreter
                 {
                     ExplicitOutput.WriteLine(e.Message);
                 }
-                return Empty;
+                return (Empty, false);
             }
 
             //Array assignment
@@ -84,7 +84,7 @@ namespace Interpreter
                 {
                     ExplicitOutput.WriteLine(e.Message);
                 }
-                return Empty;
+                return (Empty, false);
             }
 
             //Variable assignment
@@ -98,7 +98,7 @@ namespace Interpreter
                 {
                     ExplicitOutput.WriteLine(e.Message);
                 }
-                return Empty;
+                return (Empty, false);
             }
 
             //Operator assignment
@@ -123,7 +123,7 @@ namespace Interpreter
             {
                 var result = _evaluator.CallMethod(lineToInterprete, access);
                 Output.WriteLine(result);
-                return result;
+                return (result,false);
             }    
 
             //Function
@@ -140,7 +140,7 @@ namespace Interpreter
                 if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
                 {
                     _evaluator.CallCustomFunction(groups);
-                    return Empty;
+                    return (Empty, false);
                 }
 
                 //Out
@@ -154,10 +154,10 @@ namespace Interpreter
                     catch (Exception e)
                     {
                         ExplicitOutput.WriteLine(e.Message);
-                        return Empty;
+                        return (Empty, false);
                     }
                     ExplicitOutput.WriteLine(result.TrimStart('\'').TrimEnd('\''));
-                    return $"'{result.TrimStart('\'').TrimEnd('\'')}'";
+                    return ($"'{result.TrimStart('\'').TrimEnd('\'')}'",true);
                 }
 
                 //Unload
@@ -171,7 +171,7 @@ namespace Interpreter
                     {
                         ExplicitOutput.WriteLine(e.Message);
                     }
-                    return Empty;
+                    return (Empty, false);
                 }
 
                 #region Console-Specific
@@ -181,7 +181,7 @@ namespace Interpreter
                 {
                     var result = _evaluator.Input(lineToInterprete, access, Output,this);
                     Output.WriteLine(result.Message);
-                    return result.Value;
+                    return (result.Value,false);
                 }
 
                 //Random number
@@ -189,7 +189,7 @@ namespace Interpreter
                 {
                     var result = new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value)).ToString();
                     Output.WriteLine(result);
-                    return result;
+                    return (result,false);
                 }
 
                 //Type/dtype
@@ -201,9 +201,9 @@ namespace Interpreter
                         if (_evaluator.DataTypeFromData(lineToInterprete,true) == DataTypes.WORD)
                         {
                             Output.WriteLine(DataTypes.WORD.ToString());
-                            return DataTypes.WORD.ToString();
+                            return (DataTypes.WORD.ToString(),false);
                         }
-                        result = _evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value,access), true).ToString();
+                        result = _evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value,access).Message, true).ToString();
                     }
                     else
                     {
@@ -213,7 +213,7 @@ namespace Interpreter
                     }
 
                     Output.WriteLine(result);
-                    return result;
+                    return (result,false);
                 }
 
                 //Exists
@@ -221,7 +221,7 @@ namespace Interpreter
                 {
                     var result = _evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value,access).Exists.ToString().ToLower();
                     Output.WriteLine(result);
-                    return result;
+                    return (result,false);
                 }
 
                 //ScriptOutput
@@ -232,14 +232,14 @@ namespace Interpreter
                         case "0":
                             _evaluator.ScriptOutput = new NoOutput();
                             Output.WriteLine("Script output disabled!");
-                            return Empty;
+                            return (Empty, false);
                         case "1":
                             _evaluator.ScriptOutput = _fileOutput;
                             Output.WriteLine("Script output enabled!");
-                            return Empty;
+                            return (Empty, false);
                         default:
                             Output.WriteLine("Invalid setting!");
-                            return Empty;
+                            return (Empty, false);
                     }
                 }
 
@@ -251,14 +251,14 @@ namespace Interpreter
                         case "0":
                             Cache.Instance.EraseVars = false;
                             Output.WriteLine("Garbage collection disabled!");
-                            return Empty;
+                            return (Empty, false);
                         case "1":
                             Cache.Instance.EraseVars = true;
                             Output.WriteLine("Garbage collection enabled!");
-                            return Empty;
+                            return (Empty, false);
                         default:
                             Output.WriteLine("Invalid setting!");
-                            return Empty;
+                            return (Empty, false);
                     }
                 }
 
@@ -270,14 +270,14 @@ namespace Interpreter
                         case "0":
                             Cache.Instance.CacheCalculation = false;
                             Output.WriteLine("Caching disabled!");
-                            return Empty;
+                            return (Empty, false);
                         case "1":
                             Cache.Instance.CacheCalculation = true;
                             Output.WriteLine("Caching enabled!");
-                            return Empty;
+                            return (Empty, false);
                         default:
                             Output.WriteLine("Invalid setting!");
-                            return Empty;
+                            return (Empty, false);
                     }
                 }
 
@@ -286,12 +286,12 @@ namespace Interpreter
                 {
                     var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
                     Output.WriteLine(_evaluator.DumpVars(dataTypeAsString == "all" ? DataTypes.NONE : TypeParser.ParseDataType(dataTypeAsString)));
-                    return Empty;
+                    return (Empty, false);
                 }
 
                 #endregion
 
-                return Empty;
+                return (Empty, false);
             }
 
             //Return array value
@@ -305,17 +305,17 @@ namespace Interpreter
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
-                    return value;
+                    return (value,false);
                 }
                 Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
-                return value;
+                return (value,false);
             }
 
             //In/Decrease
             if (RegexCollection.Store.InDeCrease.IsMatch(lineToInterprete))
             {
                 _evaluator.InDeCrease(lineToInterprete, access, this);
-                return Empty;
+                return (Empty, false);
             }
 
             //Calculation
@@ -326,7 +326,7 @@ namespace Interpreter
 
                 if (calculationResult.Result != "NaN")
                 {
-                    return calculationResult.Result;
+                    return (calculationResult.Result,false);
                 }
             }
 
@@ -334,15 +334,14 @@ namespace Interpreter
             if (lineToInterprete.ToLower().Replace(" ", "") == "clear")
             {
                 Output.Clear();
-                return Empty;
+                return (Empty, false);
             }
 
             //Include library
             if (RegexCollection.Store.With.IsMatch(lineToInterprete))
             {
-                var groups = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
                 Output.WriteLine(_evaluator.IncludeLib(lineToInterprete, access));
-                return Empty;
+                return (Empty, false);
             }
 
             //String concat
@@ -354,13 +353,13 @@ namespace Interpreter
             //Bool type
             if (RegexCollection.Store.IsBit.IsMatch(lineToInterprete.ToLower()))
             {
-                return lineToInterprete.ToLower();
+                return (lineToInterprete.ToLower(),false);
             }
 
             //Return string
             if (RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
-                return RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value;
+                return (RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value,false);
             }
 
             //Constants
@@ -368,10 +367,10 @@ namespace Interpreter
             {
                 case "e":
                     Output.WriteLine(Math.E.ToString(CultureInfo.InvariantCulture));
-                    return Math.E.ToString(CultureInfo.InvariantCulture);
+                    return (Math.E.ToString(CultureInfo.InvariantCulture),false);
                 case "pi":
                     Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
-                    return Math.PI.ToString(CultureInfo.InvariantCulture);
+                    return (Math.PI.ToString(CultureInfo.InvariantCulture),false);
             }
 
             //Return var value
@@ -385,13 +384,13 @@ namespace Interpreter
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
-                    return Empty;
+                    return (Empty, false);
                 }
                 if (variable is Variable)
                 {
                     var o = variable as Variable;
                     Output.WriteLine(o.Value);
-                    return o.Value;
+                    return (o.Value,false);
                 }
                 if(variable is Variables.Array)
                 {
@@ -399,12 +398,12 @@ namespace Interpreter
                     var result = o.Values.Aggregate("{", (current, keyValuePair) => current + $"{keyValuePair.Value},")
                                      .TrimEnd(',') + "}";
                     Output.WriteLine(result);
-                    return result;
+                    return (result,false);
                 }
                 if (variable is Object)
                 {
                     Output.WriteLine($"Variable {lineToInterprete} is an object!");
-                    return Empty;
+                    return (Empty, false);
                 }
                 Output.WriteLine($"Invalid operation {lineToInterprete}");
             }
@@ -416,14 +415,14 @@ namespace Interpreter
                 var eOutput = ExplicitOutput;
                 Output = new NoOutput();
                 ExplicitOutput = new NoOutput();
-                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,access).TrimStart('\'').TrimEnd('\'');
+                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,access).Message.TrimStart('\'').TrimEnd('\'');
                 Output = output;
                 ExplicitOutput = eOutput;
 
                 return InterpretLine(valueToInterpret, access);
             }
 
-            return lineToInterprete;
+            return (lineToInterprete,false);
         }
 
         /// <summary>
