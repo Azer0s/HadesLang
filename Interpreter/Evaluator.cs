@@ -104,6 +104,11 @@ namespace Interpreter
 
             var split = RegexCollection.Store.ArrayValues.Match(result).Groups[1].Value.StringSplit(',').ToList();
 
+            for (var sp = 0; sp < split.Count; sp++)
+            {
+                split[sp] = split[sp].TrimStart(' ').TrimEnd(' ');
+            }
+
             var success = false;
             if (Exists(groups[1], access).Exists)
             {
@@ -138,7 +143,7 @@ namespace Interpreter
 
                 try
                 {
-                    success = SetArray(groups[1], access, list.ToDictionary(pair => pair.Key, pair => pair.Value));
+                    success = SetArray(groups[1], access, list.ToDictionary(pair => pair.Key, pair => pair.Value.TrimStart(' ')));
                 }
                 catch (Exception e)
                 {
