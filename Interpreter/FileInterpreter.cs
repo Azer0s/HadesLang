@@ -46,7 +46,7 @@ namespace Interpreter
             LoadFunctions();
         }
 
-        public string Execute(Interpreter interpreter, int start = 0, int end = -1)
+        public string Execute(Interpreter interpreter, string access, int start = 0, int end = -1)
         {
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
@@ -69,9 +69,9 @@ namespace Interpreter
                     var groups = RegexCollection.Store.Case.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
-                    if (bool.Parse(interpreter.InterpretLine(groups[1],FAccess,this)))
+                    if (bool.Parse(interpreter.InterpretLine(groups[1],access,this,FAccess)))
                     {
-                        var result = Execute(interpreter, block.start + 1, block.end);
+                        var result = Execute(interpreter,access: access, start: block.start + 1, end: block.end);
 
                         if (!IsNullOrEmpty(result))
                         {
@@ -91,9 +91,9 @@ namespace Interpreter
                     var groups = RegexCollection.Store.AsLongAs.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
-                    while (bool.Parse(interpreter.InterpretLine(groups[1], FAccess,this)))
+                    while (bool.Parse(interpreter.InterpretLine(groups[1], access,this,FAccess)))
                     {
-                        var result = Execute(interpreter, block.start + 1, block.end);
+                        var result = Execute(interpreter, start: block.start + 1, end: block.end,access:access);
 
                         if (!IsNullOrEmpty(result))
                         {
@@ -112,10 +112,10 @@ namespace Interpreter
                 if (RegexCollection.Store.Put.IsMatch(Lines[i]))
                 {
                     interpreter.Output = output;
-                    return interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value,FAccess,this);
+                    return interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value,access,this,FAccess);
                 }
 
-                var interresult = interpreter.InterpretLine(Lines[i], FAccess, this);
+                var interresult = interpreter.InterpretLine(Lines[i], access, this,FAccess);
                 //Function call
                 if (RegexCollection.Store.Function.IsMatch(Lines[i]) && Functions.Any(a => a.Name == RegexCollection.Store.Function.Match(Lines[i]).Groups[1].Value))
                 {
@@ -149,15 +149,12 @@ namespace Interpreter
 
                 for (var i = 0; i < args.Count; i++)
                 {
-                    interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}",FAccess,interpreter,this);
+                    interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}",$"{FAccess}@{groups[1]}",interpreter,this,FAccess);
                 }
 
-                var result = Execute(interpreter, func.Postition.Item1+1, func.Postition.Item2);
+                var result = Execute(interpreter, start: func.Postition.Item1+1, end: func.Postition.Item2,access: $"{FAccess}@{groups[1]}");
 
-                foreach (var keyValuePair in expectedArgs)
-                {
-                    interpreter.Evaluator.Unload(keyValuePair.Key, FAccess);
-                }
+                interpreter.Evaluator.Unload("all", $"{FAccess}@{groups[1]}");
 
                 return result;
             }

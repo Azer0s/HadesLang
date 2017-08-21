@@ -1,6 +1,7 @@
-﻿c as num closed = fib:[1,1]
-out:c
+﻿c as word closed = 'Hello world'
+fib:[1,1]
 func fib[num a, num b]
+	out:c
 	asLongAs[true]
 		out:a
 		out:b
