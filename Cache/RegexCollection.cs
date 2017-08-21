@@ -16,9 +16,17 @@ public class RegexCollection
     /// </summary>
     public Regex ScriptOutput { get; set; } = new Regex("^scriptOutput:(\\d)", RegexOptions.Compiled);
     /// <summary>
+    /// Regex for ignoring tabs and spaces in file
+    /// </summary>
+    public Regex IgnoreTabsAndSpaces { get; set; } = new Regex("^[ \\t]*(.*)",RegexOptions.Compiled);
+    /// <summary>
     /// Regex for toggling scriptOutput
     /// </summary>
     public Regex CacheCalculations { get; set; } = new Regex("^cacheCalculations:(\\d)", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for arguments in function decleration
+    /// </summary>
+    public Regex Argument { get; set; } = new Regex("^(word|num|dec|bit) +([\\w]*)",RegexOptions.Compiled);
     /// <summary>
     /// Regex for dumping variables
     /// </summary>
@@ -72,9 +80,29 @@ public class RegexCollection
     /// </summary>
     public Regex Function { get; set; } = new Regex("^(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
     /// <summary>
+    /// Function decleration
+    /// </summary>
+    public Regex FunctionDecleration { get; set; } = new Regex("^func *(\\w*) *\\[(.*)\\]",RegexOptions.Compiled);
+    /// <summary>
+    /// Case statement
+    /// </summary>
+    public Regex Case { get; set; } = new Regex("^case *\\[(.*)\\]",RegexOptions.Compiled);
+    /// <summary>
+    /// Loop
+    /// </summary>
+    public Regex AsLongAs { get; set; } = new Regex("^asLongAs *\\[(.*)\\]", RegexOptions.Compiled);
+    /// <summary>
+    /// Return
+    /// </summary>
+    public Regex Put { get; set; } = new Regex("^put +(.*)",RegexOptions.Compiled);
+    /// <summary>
     /// Regex for matching method calls
     /// </summary>
     public Regex MethodCall { get; set; } = new Regex("^\\$(\\w*) *-> *(\\w*):(?:\\[?(.*)\\]|(.*))",RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for getting var from object
+    /// </summary>
+    public Regex VarCall { get; set; } = new Regex("^\\$(\\w*) *-> *(\\w*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for halting the program
     /// </summary>
@@ -111,6 +139,10 @@ public class RegexCollection
     /// Regex for type keyword
     /// </summary>
     public Regex Type { get; set; } = new Regex("^d?type:([\\w' .]*)", RegexOptions.Compiled);
+    /// <summary>
+    /// Load file
+    /// </summary>
+    public Regex Load { get; set; } = new Regex("^load:'([\\w\\.]*)'", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collecter
     /// </summary>

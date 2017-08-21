@@ -1,0 +1,15 @@
+﻿c as num closed = fib:[1,1]
+out:c
+func fib[num a, num b]
+	asLongAs[true]
+		out:a
+		out:b
+
+		a = $a + $b
+		b = $a + $b
+
+		case[$a bigger 10000]
+		put a
+		endCase
+	endAsLongAs
+endfunc

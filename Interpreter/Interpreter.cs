@@ -11,7 +11,6 @@ using StringExtension;
 using Variables;
 using static System.String;
 using Function = Variables.Function;
-using Object = Variables.Object;
 
 namespace Interpreter
 {
@@ -19,16 +18,16 @@ namespace Interpreter
     {
         public IScriptOutput Output;
         public IScriptOutput ExplicitOutput;
-        private readonly IScriptOutput _fileOutput;
-        private readonly Evaluator _evaluator;
+        private IScriptOutput _backup;
+        public readonly Evaluator Evaluator;
 
 
-        public Interpreter(IScriptOutput output, IScriptOutput fileOutput,IScriptOutput explicitOutput)
+        public Interpreter(IScriptOutput output,IScriptOutput explicitOutput)
         {
             Output = output;
             ExplicitOutput = explicitOutput;
-            _fileOutput = fileOutput;
-            _evaluator = new Evaluator(_fileOutput);
+            _backup = explicitOutput;
+            Evaluator = new Evaluator();
 
             //Custom default library location
             Cache.Instance.LibraryLocation = File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib") ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib") : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -45,18 +44,18 @@ namespace Interpreter
             Cache.Instance.LoadFiles = new List<string>();
         }
 
-        public InterpreterResult InterpretLine(string lineToInterprete, string access)
+        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file)
         {
             if (IsNullOrEmpty(lineToInterprete))
             {
-                return new InterpreterResult(Empty,false);
+                return Empty;
             }
 
             //Variable decleration
             if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))
             {
-                Output.WriteLine(_evaluator.CreateVariable(lineToInterprete, access,this));
-                return new InterpreterResult(Empty, false);
+                Output.WriteLine(Evaluator.CreateVariable(lineToInterprete, access,this,file));
+                return Empty;
             }
 
             //Array decleration
@@ -64,13 +63,13 @@ namespace Interpreter
             {
                 try
                 {
-                    Output.WriteLine(_evaluator.CreateArray(lineToInterprete, access, this));
+                    Output.WriteLine(Evaluator.CreateArray(lineToInterprete, access, this,file));
                 }
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
                 }
-                return new InterpreterResult(Empty, false);
+                return Empty;
             }
 
             //Array assignment
@@ -78,13 +77,13 @@ namespace Interpreter
             {
                 try
                 {
-                    Output.WriteLine(_evaluator.AssignToArrayAtPos(lineToInterprete, access, this));
+                    Output.WriteLine(Evaluator.AssignToArrayAtPos(lineToInterprete, access, this,file));
                 }
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
                 }
-                return new InterpreterResult(Empty, false);
+                return Empty;
             }
 
             //Variable assignment
@@ -92,13 +91,13 @@ namespace Interpreter
             {
                 try
                 {
-                    Output.WriteLine(_evaluator.AssignToVariable(lineToInterprete, access, true, this));
+                    Output.WriteLine(Evaluator.AssignToVariable(lineToInterprete, access, true, this,file));
                 }
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
                 }
-                return new InterpreterResult(Empty, false);
+                return Empty;
             }
 
             //Operator assignment
@@ -111,36 +110,49 @@ namespace Interpreter
                 var eOutput = ExplicitOutput;
                 Output = new NoOutput();
                 ExplicitOutput = new NoOutput();
-                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {InterpretLine(groups[3],access)}";
+                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {InterpretLine(groups[3],access,file)}";
                 Output = output;
                 ExplicitOutput = eOutput;
 
-                return InterpretLine(lineToInterprete, access);
+                return InterpretLine(lineToInterprete, access,file);
             }
 
             //Method calls
             if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
             {
-                var result = _evaluator.CallMethod(lineToInterprete, access);
+                var result = Evaluator.CallMethod(lineToInterprete, access);
                 Output.WriteLine(result);
-                return new InterpreterResult(result,false);
-            }    
+                return result;
+            }
 
             //Function
             if (RegexCollection.Store.Function.IsMatch(lineToInterprete))
             {
+                //Method call from file
+                if (file != null)
+                {
+                    try
+                    {
+                        return file.CallFunction(lineToInterprete,this);
+                    }
+                    catch (Exception e)
+                    {
+                        //Ignored
+                    }
+                }
+
                 //Exit
                 if (RegexCollection.Store.Exit.IsMatch(lineToInterprete))
                 {
-                    _evaluator.Exit(lineToInterprete);
+                    Evaluator.Exit(lineToInterprete);
                 }
 
                 var groups = RegexCollection.Store.Function.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
                 if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
                 {
-                    _evaluator.CallCustomFunction(groups);
-                    return new InterpreterResult(Empty, false);
+                    Evaluator.CallCustomFunction(groups);
+                    return Empty;
                 }
 
                 //Out
@@ -149,15 +161,21 @@ namespace Interpreter
                     string result;
                     try
                     {
-                        result = _evaluator.EvaluateOut(lineToInterprete, access, this);
+                        result = Evaluator.EvaluateOut(lineToInterprete, access, this,file).TrimStart('\'').TrimEnd('\'');
                     }
                     catch (Exception e)
                     {
                         ExplicitOutput.WriteLine(e.Message);
-                        return new InterpreterResult(Empty, false);
+                        return Empty;
                     }
-                    ExplicitOutput.WriteLine(result.TrimStart('\'').TrimEnd('\''));
-                    return new InterpreterResult($"'{result.TrimStart('\'').TrimEnd('\'')}'",true);
+                    ExplicitOutput.WriteLine(result);
+                    return $"'{result}'";
+                }
+
+                //Load
+                if (RegexCollection.Store.Load.IsMatch(lineToInterprete))
+                {
+                    return Evaluator.LoadFile(lineToInterprete,this);
                 }
 
                 //Unload
@@ -165,13 +183,13 @@ namespace Interpreter
                 {
                     try
                     {
-                        Output.WriteLine(_evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, access));
+                        Output.WriteLine(Evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, access));
                     }
                     catch (Exception e)
                     {
                         ExplicitOutput.WriteLine(e.Message);
                     }
-                    return new InterpreterResult(Empty, false);
+                    return Empty;
                 }
 
                 #region Console-Specific
@@ -179,9 +197,9 @@ namespace Interpreter
                 //Input
                 if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
                 {
-                    var result = _evaluator.Input(lineToInterprete, access, Output,this);
+                    var result = Evaluator.Input(lineToInterprete, access, Output,this,file);
                     Output.WriteLine(result.Message);
-                    return new InterpreterResult(result.Value,false);
+                    return result.Value;
                 }
 
                 //Random number
@@ -189,7 +207,7 @@ namespace Interpreter
                 {
                     var result = new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value)).ToString();
                     Output.WriteLine(result);
-                    return new InterpreterResult(result,false);
+                    return result;
                 }
 
                 //Type/dtype
@@ -198,30 +216,30 @@ namespace Interpreter
                     string result;
                     if (lineToInterprete.StartsWith("d"))
                     {
-                        if (_evaluator.DataTypeFromData(lineToInterprete,true) == DataTypes.WORD)
+                        if (Evaluator.DataTypeFromData(lineToInterprete,true) == DataTypes.WORD)
                         {
                             Output.WriteLine(DataTypes.WORD.ToString());
-                            return new InterpreterResult(DataTypes.WORD.ToString(),false);
+                            return DataTypes.WORD.ToString();
                         }
-                        result = _evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value,access).Message, true).ToString();
+                        result = Evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value,access,file), true).ToString();
                     }
                     else
                     {
-                        result = _evaluator
+                        result = Evaluator
                             .GetVariable(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access)
                             .DataType.ToString();
                     }
 
                     Output.WriteLine(result);
-                    return new InterpreterResult(result,false);
+                    return result;
                 }
 
                 //Exists
                 if (RegexCollection.Store.Exists.IsMatch(lineToInterprete))
                 {
-                    var result = _evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value,access).Exists.ToString().ToLower();
+                    var result = Evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value,access).Exists.ToString().ToLower();
                     Output.WriteLine(result);
-                    return new InterpreterResult(result,false);
+                    return result;
                 }
 
                 //ScriptOutput
@@ -230,16 +248,17 @@ namespace Interpreter
                     switch (RegexCollection.Store.ScriptOutput.Match(lineToInterprete).Groups[1].Value)
                     {
                         case "0":
-                            _evaluator.ScriptOutput = new NoOutput();
+                            _backup = ExplicitOutput;
+                            ExplicitOutput = new NoOutput();
                             Output.WriteLine("Script output disabled!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                         case "1":
-                            _evaluator.ScriptOutput = _fileOutput;
+                            ExplicitOutput = _backup;
                             Output.WriteLine("Script output enabled!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                         default:
                             Output.WriteLine("Invalid setting!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                     }
                 }
 
@@ -251,14 +270,14 @@ namespace Interpreter
                         case "0":
                             Cache.Instance.EraseVars = false;
                             Output.WriteLine("Garbage collection disabled!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                         case "1":
                             Cache.Instance.EraseVars = true;
                             Output.WriteLine("Garbage collection enabled!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                         default:
                             Output.WriteLine("Invalid setting!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                     }
                 }
 
@@ -270,14 +289,14 @@ namespace Interpreter
                         case "0":
                             Cache.Instance.CacheCalculation = false;
                             Output.WriteLine("Caching disabled!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                         case "1":
                             Cache.Instance.CacheCalculation = true;
                             Output.WriteLine("Caching enabled!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                         default:
                             Output.WriteLine("Invalid setting!");
-                            return new InterpreterResult(Empty, false);
+                            return Empty;
                     }
                 }
 
@@ -285,13 +304,20 @@ namespace Interpreter
                 if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))
                 {
                     var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
-                    Output.WriteLine(_evaluator.DumpVars(dataTypeAsString == "all" ? DataTypes.NONE : TypeParser.ParseDataType(dataTypeAsString)));
-                    return new InterpreterResult(Empty, false);
+                    var result = Evaluator.DumpVars(dataTypeAsString == "all"
+                        ? DataTypes.NONE
+                        : TypeParser.ParseDataType(dataTypeAsString));
+
+                    if (!IsNullOrEmpty(result))
+                    {
+                        Output.WriteLine(result);
+                    }
+                    return Empty;
                 }
 
                 #endregion
 
-                return new InterpreterResult(Empty, false);
+                return Empty;
             }
 
             //Return array value
@@ -300,33 +326,33 @@ namespace Interpreter
                 var value = Empty;
                 try
                 {
-                    value = _evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access, this);
+                    value = Evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access, this,file);
                 }
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
-                    return new InterpreterResult(value,false);
+                    return value;
                 }
                 Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
-                return new InterpreterResult(value,false);
+                return value;
             }
 
             //In/Decrease
             if (RegexCollection.Store.InDeCrease.IsMatch(lineToInterprete))
             {
-                _evaluator.InDeCrease(lineToInterprete, access, this);
-                return new InterpreterResult(Empty, false);
+                Evaluator.InDeCrease(lineToInterprete, access, this,file);
+                return Empty;
             }
 
             //Calculation
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete) && !lineToInterprete.StartsWith("#"))
             {
-                var calculationResult = _evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(","int(").Replace("%","#"), access, this);
+                var calculationResult = Evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(","int(").Replace("%","#"), access, this,file);
                 Output.WriteLine(calculationResult.Result);
 
                 if (calculationResult.Result != "NaN")
                 {
-                    return new InterpreterResult(calculationResult.Result,false);
+                    return calculationResult.Result;
                 }
             }
 
@@ -334,14 +360,14 @@ namespace Interpreter
             if (lineToInterprete.ToLower().Replace(" ", "") == "clear")
             {
                 Output.Clear();
-                return new InterpreterResult(Empty, false);
+                return Empty;
             }
 
             //Include library
             if (RegexCollection.Store.With.IsMatch(lineToInterprete))
             {
-                Output.WriteLine(_evaluator.IncludeLib(lineToInterprete, access));
-                return new InterpreterResult(Empty, false);
+                Output.WriteLine(Evaluator.IncludeLib(lineToInterprete, access));
+                return Empty;
             }
 
             //String concat
@@ -350,16 +376,24 @@ namespace Interpreter
                 //TODO Make string concat, replace with vars
             }
 
+            //Var call
+            if (RegexCollection.Store.VarCall.IsMatch(lineToInterprete))
+            {
+                var result = Evaluator.GetObjectVar(lineToInterprete, access);
+                Output.WriteLine(result);
+                return result;
+            }
+
             //Bool type
             if (RegexCollection.Store.IsBit.IsMatch(lineToInterprete.ToLower()))
             {
-                return new InterpreterResult(lineToInterprete.ToLower(),false);
+                return lineToInterprete.ToLower();
             }
 
             //Return string
             if (RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
             {
-                return new InterpreterResult(RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value,false);
+                return RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value;
             }
 
             //Constants
@@ -367,10 +401,10 @@ namespace Interpreter
             {
                 case "e":
                     Output.WriteLine(Math.E.ToString(CultureInfo.InvariantCulture));
-                    return new InterpreterResult(Math.E.ToString(CultureInfo.InvariantCulture),false);
+                    return Math.E.ToString(CultureInfo.InvariantCulture);
                 case "pi":
                     Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
-                    return new InterpreterResult(Math.PI.ToString(CultureInfo.InvariantCulture),false);
+                    return Math.PI.ToString(CultureInfo.InvariantCulture);
             }
 
             //Return var value
@@ -379,18 +413,18 @@ namespace Interpreter
                 IVariable variable = null;
                 try
                 {
-                    variable = _evaluator.GetVariable(lineToInterprete.TrimStart('$'), access);
+                    variable = Evaluator.GetVariable(lineToInterprete.TrimStart('$'), access);
                 }
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
-                    return new InterpreterResult(Empty, false);
+                    return Empty;
                 }
                 if (variable is Variable)
                 {
                     var o = variable as Variable;
                     Output.WriteLine(o.Value);
-                    return new InterpreterResult(o.Value,false);
+                    return o.Value;
                 }
                 if(variable is Variables.Array)
                 {
@@ -398,12 +432,12 @@ namespace Interpreter
                     var result = o.Values.Aggregate("{", (current, keyValuePair) => current + $"{keyValuePair.Value},")
                                      .TrimEnd(',') + "}";
                     Output.WriteLine(result);
-                    return new InterpreterResult(result,false);
+                    return result;
                 }
-                if (variable is Object)
+                if (variable is FileInterpreter)
                 {
                     Output.WriteLine($"Variable {lineToInterprete} is an object!");
-                    return new InterpreterResult(Empty, false);
+                    return Empty;
                 }
                 Output.WriteLine($"Invalid operation {lineToInterprete}");
             }
@@ -415,14 +449,14 @@ namespace Interpreter
                 var eOutput = ExplicitOutput;
                 Output = new NoOutput();
                 ExplicitOutput = new NoOutput();
-                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,access).Message.TrimStart('\'').TrimEnd('\'');
+                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,access,file).TrimStart('\'').TrimEnd('\'');
                 Output = output;
                 ExplicitOutput = eOutput;
 
-                return InterpretLine(valueToInterpret, access);
+                return InterpretLine(valueToInterpret, access,file);
             }
 
-            return new InterpreterResult(lineToInterprete,false);
+            return lineToInterprete;
         }
 
         /// <summary>

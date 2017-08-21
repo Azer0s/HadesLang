@@ -12,12 +12,12 @@ namespace Testing
     [TestFixture]
     public class Testingcs
     {
-        private readonly Interpreter.Interpreter _interpreter = new Interpreter.Interpreter(new ConsoleOutput(), new NoOutput(), new ConsoleOutput());
+        private readonly Interpreter.Interpreter _interpreter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
 
         [Test]
         public void AddTest()
         {
-            Assert.AreEqual("15",_interpreter.InterpretLine("10+5","testing").Message);
+            Assert.AreEqual("15",_interpreter.InterpretLine("10+5","testing"));
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace Testing
         public void CreateVar(string name,string dataType,string value)
         {
             _interpreter.InterpretLine($"{name} as {dataType} closed = {value}", "testing");
-            Assert.AreEqual(value,_interpreter.InterpretLine(name,"testing").Message);
+            Assert.AreEqual(value,_interpreter.InterpretLine(name,"testing"));
             _interpreter.InterpretLine($"uload:{name}", "testing");
         }
 
@@ -46,7 +46,7 @@ namespace Testing
         public void ArrayTest(string name, string dataType, string values, string postion, string expected)
         {
             _interpreter.InterpretLine($"{name} as {dataType}[*] closed = {values}", "testing");
-            Assert.AreEqual(expected, _interpreter.InterpretLine($"{name}[{postion}]", "testing").Message);
+            Assert.AreEqual(expected, _interpreter.InterpretLine($"{name}[{postion}]", "testing"));
             _interpreter.InterpretLine($"uload:{name}", "testing");
         }
 
@@ -56,7 +56,7 @@ namespace Testing
             _interpreter.InterpretLine("a as num[*] closed = {1,2,3,4,5}", "testing");
             _interpreter.InterpretLine("b as num[*] closed", "testing");
             _interpreter.InterpretLine("b = a", "testing");
-            Assert.AreEqual("{1,2,3,4,5}",_interpreter.InterpretLine("b","testing").Message);
+            Assert.AreEqual("{1,2,3,4,5}",_interpreter.InterpretLine("b","testing"));
             _interpreter.InterpretLine("uload:a", "testing");
             _interpreter.InterpretLine("uload:b", "testing");
         }
@@ -66,7 +66,7 @@ namespace Testing
         {
             _interpreter.InterpretLine("a as word closed = 'out:b'", "testing");
             _interpreter.InterpretLine("b as word closed = 'Hello world'", "testing");
-            Assert.AreEqual("'Hello world'",_interpreter.InterpretLine("#a","testing").Message);
+            Assert.AreEqual("'Hello world'",_interpreter.InterpretLine("#a","testing"));
             _interpreter.InterpretLine("uload:a", "testing");
             _interpreter.InterpretLine("uload:b", "testing");
         }
@@ -77,7 +77,7 @@ namespace Testing
             _interpreter.InterpretLine("a as word closed = 'out:b'", "testing");
             _interpreter.InterpretLine("b as word closed = 'Hello world'", "testing");
             _interpreter.InterpretLine("c as word closed = #a", "testing");
-            Assert.AreEqual("'Hello world'", _interpreter.InterpretLine("c", "testing").Message);
+            Assert.AreEqual("'Hello world'", _interpreter.InterpretLine("c", "testing"));
             _interpreter.InterpretLine("uload:a", "testing");
             _interpreter.InterpretLine("uload:b", "testing");
             _interpreter.InterpretLine("uload:c", "testing");
@@ -89,7 +89,7 @@ namespace Testing
         [TestCase("false", "(true and false) or (true and false)")]
         public void BoolTests(string expected, string calc)
         {
-            Assert.AreEqual(expected,_interpreter.InterpretLine(calc,"testing").Message);
+            Assert.AreEqual(expected,_interpreter.InterpretLine(calc,"testing"));
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace Testing
         [TestCase("DEC", "0.9")]
         public void TypeTest(string expected, string calc)
         {
-            Assert.AreEqual(expected, _interpreter.InterpretLine($"dtype:{calc}", "testing").Message);
+            Assert.AreEqual(expected, _interpreter.InterpretLine($"dtype:{calc}", "testing"));
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace Testing
             _interpreter.InterpretLine("b as num closed = 2", "testing");
             _interpreter.InterpretLine("a = $a + $b", "testing");
             _interpreter.InterpretLine("b = $a + $b", "testing");
-            Assert.AreEqual("5", _interpreter.InterpretLine("b", "testing").Message);
+            Assert.AreEqual("5", _interpreter.InterpretLine("b", "testing"));
             _interpreter.InterpretLine("uload:b", "testing");
             _interpreter.InterpretLine("uload:c", "testing");
         }

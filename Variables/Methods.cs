@@ -5,7 +5,7 @@ namespace Variables
 {
     public class Methods
     {
-        public Methods(string name, Tuple<int,int> postition, List<Tuple<string,DataTypes>> parameters)
+        public Methods(string name, Tuple<int,int> postition, Dictionary<string, DataTypes> parameters)
         {
             Name = name;
             Postition = postition;
@@ -14,6 +14,6 @@ namespace Variables
 
         public string Name { get; set; }
         public Tuple<int,int> Postition { get; set; }
-        public List<Tuple<string, DataTypes>> Parameters { get; set; }
+        public Dictionary<string,DataTypes> Parameters { get; set; }
     }
 }
