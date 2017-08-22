@@ -1,7 +1,11 @@
-﻿c as word closed = 'Hello world'
+﻿c as num closed = 1
 fib:[1,1]
+out:c
 func fib[num a, num b]
-	out:c
+	case[$c smaller 3]
+		c++
+		fib:[1,1]
+	endcase
 	asLongAs[true]
 		out:a
 		out:b

@@ -160,6 +160,11 @@ public class RegexCollection
     /// </summary>
     public Regex ForceThrough { get; set; } = new Regex("^#(.*)",RegexOptions.Compiled);
     /// <summary>
+    /// End of block
+    /// </summary>
+    public Regex End { get; set; } = new Regex("^end(case|aslongas)");
+
+    /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
     /// </summary>
     private RegexCollection()

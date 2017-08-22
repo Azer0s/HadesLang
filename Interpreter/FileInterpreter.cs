@@ -46,7 +46,7 @@ namespace Interpreter
             LoadFunctions();
         }
 
-        public string Execute(Interpreter interpreter, string access, int start = 0, int end = -1)
+        public (string Value,bool Return) Execute(Interpreter interpreter, string access, int start = 0, int end = -1)
         {
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
@@ -73,7 +73,7 @@ namespace Interpreter
                     {
                         var result = Execute(interpreter,access: access, start: block.start + 1, end: block.end);
 
-                        if (!IsNullOrEmpty(result))
+                        if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
                             interpreter.Output = output;
                             return result;
@@ -95,7 +95,7 @@ namespace Interpreter
                     {
                         var result = Execute(interpreter, start: block.start + 1, end: block.end,access:access);
 
-                        if (!IsNullOrEmpty(result))
+                        if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
                             interpreter.Output = output;
                             return result;
@@ -112,29 +112,35 @@ namespace Interpreter
                 if (RegexCollection.Store.Put.IsMatch(Lines[i]))
                 {
                     interpreter.Output = output;
-                    return interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value,access,this,FAccess);
+                    return (interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value,access,this,FAccess),true);
                 }
 
                 var interresult = interpreter.InterpretLine(Lines[i], access, this,FAccess);
                 //Function call
                 if (RegexCollection.Store.Function.IsMatch(Lines[i]) && Functions.Any(a => a.Name == RegexCollection.Store.Function.Match(Lines[i]).Groups[1].Value))
                 {
+                    var result = Execute(interpreter, access, i + 1);
+                    if (!IsNullOrEmpty(result.Value) && result.Return)
+                    {
+                        return result;
+                    }
                     if (!IsNullOrEmpty(interresult))
                     {
                         interpreter.Output = output;
-                        return interresult;
+                        return (interresult,false);
                     }
                 }
             }
 
             interpreter.Output = output;
-            return Empty;
+            return (Empty,false);
         }
 
         public string CallFunction(string function,Interpreter interpreter)
         {
             var groups = RegexCollection.Store.Function.Match(function).Groups.OfType<Group>().Select(a => a.Value)
                 .ToList();
+            var access = Guid.NewGuid().ToString().ToLower();
             if (Functions.Any(a => a.Name == groups[1]))
             {
                 var func = Functions.First(a => a.Name == groups[1]);
@@ -149,14 +155,14 @@ namespace Interpreter
 
                 for (var i = 0; i < args.Count; i++)
                 {
-                    interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}",$"{FAccess}@{groups[1]}",interpreter,this,FAccess);
+                    interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}",access,interpreter,this);
                 }
 
-                var result = Execute(interpreter, start: func.Postition.Item1+1, end: func.Postition.Item2,access: $"{FAccess}@{groups[1]}");
+                var result = Execute(interpreter, start: func.Postition.Item1+1, end: func.Postition.Item2,access:access);
 
-                interpreter.Evaluator.Unload("all", $"{FAccess}@{groups[1]}");
+                interpreter.Evaluator.Unload("all", access);
 
-                return result;
+                return result.Value;
             }
             throw new Exception($"Function {function} does not exist!");
         }
