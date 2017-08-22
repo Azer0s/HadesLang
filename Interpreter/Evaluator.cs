@@ -97,7 +97,7 @@ namespace Interpreter
 
             for (var sp = 0; sp < split.Count; sp++)
             {
-                split[sp] = split[sp].TrimStart(' ').TrimEnd(' ');
+                split[sp] = interpreter.InterpretLine(split[sp].TrimStart(' ').TrimEnd(' '),access,file);
             }
 
             var success = false;
@@ -109,22 +109,21 @@ namespace Interpreter
                 var index = 0;
                 var list = split.Select(group =>
                 {
-                    var interpreted = DataTypeFromData(group, true) != DataTypes.NONE ? group : interpreter.InterpretLine(group, access, file);
                     var datatypeFromData = DataTypeFromData(group, false);
                     if (datatypeFromVariable == DataTypes.WORD)
                     {
                         index++;
-                        return new KeyValuePair<int, string>(index - 1, $"'{interpreted.TrimStart('\'').TrimEnd('\'')}'");
+                        return new KeyValuePair<int, string>(index - 1, $"'{group.TrimStart('\'').TrimEnd('\'')}'");
                     }
                     if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
                     {
                         index++;
-                        return new KeyValuePair<int, string>(index - 1, $"{interpreted.Replace(" ", "")}.0");
+                        return new KeyValuePair<int, string>(index - 1, $"{group.Replace(" ", "")}.0");
                     }
                     if (datatypeFromData == datatypeFromVariable)
                     {
                         index++;
-                        return new KeyValuePair<int, string>(index - 1, interpreted);
+                        return new KeyValuePair<int, string>(index - 1, group);
                     }
 
                     interpreter.Output = output;
@@ -145,7 +144,7 @@ namespace Interpreter
             interpreter.Output = output;
             if (success)
             {
-                return $"{groups[1]} is {result}";
+                return $"{groups[1]} is {{{Join(",",split)}}}";
             }
             throw new Exception($"{groups[1]} could not be set!");
         }
@@ -162,6 +161,7 @@ namespace Interpreter
             {
                 var variable = GetVariable(groups[1], access);
                 var datatypeFromVariable = variable.DataType;
+                groups[3] = interpreter.InterpretLine(groups[3], access, file);
                 var datatypeFromData = DataTypeFromData(groups[3], false);
                 int position;
                 try
@@ -173,15 +173,6 @@ namespace Interpreter
                     interpreter.Output = output;
 
                     throw e;
-                }
-
-                if (datatypeFromData != DataTypes.NONE)
-                {
-                    groups[3] = groups[3];
-                }
-                else
-                {
-                    groups[3] = interpreter.InterpretLine(groups[3], access, file);
                 }
 
                 if (datatypeFromVariable == DataTypes.WORD)
