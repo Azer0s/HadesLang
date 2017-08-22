@@ -189,7 +189,7 @@ namespace Interpreter
             }
 
             //Function
-            if (RegexCollection.Store.Function.IsMatch(lineToInterprete))
+            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && !RegexCollection.Store.Outside.Replace(lineToInterprete,"").ContainsFromList(Cache.Instance.CharList))
             {
                 //Method call from file
                 if (file != null)

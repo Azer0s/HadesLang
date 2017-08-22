@@ -1,0 +1,9 @@
+﻿c as num closed = fib:[7]
+out:c
+func fib[num n]
+	case[($n is 0) or ($n is 1)]
+		put n
+	endcase
+
+	put fib:[$n -1] + fib:[$n-2]
+endfunc

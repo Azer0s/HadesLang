@@ -162,7 +162,11 @@ public class RegexCollection
     /// <summary>
     /// End of block
     /// </summary>
-    public Regex End { get; set; } = new Regex("^end(case|aslongas)");
+    public Regex End { get; set; } = new Regex("^end(case|aslongas)",RegexOptions.Compiled);
+    /// <summary>
+    /// Values outside of function call
+    /// </summary>
+    public Regex Outside { get; set; } = new Regex("\\[.*?\\]",RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
