@@ -39,7 +39,6 @@ endfunc
 ```vb
 load:'fibonacci.hades' as a
 b as num reachable = $a->fib:[7]
-out:' '
 out:b
 ```
 ## Force value through interpreter 
