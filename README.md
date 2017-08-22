@@ -27,27 +27,18 @@ out:'Hello world'
 ## Fibonacci Numbers
 ### fibonacci.hades
 ```vb
-func fib[]
-    a as num closed = 1
-    b as num closed = 1
+func fib[num n]
+    case[($n is 0) or ($n is 1)]
+        put n
+    endcase
 
-    asLongAs[true]
-        out:a
-        out:b
-
-        a = $a + $b
-        b = $a + $b
-
-        case[$a bigger 10000]
-	    put a
-        endCase
-    endAsLongAs
+    put fib:[$n -1] + fib:[$n-2]
 endfunc
 ```
 ### main.hades
 ```vb
 load:'fibonacci.hades' as a
-b as num reachable = $a->fib:[]
+b as num reachable = $a->fib:[7]
 out:' '
 out:b
 ```
