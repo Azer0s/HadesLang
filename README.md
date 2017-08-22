@@ -32,7 +32,7 @@ func fib[num n]
         put n
     endcase
 
-    put fib:[$n -1] + fib:[$n-2]
+    put fib:[$n-1] + fib:[$n-2]
 endfunc
 ```
 ### main.hades
