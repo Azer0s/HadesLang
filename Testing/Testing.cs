@@ -23,7 +23,7 @@ namespace Testing
         [Test]
         public void ConcatTest()
         {
-            //Assert.AreEqual("Hello world",_interpreter.InterpretLine("'Hello ' + 'world'","testing").Message);
+            Assert.AreEqual("'Hello world'",_interpreter.InterpretLine("'Hello' + ' ' + 'world'", "testing", null, ""));
         }
 
         [Test]

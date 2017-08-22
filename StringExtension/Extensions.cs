@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace StringExtension
 {
@@ -14,6 +15,22 @@ namespace StringExtension
         public static bool Contains(this string source, string toCheck, StringComparison comp)
         {
             return source.IndexOf(toCheck, comp) >= 0;
+        }
+
+        public static bool IsValidFunction(this string source)
+        {
+            return source.StringSplit(':',new []{'\'','[',']'}).Count() == 2;
+        }
+
+        public static string Remainder(this string source, Regex check)
+        {
+            var matches = check.Matches(source);
+            foreach (Match match in matches)
+            {
+                source.Replace(match.Value, "");
+            }
+
+            return source;
         }
 
         public static string[] SplitToTwo(this string source, string delimiter, StringSplitOptions options)

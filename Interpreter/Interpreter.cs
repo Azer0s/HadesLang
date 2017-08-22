@@ -189,7 +189,7 @@ namespace Interpreter
             }
 
             //Function
-            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && !RegexCollection.Store.Outside.Replace(lineToInterprete,"").ContainsFromList(Cache.Instance.CharList))
+            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && (!RegexCollection.Store.Outside.Replace(lineToInterprete,"").ContainsFromList(Cache.Instance.CharList) || lineToInterprete.IsValidFunction()))
             {
                 //Method call from file
                 if (file != null)
@@ -492,8 +492,8 @@ namespace Interpreter
                 return Empty;
             }
 
-            //Calculation
-            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete) && !lineToInterprete.StartsWith("#"))
+            //Calculation & string concat
+            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && (!RegexCollection.Store.IsWord.IsMatch(lineToInterprete) || lineToInterprete.Remainder(RegexCollection.Store.IsWord).ContainsFromList(Cache.Instance.CharList)) && !lineToInterprete.StartsWith("#"))
             {
                 (bool Success, string Result) calculationResult;
                 try
@@ -539,12 +539,6 @@ namespace Interpreter
             {
                 Output.WriteLine(Evaluator.IncludeLib(lineToInterprete, access));
                 return Empty;
-            }
-
-            //String concat
-            if (lineToInterprete.Contains('+') && RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
-            {
-                //TODO Make string concat, replace with vars
             }
 
             //Var call

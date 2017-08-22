@@ -663,6 +663,25 @@ namespace Interpreter
 
         #region Calculations
 
+        public (bool Success, string Result) ConcatString(string[] args)
+        {
+            var result = Empty;
+
+            foreach (var s in args)
+            {
+                if (s != "+")
+                {
+                    if (s.EqualsFromList(Cache.Instance.CharList))
+                    {
+                        throw new Exception($"Invalid concat: {Join("",args)}!");
+                    }
+                    result += s.TrimStart('\'').TrimEnd('\'');
+                }
+            }
+
+            return (true,$"'{result}'");
+        }
+
         public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
         {
             try
@@ -711,6 +730,10 @@ namespace Interpreter
 
             for (var i = 0; i < args.Length; i++)
             {
+                if (RegexCollection.Store.IsWord.IsMatch(args[i]))
+                {
+                    return ConcatString(args);
+                }
                 if (args[i].ToUpper().EqualsFromList(Cache.Instance.Replacement.Keys))
                 {
                     args[i] = Cache.Instance.Replacement[args[i].ToUpper()];
