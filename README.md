@@ -88,3 +88,6 @@ endcase
 a as num reachable = 18
 uload:a
 ```
+
+## Credits
+![mXparser](https://github.com/mariuszgromada/MathParser.org-mXparser) by Mariusz Gromada
