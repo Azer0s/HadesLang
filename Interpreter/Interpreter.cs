@@ -51,6 +51,8 @@ namespace Interpreter
                 return Empty;
             }
 
+            altAccess = file != null ? file.FAccess : altAccess;
+
             //Variable decleration
             if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))
             {
@@ -101,7 +103,7 @@ namespace Interpreter
                     }
                     catch (Exception exception)
                     {
-                        ExplicitOutput.WriteLine(e.Message);
+                        ExplicitOutput.WriteLine(exception.Message);
                     }
                 }
                 return Empty;
@@ -129,7 +131,7 @@ namespace Interpreter
                     }
                     catch (Exception exception)
                     {
-                        ExplicitOutput.WriteLine(e.Message);
+                        ExplicitOutput.WriteLine(exception.Message);
                     }
                 }
                 return Empty;
@@ -157,7 +159,7 @@ namespace Interpreter
                     }
                     catch (Exception exception)
                     {
-                        ExplicitOutput.WriteLine(e.Message);
+                        ExplicitOutput.WriteLine(exception.Message);
                     }
                 }
                 return Empty;
@@ -191,19 +193,6 @@ namespace Interpreter
             //Function
             if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && (!RegexCollection.Store.Outside.Replace(lineToInterprete,"").ContainsFromList(Cache.Instance.CharList) || lineToInterprete.IsValidFunction()))
             {
-                //Method call from file
-                if (file != null)
-                {
-                    try
-                    {
-                        return file.CallFunction(lineToInterprete, this);
-                    }
-                    catch (Exception e)
-                    {
-                        //Ignored
-                    }
-                }
-
                 //Exit
                 if (RegexCollection.Store.Exit.IsMatch(lineToInterprete))
                 {
@@ -212,6 +201,23 @@ namespace Interpreter
 
                 var groups = RegexCollection.Store.Function.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
+                //Method call from file
+                if (file != null)
+                {
+                    if (file.Functions.Any(a => a.Name == groups[1].Value))
+                    {
+                        try
+                        {
+                            return file.CallFunction(lineToInterprete, this);
+                        }
+                        catch (Exception)
+                        {
+                            // Ignored
+                        }
+                    }
+                }
+
+                //Custom functions
                 if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
                 {
                     Evaluator.CallCustomFunction(groups);
@@ -241,7 +247,7 @@ namespace Interpreter
                         }
                         catch (Exception exception)
                         {
-                            ExplicitOutput.WriteLine(e.Message);
+                            ExplicitOutput.WriteLine(exception.Message);
                             return Empty;
                         }
                     }
@@ -315,9 +321,9 @@ namespace Interpreter
                                 throw e;
                             }
                         }
-                        catch (Exception e1)
+                        catch (Exception exception)
                         {
-                            ExplicitOutput.WriteLine(e1.Message);
+                            ExplicitOutput.WriteLine(exception.Message);
                             return Empty;
                         }
                     }
@@ -467,7 +473,7 @@ namespace Interpreter
                     }
                     catch (Exception exception)
                     {
-                        ExplicitOutput.WriteLine(e.Message);
+                        ExplicitOutput.WriteLine(exception.Message);
                         return value;
                     }
                 }
