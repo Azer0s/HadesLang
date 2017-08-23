@@ -1,5 +1,10 @@
-﻿c as num closed = fib:[7]
+﻿c as num closed = add:[8,5]
 out:c
+
+func add[num a, num b]
+	put fib:[$a] + fib:[$b]
+endfunc
+
 func fib[num n]
 	case[($n is 0) or ($n is 1)]
 		put n

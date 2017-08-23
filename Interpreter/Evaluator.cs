@@ -324,7 +324,7 @@ namespace Interpreter
 
                 if (variable is Variable)
                 {
-                    result = result.Replace(match.Value, (variable as Variable).Value);
+                    result = result.Replace(match.Groups[1].Value, (variable as Variable).Value);
                 }
                 else if (variable is Variables.Array)
                 {
