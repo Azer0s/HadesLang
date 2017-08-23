@@ -405,7 +405,7 @@ namespace Interpreter
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
 
-            var result = interpreter.InterpretLine(groups[2].Value, access, file);
+            var result = interpreter.InterpretLine(groups[2].Value, access, file,file != null ? file.FAccess : "");
             interpreter.Output = output;
 
             var success = false;
