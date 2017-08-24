@@ -20,7 +20,7 @@ public class RegexCollection
     /// </summary>
     public Regex IgnoreTabsAndSpaces { get; set; } = new Regex("^[ \\t]*(.*)",RegexOptions.Compiled);
     /// <summary>
-    /// Regex for toggling scriptOutput
+    /// Regex for toggling calculation cache
     /// </summary>
     public Regex CacheCalculations { get; set; } = new Regex("^cacheCalculations:(\\d)", RegexOptions.Compiled);
     /// <summary>
