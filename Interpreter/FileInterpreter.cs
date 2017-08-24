@@ -62,6 +62,12 @@ namespace Interpreter
                     HadesDebugger.EventManager.InvokeOnInterrupted(new DebugInfo { File = FAccess, Line = i, VarDump = interpreter.Evaluator.DumpVars(DataTypes.NONE) });
                 }
 
+                //Break
+                if (Lines[i] == "break")
+                {
+                    return (Empty, false);
+                }
+
                 //Function
                 if (RegexCollection.Store.FunctionDecleration.IsMatch(Lines[i]))
                 {
