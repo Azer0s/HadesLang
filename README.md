@@ -11,7 +11,7 @@
 Here are a few examples of the language in action:
 
 ## Register a custom function in C#
-```cs
+```csharp
 var interpreter = new Interpreter(new ConsoleOutput());
 interpreter.RegisterFunction(new Function("print", a =>
 {
@@ -90,4 +90,4 @@ uload:a
 ```
 
 ## Credits
-![mXparser](https://github.com/mariuszgromada/MathParser.org-mXparser) by Mariusz Gromada
+[mXparser](https://github.com/mariuszgromada/MathParser.org-mXparser) by Mariusz Gromada
