@@ -12,7 +12,7 @@ Here are a few examples of the language in action:
 
 ## Register a custom function in C#
 ```csharp
-var interpreter = new Interpreter(new ConsoleOutput());
+var interpreter = new Interpreter(new ConsoleOutput(),new ConsoleOutput());
 interpreter.RegisterFunction(new Function("print", a =>
 {
     a.ToList().ForEach(Console.WriteLine);
