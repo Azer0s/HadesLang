@@ -58,7 +58,7 @@
       <Project>{871EEF92-5231-45F1-B42F-63E3E06196CB}</Project>
       <Name>Cache</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Debug\Debug.csproj">
+    <ProjectReference Include="..\Debugger\Debug.csproj">
       <Project>{3e8f583d-7044-4984-bf32-a0ffd09db7e5}</Project>
       <Name>Debug</Name>
     </ProjectReference>

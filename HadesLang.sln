@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringExtension", "StringEx
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{DC57EFB8-D0DE-4777-8777-34FB7A0F7060}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug", "Debug\Debug.csproj", "{3E8F583D-7044-4984-BF32-A0FFD09DB7E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug", "Debugger\Debug.csproj", "{3E8F583D-7044-4984-BF32-A0FFD09DB7E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
