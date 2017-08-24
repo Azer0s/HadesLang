@@ -144,7 +144,7 @@ public class RegexCollection
     /// </summary>
     public Regex Load { get; set; } = new Regex("^load:'([\\w\\.]*)'", RegexOptions.Compiled);
     /// <summary>
-    /// Regex for toggling the Hades garbage collecter
+    /// Regex for toggling the Hades garbage collector
     /// </summary>
     public Regex EraseVars { get; set; } = new Regex("^eraseVars:(\\d)", RegexOptions.Compiled);
     /// <summary>
