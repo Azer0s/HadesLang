@@ -688,7 +688,7 @@ namespace Interpreter
 
             if (lineToInterprete.ContainsFromList(new List<string> { ":", "->" }))
             {
-                var split = lineToInterprete.StringSplit(' ', new[] { '\'', '[', ']' }).ToArray();
+                var split = lineToInterprete.StringSplit(' ', new[] { '\'', '[', ']' ,'(',')'}).ToArray();
 
                 lineToInterprete = Empty;
 
