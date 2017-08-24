@@ -372,6 +372,8 @@ namespace Interpreter
                     return result;
                 }
 
+                #region Settings
+
                 //ScriptOutput
                 if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
                 {
@@ -411,6 +413,25 @@ namespace Interpreter
                     }
                 }
 
+                //Debug
+                if (RegexCollection.Store.Debug.IsMatch(lineToInterprete))
+                {
+                    switch (RegexCollection.Store.Debug.Match(lineToInterprete).Groups[1].Value)
+                    {
+                        case "0":
+                            Cache.Instance.Debug = false;
+                            Output.WriteLine("Debug disabled!");
+                            return Empty;
+                        case "1":
+                            Cache.Instance.Debug = true;
+                            Output.WriteLine("Debug enabled!");
+                            return Empty;
+                        default:
+                            Output.WriteLine("Invalid setting!");
+                            return Empty;
+                    }
+                }
+
                 //Cache calculations
                 if (RegexCollection.Store.CacheCalculations.IsMatch(lineToInterprete))
                 {
@@ -429,6 +450,8 @@ namespace Interpreter
                             return Empty;
                     }
                 }
+
+                #endregion
 
                 //Dumpvars
                 if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))

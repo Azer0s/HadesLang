@@ -148,6 +148,10 @@ public class RegexCollection
     /// </summary>
     public Regex EraseVars { get; set; } = new Regex("^eraseVars:(\\d)", RegexOptions.Compiled);
     /// <summary>
+    /// Regex for toggling the Hades debugger
+    /// </summary>
+    public Regex Debug { get; set; } = new Regex("^debug:(\\d)", RegexOptions.Compiled);
+    /// <summary>
     /// Regex for random number function
     /// </summary>
     public Regex RandomNum { get; set; } = new Regex("^rand:\\[? *(\\d*) *\\]?", RegexOptions.Compiled);

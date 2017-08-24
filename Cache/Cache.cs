@@ -70,6 +70,10 @@ public sealed class Cache
     /// </summary>
     public bool CacheCalculation { get; set; } = true;
     /// <summary>
+    /// Toggle for debug
+    /// </summary>
+    public bool Debug { get; set; } = false;
+    /// <summary>
     /// Singleton constructor
     /// </summary>
     private Cache()

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Debug;
 using Output;
 using StringExtension;
 using Variables;
@@ -55,6 +56,12 @@ namespace Interpreter
 
             for (var i = start; i < end; i++)
             {
+                //Debug
+                if (Cache.Instance.Debug)
+                {
+                    HadesDebugger.EventManager.InvokeOnInterrupted(new DebugInfo { File = FAccess, Line = i, VarDump = interpreter.Evaluator.DumpVars(DataTypes.NONE) });
+                }
+
                 //Function
                 if (RegexCollection.Store.FunctionDecleration.IsMatch(Lines[i]))
                 {

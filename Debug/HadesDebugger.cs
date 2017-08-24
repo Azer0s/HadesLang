@@ -16,10 +16,12 @@ namespace Debug
         /// Cache instance
         /// </summary>
         public static HadesDebugger EventManager => Lazy.Value;
-        /// <summary>
-        /// Method for interrupting the program
-        /// </summary>
-        public delegate bool Interrupt(int line, string varDump);
+
+        public delegate bool Interrupt(DebugInfo a);
+        public void InvokeOnInterrupted(DebugInfo a)
+        {
+            OnInterrupted.Invoke(a);
+        }
         /// <summary>
         /// Event to subscribe to
         /// </summary>
@@ -30,5 +32,12 @@ namespace Debug
         private HadesDebugger()
         {
         }
+    }
+
+    public class DebugInfo
+    {
+        public int Line { get; set; }
+        public string File { get; set; }
+        public string VarDump { get; set; }
     }
 }
