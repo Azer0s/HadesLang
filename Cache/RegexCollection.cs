@@ -106,7 +106,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for halting the program
     /// </summary>
-    public Regex Exit { get; set; } = new Regex("^exit:(\\d)",RegexOptions.Compiled);
+    public Regex Exit { get; set; } = new Regex("^exit:(-?\\d*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for input
     /// </summary>
