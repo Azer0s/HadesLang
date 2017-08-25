@@ -44,7 +44,7 @@ namespace Interpreter
             Cache.Instance.LoadFiles = new List<string>();
         }
 
-        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "", bool isolateVars = false)
+        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "",bool writeSettings = false)
         {
             if (IsNullOrEmpty(lineToInterprete) || RegexCollection.Store.End.IsMatch(lineToInterprete.ToLower()))
             {
@@ -374,99 +374,102 @@ namespace Interpreter
 
                 #region Settings
 
-                //ScriptOutput
-                if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
+                if (writeSettings)
                 {
-                    switch (RegexCollection.Store.ScriptOutput.Match(lineToInterprete).Groups[1].Value)
+                    //ScriptOutput
+                    if (RegexCollection.Store.ScriptOutput.IsMatch(lineToInterprete))
                     {
-                        case "0":
-                            _backup = ExplicitOutput;
-                            ExplicitOutput = new NoOutput();
-                            Output.WriteLine("Script output disabled!");
-                            return Empty;
-                        case "1":
-                            ExplicitOutput = _backup;
-                            Output.WriteLine("Script output enabled!");
-                            return Empty;
-                        default:
-                            Output.WriteLine("Invalid setting!");
-                            return Empty;
+                        switch (RegexCollection.Store.ScriptOutput.Match(lineToInterprete).Groups[1].Value)
+                        {
+                            case "0":
+                                _backup = ExplicitOutput;
+                                ExplicitOutput = new NoOutput();
+                                Output.WriteLine("Script output disabled!");
+                                return Empty;
+                            case "1":
+                                ExplicitOutput = _backup;
+                                Output.WriteLine("Script output enabled!");
+                                return Empty;
+                            default:
+                                Output.WriteLine("Invalid setting!");
+                                return Empty;
+                        }
                     }
-                }
 
-                //EraseVars
-                if (RegexCollection.Store.EraseVars.IsMatch(lineToInterprete))
-                {
-                    switch (RegexCollection.Store.EraseVars.Match(lineToInterprete).Groups[1].Value)
+                    //EraseVars
+                    if (RegexCollection.Store.EraseVars.IsMatch(lineToInterprete))
                     {
-                        case "0":
-                            Cache.Instance.EraseVars = false;
-                            Output.WriteLine("Garbage collection disabled!");
-                            return Empty;
-                        case "1":
-                            Cache.Instance.EraseVars = true;
-                            Output.WriteLine("Garbage collection enabled!");
-                            return Empty;
-                        default:
-                            Output.WriteLine("Invalid setting!");
-                            return Empty;
+                        switch (RegexCollection.Store.EraseVars.Match(lineToInterprete).Groups[1].Value)
+                        {
+                            case "0":
+                                Cache.Instance.EraseVars = false;
+                                Output.WriteLine("Garbage collection disabled!");
+                                return Empty;
+                            case "1":
+                                Cache.Instance.EraseVars = true;
+                                Output.WriteLine("Garbage collection enabled!");
+                                return Empty;
+                            default:
+                                Output.WriteLine("Invalid setting!");
+                                return Empty;
+                        }
                     }
-                }
 
-                //Debug
-                if (RegexCollection.Store.Debug.IsMatch(lineToInterprete))
-                {
-                    switch (RegexCollection.Store.Debug.Match(lineToInterprete).Groups[1].Value)
+                    //Debug
+                    if (RegexCollection.Store.Debug.IsMatch(lineToInterprete))
                     {
-                        case "0":
-                            Cache.Instance.Debug = false;
-                            Output.WriteLine("Debug disabled!");
-                            return Empty;
-                        case "1":
-                            Cache.Instance.Debug = true;
-                            Output.WriteLine("Debug enabled!");
-                            return Empty;
-                        default:
-                            Output.WriteLine("Invalid setting!");
-                            return Empty;
+                        switch (RegexCollection.Store.Debug.Match(lineToInterprete).Groups[1].Value)
+                        {
+                            case "0":
+                                Cache.Instance.Debug = false;
+                                Output.WriteLine("Debug disabled!");
+                                return Empty;
+                            case "1":
+                                Cache.Instance.Debug = true;
+                                Output.WriteLine("Debug enabled!");
+                                return Empty;
+                            default:
+                                Output.WriteLine("Invalid setting!");
+                                return Empty;
+                        }
                     }
-                }
 
-                //Cache calculations
-                if (RegexCollection.Store.CacheCalculations.IsMatch(lineToInterprete))
-                {
-                    switch (RegexCollection.Store.CacheCalculations.Match(lineToInterprete).Groups[1].Value)
+                    //Cache calculations
+                    if (RegexCollection.Store.CacheCalculations.IsMatch(lineToInterprete))
                     {
-                        case "0":
-                            Cache.Instance.CacheCalculation = false;
-                            Output.WriteLine("Caching disabled!");
-                            return Empty;
-                        case "1":
-                            Cache.Instance.CacheCalculation = true;
-                            Output.WriteLine("Caching enabled!");
-                            return Empty;
-                        default:
-                            Output.WriteLine("Invalid setting!");
-                            return Empty;
+                        switch (RegexCollection.Store.CacheCalculations.Match(lineToInterprete).Groups[1].Value)
+                        {
+                            case "0":
+                                Cache.Instance.CacheCalculation = false;
+                                Output.WriteLine("Caching disabled!");
+                                return Empty;
+                            case "1":
+                                Cache.Instance.CacheCalculation = true;
+                                Output.WriteLine("Caching enabled!");
+                                return Empty;
+                            default:
+                                Output.WriteLine("Invalid setting!");
+                                return Empty;
+                        }
                     }
-                }
+
+                    //Dumpvars
+                    if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))
+                    {
+                        var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
+                        var result = Evaluator.DumpVars(dataTypeAsString == "all"
+                            ? DataTypes.NONE
+                            : TypeParser.ParseDataType(dataTypeAsString));
+
+                        if (!IsNullOrEmpty(result))
+                        {
+                            Output.WriteLine(result);
+                        }
+                        return Empty;
+                    }
+                }   
 
                 #endregion
-
-                //Dumpvars
-                if (RegexCollection.Store.DumpVars.IsMatch(lineToInterprete))
-                {
-                    var dataTypeAsString = RegexCollection.Store.DumpVars.Match(lineToInterprete).Groups[1].Value;
-                    var result = Evaluator.DumpVars(dataTypeAsString == "all"
-                        ? DataTypes.NONE
-                        : TypeParser.ParseDataType(dataTypeAsString));
-
-                    if (!IsNullOrEmpty(result))
-                    {
-                        Output.WriteLine(result);
-                    }
-                    return Empty;
-                }
 
                 #endregion
 

@@ -23,7 +23,7 @@ namespace Interpreter
             while (true)
             {
                 Console.Write(">");
-                interpreter.InterpretLine(Console.ReadLine(), "console",null,"");
+                interpreter.InterpretLine(Console.ReadLine(), "console",null,"","",true);
             }
         }
     }
