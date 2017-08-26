@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace StringExtension
@@ -9,13 +12,38 @@ namespace StringExtension
     {
         public static bool ContainsFromList(this string s, IEnumerable<string> source)
         {
-            return source.Any(a => s.Contains(a,StringComparison.OrdinalIgnoreCase));
+            return source.Any(a => s.ToLower().Contains(a.ToLower()));
         }
 
-        public static bool Contains(this string source, string toCheck, StringComparison comp)
+        public static IEnumerable<string> SplitByLength(this string str, int maxLength)
         {
-            return source.IndexOf(toCheck, comp) >= 0;
+            for (var index = 0; index < str.Length; index += maxLength)
+            {
+                yield return str.Substring(index, Math.Min(maxLength, str.Length - index));
+            }
         }
+
+        public static string GetIntValue(this string source)
+        {
+            var md5 = System.Security.Cryptography.MD5.Create();
+            var inputBytes = System.Text.Encoding.ASCII.GetBytes(source);
+            var hash = md5.ComputeHash(inputBytes);
+            var sb = new StringBuilder();
+            foreach (var t in hash)
+            {
+                sb.Append(t.ToString("D"));
+            }
+
+            var groups = sb.ToString().SplitByLength(8).ToArray();
+
+            for (var i = 0; i < groups.Length; i++)
+            {
+                groups[i] = (Convert.ToInt32(groups[i]) % 21 /*Becaus first two digits of int.MaxValue are 21*/).ToString();
+            }
+
+            return string.Join("",groups);
+        }
+
 
         public static bool IsValidFunction(this string source)
         {
@@ -25,12 +53,7 @@ namespace StringExtension
         public static string Remainder(this string source, Regex check)
         {
             var matches = check.Matches(source);
-            foreach (Match match in matches)
-            {
-                source.Replace(match.Value, "");
-            }
-
-            return source;
+            return matches.Cast<Match>().Aggregate(source, (current, match) => current.Replace(match.Value, ""));
         }
 
         public static string[] SplitToTwo(this string source, string delimiter, StringSplitOptions options)
@@ -98,7 +121,12 @@ namespace StringExtension
                 }
                 else if (c == delimiter)
                 {
-                    yield return source.Substring(lastIndex, i - lastIndex);
+                    var val = source.Substring(lastIndex, i - lastIndex);
+
+                    if (!string.IsNullOrEmpty(val))
+                    {
+                        yield return val;
+                    }
                     lastIndex = i + 1;
                 }
             }

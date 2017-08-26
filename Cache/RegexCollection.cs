@@ -170,7 +170,7 @@ public class RegexCollection
     /// <summary>
     /// Values outside of function call
     /// </summary>
-    public Regex Outside { get; set; } = new Regex("\\[.*?\\]",RegexOptions.Compiled);
+    public Regex Outside { get; set; } = new Regex("(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

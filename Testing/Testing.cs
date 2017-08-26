@@ -109,8 +109,17 @@ namespace Testing
             _interpreter.InterpretLine("a = $a + $b", "testing", null, "");
             _interpreter.InterpretLine("b = $a + $b", "testing", null, "");
             Assert.AreEqual("5", _interpreter.InterpretLine("b", "testing", null, ""));
+            _interpreter.InterpretLine("uload:a", "testing", null, "");
             _interpreter.InterpretLine("uload:b", "testing", null, "");
             _interpreter.InterpretLine("uload:c", "testing", null, "");
+        }
+
+        [Test]
+        [TestCase("'Hello'","'Hello'")]
+        [TestCase("out:[dtype:12]","'NUM'")]
+        public void StringCompTest(string a, string b)
+        {
+            Assert.AreEqual("true",_interpreter.InterpretLine($"{a} is {b}", "testing", null, ""));
         }
     }
 }

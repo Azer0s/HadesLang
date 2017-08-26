@@ -675,6 +675,14 @@ namespace Interpreter
 
         public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
         {
+            if (lineToInterprete.Trim().StartsWith("'") && lineToInterprete.Trim().EndsWith("'"))
+            {
+                if (RegexCollection.Store.IsWord.Matches(lineToInterprete).Count == 1)
+                {
+                    return (false, Empty);
+                }
+            }
+
             try
             {
                 lineToInterprete = ReplaceWithVars(lineToInterprete, access, interpreter, file);
@@ -694,37 +702,37 @@ namespace Interpreter
 
                 foreach (var t in split)
                 {
-                    if (!(RegexCollection.Store.IsNum.IsMatch(t) || RegexCollection.Store.IsDec.IsMatch(t) || t.EqualsFromList(Cache.Instance.CharList)))
+                    if (RegexCollection.Store.Function.IsMatch(t))
                     {
                         var output = interpreter.Output;
+                        var eOutput = interpreter.ExplicitOutput;
                         interpreter.Output = new NoOutput();
+                        interpreter.ExplicitOutput = new NoOutput();
                         lineToInterprete += interpreter.InterpretLine(t, access, file);
                         interpreter.Output = output;
+                        interpreter.ExplicitOutput = eOutput;
                     }
                     else
                     {
-                        if (t.EqualsFromList(Cache.Instance.CharList))
-                        {
-                            lineToInterprete += $" {t} ";
-                        }
-                        else
-                        {
-                            lineToInterprete += t;
-                        }
+                        lineToInterprete += $" {t} ";
                     }
                 }
             }
 
-            var args = lineToInterprete.StringSplit(' ').ToArray();
+            var args = lineToInterprete.Trim().StringSplit(' ').ToArray();
+
+            if (args.Any(a => a == "+"))
+            {
+                if (args.Any(a => RegexCollection.Store.IsWord.IsMatch(a)))
+                {
+                    return ConcatString(args);
+                }
+            }
 
             var isBool = false;
 
             for (var i = 0; i < args.Length; i++)
             {
-                if (RegexCollection.Store.IsWord.IsMatch(args[i]))
-                {
-                    return ConcatString(args);
-                }
                 if (args[i].ToUpper().EqualsFromList(Cache.Instance.Replacement.Keys))
                 {
                     args[i] = Cache.Instance.Replacement[args[i].ToUpper()];
@@ -739,6 +747,10 @@ namespace Interpreter
                 {
                     args[i] = "0.0";
                     isBool = true;
+                }
+                if (RegexCollection.Store.IsWord.IsMatch(args[i]))
+                {
+                    args[i] = args[i].GetIntValue();
                 }
             }
 

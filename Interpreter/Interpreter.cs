@@ -191,7 +191,10 @@ namespace Interpreter
             }
 
             //Function
-            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && (!RegexCollection.Store.Outside.Replace(lineToInterprete,"").ContainsFromList(Cache.Instance.CharList) || lineToInterprete.IsValidFunction()))
+            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && 
+                !lineToInterprete.Remainder(RegexCollection.Store.Outside)
+                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys)) && 
+                lineToInterprete.IsValidFunction())
             {
                 //Exit
                 if (RegexCollection.Store.Exit.IsMatch(lineToInterprete))
@@ -525,7 +528,12 @@ namespace Interpreter
             }
 
             //Calculation & string concat
-            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && (!RegexCollection.Store.IsWord.IsMatch(lineToInterprete) || lineToInterprete.Remainder(RegexCollection.Store.IsWord).ContainsFromList(Cache.Instance.CharList)) && !lineToInterprete.StartsWith("#"))
+            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || 
+                lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && 
+                (!RegexCollection.Store.IsWord.IsMatch(lineToInterprete) || 
+                lineToInterprete.Remainder(RegexCollection.Store.IsWord)
+                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys.ToList())) && 
+                !lineToInterprete.StartsWith("#")))
             {
                 (bool Success, string Result) calculationResult;
                 try
@@ -551,7 +559,11 @@ namespace Interpreter
                         return Empty;
                     }
                 }
-                Output.WriteLine(calculationResult.Result);
+
+                if (calculationResult.Result != Empty)
+                {
+                    Output.WriteLine(calculationResult.Result);
+                }
 
                 if (calculationResult.Result != "NaN")
                 {
