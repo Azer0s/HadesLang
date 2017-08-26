@@ -480,7 +480,7 @@ namespace Interpreter
             }
 
             //Return array value
-            if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}"))
+            if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}") && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete.Remainder(RegexCollection.Store.Variable)))
             {
                 var value = Empty;
                 try
