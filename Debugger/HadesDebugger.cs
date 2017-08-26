@@ -20,7 +20,7 @@ namespace Debug
         public delegate bool Interrupt(DebugInfo a);
         public void InvokeOnInterrupted(DebugInfo a)
         {
-            OnInterrupted.Invoke(a);
+            OnInterrupted?.Invoke(a);
         }
         /// <summary>
         /// Event to subscribe to
