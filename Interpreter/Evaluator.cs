@@ -601,12 +601,23 @@ namespace Interpreter
 
             if (varObj is FileInterpreter)
             {
+                var fileVariable = GetVariable(varname, (varObj as FileInterpreter).FAccess);
+
+                if (fileVariable.Access == AccessTypes.CLOSED)
+                {
+                    throw new Exception($"The access to variable {varname} was denied!");
+                }
+
+                if (fileVariable is Variable)
+                {
+                    return (fileVariable as Variable).Value;
+                }
+
                 var output = interpreter.Output;
                 interpreter.Output = new NoOutput();
                 var fileInterpreter = varObj as FileInterpreter;
-                var result = interpreter.InterpretLine(varname, fileInterpreter.FAccess,fileInterpreter);
+                var result = interpreter.InterpretLine(varname, fileInterpreter.FAccess, fileInterpreter);
                 interpreter.Output = output;
-
                 return result;
             }
             throw new Exception($"Variable {obj} is not of type object!");
