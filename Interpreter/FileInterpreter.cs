@@ -17,12 +17,14 @@ namespace Interpreter
     {
         public List<string> Lines;
         public List<Methods> Functions = new List<Methods>();
+        private readonly Dictionary<int, int> _lineMap;
         public string FAccess;
         public FileInterpreter(string path)
         {
             try
             {
                 Lines = File.ReadAllLines(path).ToList();
+                _lineMap = new Dictionary<int, int>(Lines.Count);
             }
             catch (Exception e)
             {
@@ -30,12 +32,22 @@ namespace Interpreter
             }
 
             FAccess = path;
-
-            for (var i = 0; i < Lines.Count; i++)
+            var c = 1;
+            for (var i = 0; i < Lines.Count; i++, c++)
             {
                 if (!IsNullOrEmpty(Lines[i]))
                 {
-                    Lines[i] = RegexCollection.Store.IgnoreTabsAndSpaces.Match(Lines[i]).Groups[1].Value;
+                    var ignored = RegexCollection.Store.IgnoreTabsAndSpaces.Match(Lines[i]).Groups[1].Value;
+                    if (!ignored.StartsWith("//"))
+                    {
+                        Lines[i] = ignored;
+                        _lineMap[i] = c;
+                    }
+                    else
+                    {
+                        Lines.RemoveAt(i);
+                        i--;
+                    }
                 }
                 else
                 {
@@ -59,7 +71,7 @@ namespace Interpreter
                 //Debug
                 if (Cache.Instance.Debug)
                 {
-                    HadesDebugger.EventManager.InvokeOnInterrupted(new DebugInfo { File = FAccess, Line = i, VarDump = interpreter.Evaluator.DumpVars(DataTypes.NONE) });
+                    HadesDebugger.EventManager.InvokeOnInterrupted(new DebugInfo { File = FAccess, Line = _lineMap[i], VarDump = interpreter.Evaluator.DumpVars(DataTypes.NONE) });
                 }
 
                 //Break

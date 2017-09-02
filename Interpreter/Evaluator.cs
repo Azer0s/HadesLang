@@ -516,11 +516,32 @@ namespace Interpreter
             return DataTypes.NONE;
         }
 
-        //TODO Load as
-
-        public string LoadFile(string lineToInterprete, Interpreter interpreter)
+        public string LoadAs(string path, string varName, string access, Interpreter interpreter)
         {
-            var path = RegexCollection.Store.Load.Match(lineToInterprete).Groups[1].Value;
+            var fileInterpreter = new FileInterpreter(path);
+            var result = Exists(varName, access);
+            if (!result.Exists)
+            {
+                Cache.Instance.Variables.Add(new Meta{Name = varName,Owner = access}, fileInterpreter);
+            }
+            else
+            {
+                throw new Exception(result.Message);
+            }
+
+            return fileInterpreter.Execute(interpreter,path).Value;
+        }
+
+        public string LoadFile(string lineToInterprete,string access, Interpreter interpreter)
+        {
+            var groups = RegexCollection.Store.Load.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
+            var path = groups[1];
+
+            if (groups.Count > 2)
+            {
+                return LoadAs(path, groups[2], access, interpreter);
+            }
+
             var result = new FileInterpreter(path).Execute(interpreter,path);
 
             if (Cache.Instance.EraseVars)
@@ -569,6 +590,28 @@ namespace Interpreter
             throw new Exception($"Variable {variable} does not exist or the access was denied!");
         }
 
+        public string GetObjectVar(string obj, string varname,string acccess, Interpreter interpreter)
+        {
+            if (!Exists(obj,acccess).Exists)
+            {
+                throw new Exception($"Object {obj} does not exist!");
+            }
+
+            var varObj = GetVariable(obj, acccess);
+
+            if (varObj is FileInterpreter)
+            {
+                var output = interpreter.Output;
+                interpreter.Output = new NoOutput();
+                var fileInterpreter = varObj as FileInterpreter;
+                var result = interpreter.InterpretLine(varname, fileInterpreter.FAccess,fileInterpreter);
+                interpreter.Output = output;
+
+                return result;
+            }
+            throw new Exception($"Variable {obj} is not of type object!");
+        }
+
         public string DumpVars(DataTypes dt)
         {
             var sb = new StringBuilder();
@@ -601,11 +644,6 @@ namespace Interpreter
             }
 
             return sb.ToString();
-        }
-
-        public string GetObjectVar(string lineToInterprete, string access)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion
@@ -689,12 +727,16 @@ namespace Interpreter
             }
             catch (Exception e)
             {
-                throw e;
+                if (!lineToInterprete.Contains("->"))
+                {
+                    throw e;
+                }
             }
 
+            lineToInterprete = lineToInterprete.Replace("->", "~");
             lineToInterprete = Cache.Instance.CharList.Aggregate(lineToInterprete, (current, s) => current.Replace(s, $" {s} "));
 
-            if (lineToInterprete.ContainsFromList(new List<string> { ":", "->" }))
+            if (lineToInterprete.ContainsFromList(new List<string> { ":", "~" }))
             {
                 var split = lineToInterprete.StringSplit(' ', new[] { '\'', '[', ']' ,'(',')'}).ToArray();
 
@@ -702,13 +744,14 @@ namespace Interpreter
 
                 foreach (var t in split)
                 {
-                    if (RegexCollection.Store.Function.IsMatch(t))
+                    var repl = t.Replace("~", "->");
+                    if (RegexCollection.Store.Function.IsMatch(repl) || RegexCollection.Store.MethodCall.IsMatch(repl) || RegexCollection.Store.VarCall.IsMatch(repl) || t.StartsWith("$"))
                     {
                         var output = interpreter.Output;
                         var eOutput = interpreter.ExplicitOutput;
                         interpreter.Output = new NoOutput();
                         interpreter.ExplicitOutput = new NoOutput();
-                        lineToInterprete += interpreter.InterpretLine(t, access, file);
+                        lineToInterprete += interpreter.InterpretLine(repl, access, file);
                         interpreter.Output = output;
                         interpreter.ExplicitOutput = eOutput;
                     }
@@ -867,9 +910,23 @@ namespace Interpreter
 
         #endregion
 
-        public string CallMethod(string lineToInterprete, string access)
+        public string CallMethod(string lineToInterprete, string access,Interpreter interpreter)
         {
-            throw new NotImplementedException();
+            var groups = RegexCollection.Store.MethodCall.Match(lineToInterprete).Groups.OfType<Group>()
+                .Select(a => a.Value).ToList();
+
+            if (Exists(groups[1],access).Exists)
+            {
+                var variable = GetVariable(groups[1], access);
+
+                if (variable is FileInterpreter)
+                {
+                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter);
+                }
+                throw new Exception($"Variable {groups[1]} is not of type object!");
+            }
+
+            throw new Exception($"Object {groups[1]} does not exist!");
         }
     }
 }

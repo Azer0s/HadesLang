@@ -185,8 +185,71 @@ namespace Interpreter
             //Method calls
             if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
             {
-                var result = Evaluator.CallMethod(lineToInterprete, access);
-                Output.WriteLine(result);
+                var result = Empty;
+                try
+                {
+                    result = Evaluator.CallMethod(lineToInterprete, access, this);
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        if (!IsNullOrEmpty(altAccess))
+                        {
+                            result = Evaluator.CallMethod(lineToInterprete, altAccess, this);
+                        }
+                        else
+                        {
+                            throw e;
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        ExplicitOutput.WriteLine(exception.Message);
+                    }
+                }
+
+                if (result != Empty)
+                {
+                    Output.WriteLine(result);
+                }
+                return result;
+            }
+
+            //Var call
+            if (RegexCollection.Store.VarCall.IsMatch(lineToInterprete))
+            {
+                var groups = RegexCollection.Store.VarCall.Match(lineToInterprete).Groups.OfType<Group>()
+                    .Select(a => a.Value).ToList();
+                var result = Empty;
+
+                try
+                {
+                    result = Evaluator.GetObjectVar(groups[1], groups[2], access, this);
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        if (!IsNullOrEmpty(altAccess))
+                        {
+                            result = Evaluator.GetObjectVar(groups[1], groups[2], altAccess, this);
+                        }
+                        else
+                        {
+                            throw e;
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        ExplicitOutput.WriteLine(exception.Message);
+                    }
+                }
+
+                if (result != Empty)
+                {
+                    Output.WriteLine(result);
+                }
                 return result;
             }
 
@@ -263,7 +326,7 @@ namespace Interpreter
                 {
                     try
                     {
-                        return Evaluator.LoadFile(lineToInterprete, this);
+                        return Evaluator.LoadFile(lineToInterprete,access, this);
                     }
                     catch (Exception e)
                     {
@@ -583,14 +646,6 @@ namespace Interpreter
             {
                 Output.WriteLine(Evaluator.IncludeLib(lineToInterprete, access));
                 return Empty;
-            }
-
-            //Var call
-            if (RegexCollection.Store.VarCall.IsMatch(lineToInterprete))
-            {
-                var result = Evaluator.GetObjectVar(lineToInterprete, access);
-                Output.WriteLine(result);
-                return result;
             }
 
             //Bool type

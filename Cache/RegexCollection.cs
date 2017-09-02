@@ -98,11 +98,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for matching method calls
     /// </summary>
-    public Regex MethodCall { get; set; } = new Regex("^\\$(\\w*) *-> *(\\w*):(?:\\[?(.*)\\]|(.*))",RegexOptions.Compiled);
+    public Regex MethodCall { get; set; } = new Regex("^\\$(\\w*) *-> *(\\w*:(?:\\[.*\\]|[^\\[\\],]*))$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for getting var from object
     /// </summary>
-    public Regex VarCall { get; set; } = new Regex("^\\$(\\w*) *-> *(\\w*)", RegexOptions.Compiled);
+    public Regex VarCall { get; set; } = new Regex("^\\$(\\w*) *-> *\\$?(\\w*(?:\\[(.*)\\])?)$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for halting the program
     /// </summary>
@@ -142,7 +142,7 @@ public class RegexCollection
     /// <summary>
     /// Load file
     /// </summary>
-    public Regex Load { get; set; } = new Regex("^load:'([\\w\\.]*)'", RegexOptions.Compiled);
+    public Regex Load { get; set; } = new Regex("^load:\'([\\w\\.]*)\' *(?:as *([\\w]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collector
     /// </summary>

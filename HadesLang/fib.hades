@@ -1,5 +1,6 @@
 ﻿c as num closed = fib:[1,1]
 out:c
+//Testing
 func fib[num a, num b]
 	asLongAs[true]
 		out:a
