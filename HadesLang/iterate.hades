@@ -1,0 +1,3 @@
+﻿iterateFor[num a in range:[0,10]]
+out:a
+endIterateFor

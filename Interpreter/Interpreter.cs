@@ -363,6 +363,42 @@ namespace Interpreter
                     return Empty;
                 }
 
+                //Range
+                if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
+                {
+                    try
+                    {
+                        lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, access, this, file);
+                    }
+                    catch (Exception e)
+                    {
+                        try
+                        {
+                            if (!IsNullOrEmpty(altAccess))
+                            {
+                                lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, altAccess, this, file);
+                            }
+                            else
+                            {
+                                throw e;
+                            }
+                        }
+                        catch (Exception e1)
+                        {
+                            ExplicitOutput.WriteLine(e1.Message);
+                            return Empty;
+                        }
+                    }
+
+                    var range = RegexCollection.Store.Range.Match(lineToInterprete).Groups.OfType<Group>()
+                        .Select(a => a.Value).ToList();
+                    var rangeArray = $"{{{Join(",", Enumerable.Range(int.Parse(range[1]), int.Parse(range[2])))}}}";
+
+                    Output.WriteLine(rangeArray);
+
+                    return rangeArray;
+                }
+
                 #region Console-Specific
 
                 //Input

@@ -131,13 +131,41 @@ namespace Interpreter
                     continue;
                 }
 
+                //IterateFor
+                if (RegexCollection.Store.IterateFor.IsMatch(Lines[i]))
+                {
+                    var block = GetBlock("iterateFor", i, RegexCollection.Store.IterateFor);
+                    var groups = RegexCollection.Store.IterateFor.Match(Lines[i]).Groups.OfType<Group>()
+                        .Select(a => a.Value).ToList();
+                    interpreter.Evaluator.CreateVariable($"{groups[2]} as {groups[1]} closed", access, interpreter, this);
+
+                    var array = interpreter.InterpretLine(groups[3], access, this).TrimStart('{').TrimEnd('}');
+
+
+                    foreach (var iterator in array.StringSplit(',').ToList())
+                    {
+                        interpreter.Evaluator.AssignToVariable($"{groups[2]} = {iterator}", access, false, interpreter,this);
+                        var result = Execute(interpreter, start: block.start + 1, end: block.end, access: access);
+
+                        if (!IsNullOrEmpty(result.Value) && result.Return)
+                        {
+                            interpreter.Output = output;
+                            interpreter.Evaluator.Unload(groups[2], access);
+                            return result;
+                        }
+                    }
+                    interpreter.Evaluator.Unload(groups[2], access);
+                    i = block.end;
+                    continue;
+                }
                 //TODO: Implement tasking
 
                 //Put
                 if (RegexCollection.Store.Put.IsMatch(Lines[i]))
                 {
+                    var result = (interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value, access, this, FAccess), true);
                     interpreter.Output = output;
-                    return (interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value,access,this,FAccess),true);
+                    return result;
                 }
 
                 var interresult = interpreter.InterpretLine(Lines[i], access, this,FAccess);

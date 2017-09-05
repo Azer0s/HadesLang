@@ -88,6 +88,10 @@ public class RegexCollection
     /// </summary>
     public Regex Case { get; set; } = new Regex("^case *\\[(.*)\\]",RegexOptions.Compiled);
     /// <summary>
+    /// Foreach
+    /// </summary>
+    public Regex IterateFor { get; set; } = new Regex("^iterateFor\\[ *(num|dec|word|bit) *(\\w*) *in *(.*)\\]",RegexOptions.Compiled);
+    /// <summary>
     /// Loop
     /// </summary>
     public Regex AsLongAs { get; set; } = new Regex("^asLongAs *\\[(.*)\\]", RegexOptions.Compiled);
@@ -166,11 +170,15 @@ public class RegexCollection
     /// <summary>
     /// End of block
     /// </summary>
-    public Regex End { get; set; } = new Regex("^end(case|aslongas)",RegexOptions.Compiled);
+    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor)",RegexOptions.Compiled);
     /// <summary>
     /// Values outside of function call
     /// </summary>
     public Regex Outside { get; set; } = new Regex("(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
+    /// <summary>
+    /// Numeric range
+    /// </summary>
+    public Regex Range { get; set; } = new Regex("^range:\\[(.*),(.*)\\]",RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

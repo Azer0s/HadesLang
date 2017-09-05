@@ -313,7 +313,7 @@ namespace Interpreter
             return Cache.Instance.Variables.Any(a => a.Key.Name == varname && a.Value.Access == AccessTypes.REACHABLE_ALL);
         }
 
-        private string ReplaceWithVars(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
+        public string ReplaceWithVars(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
         {
             var matches = RegexCollection.Store.Variable.Matches(lineToInterprete);
 
@@ -537,7 +537,7 @@ namespace Interpreter
             var groups = RegexCollection.Store.Load.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
             var path = groups[1];
 
-            if (groups.Count > 2)
+            if (!IsNullOrEmpty(groups[2]))
             {
                 return LoadAs(path, groups[2], access, interpreter);
             }
