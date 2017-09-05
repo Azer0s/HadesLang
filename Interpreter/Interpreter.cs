@@ -20,6 +20,7 @@ namespace Interpreter
         public IScriptOutput ExplicitOutput;
         private IScriptOutput _backup;
         public readonly Evaluator Evaluator;
+        public bool MuteOut = false;
 
 
         public Interpreter(IScriptOutput output, IScriptOutput explicitOutput)
@@ -345,7 +346,10 @@ namespace Interpreter
                             return Empty;
                         }
                     }
-                    ExplicitOutput.WriteLine(result);
+                    if (!MuteOut)
+                    {
+                        ExplicitOutput.WriteLine(result);
+                    }
                     return $"'{result}'";
                 }
 

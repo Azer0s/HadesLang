@@ -82,7 +82,7 @@ namespace Interpreter
         {
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
-
+            interpreter.MuteOut = true;
             var groups = RegexCollection.Store.Assignment.Match(s).Groups.OfType<Group>().Select(a => a.Value).ToList();
             var result = RegexCollection.Store.ArrayValues.IsMatch(groups[2])
                 ? groups[2]
@@ -90,6 +90,7 @@ namespace Interpreter
             if (!RegexCollection.Store.ArrayValues.IsMatch(result))
             {
                 interpreter.Output = output;
+                interpreter.MuteOut = false;
                 throw new Exception("Invalid array format!");
             }
 
@@ -127,6 +128,7 @@ namespace Interpreter
                     }
 
                     interpreter.Output = output;
+                    interpreter.MuteOut = false;
                     throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                 }).ToList();
 
@@ -137,11 +139,13 @@ namespace Interpreter
                 catch (Exception e)
                 {
                     interpreter.Output = output;
+                    interpreter.MuteOut = false;
                     throw;
                 }
             }
 
             interpreter.Output = output;
+            interpreter.MuteOut = false;
             if (success)
             {
                 return $"{groups[1]} is {{{Join(",",split)}}}";
@@ -153,6 +157,7 @@ namespace Interpreter
         {
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
+            interpreter.MuteOut = true;
             var groups = RegexCollection.Store.ArrayAssignment.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
 
@@ -171,6 +176,7 @@ namespace Interpreter
                 catch (Exception e)
                 {
                     interpreter.Output = output;
+                    interpreter.MuteOut = false;
 
                     throw e;
                 }
@@ -184,6 +190,7 @@ namespace Interpreter
                     catch (Exception e)
                     {
                         interpreter.Output = output;
+                        interpreter.MuteOut = false;
 
                         throw e;
                     }
@@ -197,6 +204,7 @@ namespace Interpreter
                     catch (Exception e)
                     {
                         interpreter.Output = output;
+                        interpreter.MuteOut = false;
 
                         throw e;
                     }
@@ -210,6 +218,7 @@ namespace Interpreter
                     catch (Exception e)
                     {
                         interpreter.Output = output;
+                        interpreter.MuteOut = false;
 
                         throw e;
                     }
@@ -217,16 +226,19 @@ namespace Interpreter
                 else
                 {
                     interpreter.Output = output;
+                    interpreter.MuteOut = false;
 
                     throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                 }
 
                 interpreter.Output = output;
+                interpreter.MuteOut = false;
 
                 return $"{groups[1]}[{position}] is {groups[3]}";
             }
 
             interpreter.Output = output;
+            interpreter.MuteOut = false;
 
             throw new Exception($"{exists.Message}");
         }
@@ -404,8 +416,9 @@ namespace Interpreter
 
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
-
+            interpreter.MuteOut = true;
             var result = interpreter.InterpretLine(groups[2].Value, access, file);
+            interpreter.MuteOut = false;
             interpreter.Output = output;
 
             var success = false;
