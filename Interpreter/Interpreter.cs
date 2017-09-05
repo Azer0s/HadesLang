@@ -52,6 +52,9 @@ namespace Interpreter
                 return Empty;
             }
 
+            #region Alias
+
+            //Register aliases
             if (lineToInterprete.StartsWith("%") && lineToInterprete.EndsWith("%"))
             {
                 if (RegexCollection.Store.Alias.IsMatch(lineToInterprete))
@@ -65,7 +68,7 @@ namespace Interpreter
                         {
                             throw new Exception($"Alias for {groups[2]} already defined!");
                         }
-                        Cache.Instance.Alias.Add(groups[2],groups[1]);
+                        Cache.Instance.Alias.Add(groups[2], groups[1]);
                     }
                     catch (Exception e)
                     {
@@ -75,10 +78,26 @@ namespace Interpreter
                 return Empty;
             }
 
+            //Replacement for alias
             if (Cache.Instance.Alias.Count > 0)
             {
                 lineToInterprete = Cache.Instance.Alias.Aggregate(lineToInterprete, (current, keyValuePair) => current.Replace(keyValuePair.Value, keyValuePair.Key));
             }
+
+            //Alias info
+            if (lineToInterprete == "aliasinfo")
+            {
+                if (writeSettings)
+                {
+                    foreach (var keyValuePair in Cache.Instance.Alias)
+                    {
+                        ExplicitOutput.WriteLine($"{keyValuePair.Key}<=>{keyValuePair.Value}");
+                    }
+                    return Empty;
+                }
+            }
+
+            #endregion
 
             altAccess = file != null ? file.FAccess : altAccess;
 
