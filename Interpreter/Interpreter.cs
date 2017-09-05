@@ -51,6 +51,34 @@ namespace Interpreter
                 return Empty;
             }
 
+            if (lineToInterprete.StartsWith("%") && lineToInterprete.EndsWith("%"))
+            {
+                if (RegexCollection.Store.Alias.IsMatch(lineToInterprete))
+                {
+                    try
+                    {
+                        var groups = RegexCollection.Store.Alias.Match(lineToInterprete).Groups.OfType<Group>()
+                            .Select(a => a.Value).ToList();
+
+                        if (Cache.Instance.Alias.ContainsKey(groups[2]))
+                        {
+                            throw new Exception($"Alias for {groups[2]} already defined!");
+                        }
+                        Cache.Instance.Alias.Add(groups[2],groups[1]);
+                    }
+                    catch (Exception e)
+                    {
+                        ExplicitOutput.WriteLine(e.Message);
+                    }
+                }
+                return Empty;
+            }
+
+            if (Cache.Instance.Alias.Count > 0)
+            {
+                lineToInterprete = Cache.Instance.Alias.Aggregate(lineToInterprete, (current, keyValuePair) => current.Replace(keyValuePair.Value, keyValuePair.Key));
+            }
+
             altAccess = file != null ? file.FAccess : altAccess;
 
             //Variable decleration

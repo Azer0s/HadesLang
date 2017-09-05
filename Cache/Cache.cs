@@ -74,6 +74,11 @@ public sealed class Cache
     /// </summary>
     public bool Debug { get; set; } = false;
     /// <summary>
+    /// Alias entries
+    /// </summary>
+    public Dictionary<string,string> Alias { get; set; } = new Dictionary<string, string>();
+
+    /// <summary>
     /// Singleton constructor
     /// </summary>
     private Cache()

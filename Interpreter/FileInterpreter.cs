@@ -31,6 +31,38 @@ namespace Interpreter
                 throw new Exception($"File {path} could not be read!");
             }
 
+            while (Lines.Any(a => a.StartsWith("%import")))
+            {
+                var directives = Lines.Where(a => a.StartsWith("%import")).Select(a => a).ToList();
+
+                foreach (var directive in directives)
+                {
+                    if (RegexCollection.Store.Import.IsMatch(directive))
+                    {
+                        var importPath = RegexCollection.Store.Import.Match(directive).Groups[1].Value;
+                        List<string> importedLines;
+                        try
+                        {
+                            importedLines = File.ReadLines(importPath).ToList();
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception($"File {importPath} could not be read!");
+                        }
+
+                        if (importedLines.Count > 0)
+                        {
+                            Lines.InsertRange(Lines.IndexOf(directive), importedLines);
+                        }
+                        Lines.Remove(directive);
+                    }
+                    else
+                    {
+                        throw new Exception($"Invalid import directive {directive}");
+                    }
+                }
+            }
+
             FAccess = path;
             var c = 1;
             for (var i = 0; i < Lines.Count; i++, c++)

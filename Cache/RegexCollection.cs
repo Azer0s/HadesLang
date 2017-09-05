@@ -18,7 +18,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for ignoring tabs and spaces in file
     /// </summary>
-    public Regex IgnoreTabsAndSpaces { get; set; } = new Regex("^[ \\t]*(.*)",RegexOptions.Compiled);
+    public Regex IgnoreTabsAndSpaces { get; set; } = new Regex("^[ \\t]*(.*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling calculation cache
     /// </summary>
@@ -26,7 +26,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for arguments in function decleration
     /// </summary>
-    public Regex Argument { get; set; } = new Regex("^(word|num|dec|bit) +([\\w]*)",RegexOptions.Compiled);
+    public Regex Argument { get; set; } = new Regex("^(word|num|dec|bit) +([\\w]*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for dumping variables
     /// </summary>
@@ -46,19 +46,19 @@ public class RegexCollection
     /// <summary>
     /// Regex for assigning data to variables with an operation
     /// </summary>
-    public Regex OpAssignment { get; set; } = new Regex("^(\\w*) *(\\+|-|\\*|\\/)= *(.*)",RegexOptions.Compiled);
+    public Regex OpAssignment { get; set; } = new Regex("^(\\w*) *(\\+|-|\\*|\\/)= *(.*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for increase/decrease by one
     /// </summary>
-    public Regex InDeCrease { get; set; } = new Regex("^(\\w*)(?:-|\\+)(-|\\+)",RegexOptions.Compiled);
+    public Regex InDeCrease { get; set; } = new Regex("^(\\w*)(?:-|\\+)(-|\\+)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for assigning data to specific positions in an array
     /// </summary>
-    public Regex ArrayAssignment { get; set; } = new Regex("(\\w*)\\[(.*)\\] *= *(.*)",RegexOptions.Compiled);
+    public Regex ArrayAssignment { get; set; } = new Regex("(\\w*)\\[(.*)\\] *= *(.*)", RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type word
     /// </summary>
-    public Regex IsWord { get; set; } = new Regex("\'([\\w ]*)\'",RegexOptions.Compiled);
+    public Regex IsWord { get; set; } = new Regex("\'([\\w ]*)\'", RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type num
     /// </summary>
@@ -70,7 +70,7 @@ public class RegexCollection
     /// <summary>
     /// Checks if a string contains or is of type bit
     /// </summary>
-    public Regex IsBit { get; set; } = new Regex("^true|false",RegexOptions.Compiled);
+    public Regex IsBit { get; set; } = new Regex("^true|false", RegexOptions.Compiled);
     /// <summary>
     /// Regex for including a library
     /// </summary>
@@ -82,15 +82,15 @@ public class RegexCollection
     /// <summary>
     /// Function decleration
     /// </summary>
-    public Regex FunctionDecleration { get; set; } = new Regex("^func *(\\w*) *\\[(.*)\\]",RegexOptions.Compiled);
+    public Regex FunctionDecleration { get; set; } = new Regex("^func *(\\w*) *\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Case statement
     /// </summary>
-    public Regex Case { get; set; } = new Regex("^case *\\[(.*)\\]",RegexOptions.Compiled);
+    public Regex Case { get; set; } = new Regex("^case *\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Foreach
     /// </summary>
-    public Regex IterateFor { get; set; } = new Regex("^iterateFor\\[ *(num|dec|word|bit) *(\\w*) *in *(.*)\\]",RegexOptions.Compiled);
+    public Regex IterateFor { get; set; } = new Regex("^iterateFor\\[ *(num|dec|word|bit) *(\\w*) *in *(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Loop
     /// </summary>
@@ -98,7 +98,7 @@ public class RegexCollection
     /// <summary>
     /// Return
     /// </summary>
-    public Regex Put { get; set; } = new Regex("^put +(.*)",RegexOptions.Compiled);
+    public Regex Put { get; set; } = new Regex("^put +(.*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for matching method calls
     /// </summary>
@@ -114,7 +114,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for input
     /// </summary>
-    public Regex Input { get; set; } = new Regex("^in:(\\w*)",RegexOptions.Compiled);
+    public Regex Input { get; set; } = new Regex("^in:(\\w*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for output/conversion to word datatype
     /// </summary>
@@ -126,19 +126,19 @@ public class RegexCollection
     /// <summary>
     /// Regex for detecting array values
     /// </summary>
-    public Regex ArrayValues { get; set; } = new Regex("{(.*)}",RegexOptions.Compiled);
+    public Regex ArrayValues { get; set; } = new Regex("{(.*)}", RegexOptions.Compiled);
     /// <summary>
     /// Regex for detecting single varnames
     /// </summary>
-    public Regex SingleName { get; set; } = new Regex("^[a-zA-Z]*$",RegexOptions.Compiled);
+    public Regex SingleName { get; set; } = new Regex("^[a-zA-Z]*$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for uload keyword
     /// </summary>
-    public Regex Unload { get; set; } = new Regex("^uload:(\\w*)",RegexOptions.Compiled);
+    public Regex Unload { get; set; } = new Regex("^uload:(\\w*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for exists keyword
     /// </summary>
-    public Regex Exists { get; set; } = new Regex("^exists:(\\w*)",RegexOptions.Compiled);
+    public Regex Exists { get; set; } = new Regex("^exists:(\\w*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for type keyword
     /// </summary>
@@ -162,15 +162,19 @@ public class RegexCollection
     /// <summary>
     /// Regex for array access
     /// </summary>
-    public Regex ArrayVariable { get; set; } = new Regex("(\\$\\w*)\\[(.*)\\]",RegexOptions.Compiled);
+    public Regex ArrayVariable { get; set; } = new Regex("(\\$\\w*)\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Regex for forcing var values to interpreter
     /// </summary>
-    public Regex ForceThrough { get; set; } = new Regex("^#(.*)",RegexOptions.Compiled);
+    public Regex ForceThrough { get; set; } = new Regex("^#(.*)", RegexOptions.Compiled);
+    /// <summary>
+    /// Alias - Same as define in C/C++
+    /// </summary>
+    public Regex Alias { get; set; } = new Regex("^%alias +(.*) +(.*)%$",RegexOptions.Compiled);
     /// <summary>
     /// End of block
     /// </summary>
-    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor)",RegexOptions.Compiled);
+    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor)", RegexOptions.Compiled);
     /// <summary>
     /// Values outside of function call
     /// </summary>
@@ -178,7 +182,11 @@ public class RegexCollection
     /// <summary>
     /// Numeric range
     /// </summary>
-    public Regex Range { get; set; } = new Regex("^range:\\[(.*),(.*)\\]",RegexOptions.Compiled);
+    public Regex Range { get; set; } = new Regex("^range:\\[(.*),(.*)\\]", RegexOptions.Compiled);
+    /// <summary>
+    /// Import - Same as include in C/C++
+    /// </summary>
+    public Regex Import { get; set; } = new Regex("^%import +(.*)%$",RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

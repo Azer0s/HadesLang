@@ -2,6 +2,14 @@
 out:a
 endIterateFor
 
+%import fibrec.hades%
+
 iterateFor[word a in {'Hello','World','Test'}]
 out:a
 endIterateFor
+
+func it[num a]
+	iterateFor[num b in range:[0,$a]]
+		out:b
+	endIterateFor
+endFunc
