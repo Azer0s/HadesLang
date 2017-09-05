@@ -64,10 +64,5 @@
       <Name>Interpreter</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="deflib">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

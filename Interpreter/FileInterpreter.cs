@@ -139,8 +139,8 @@ namespace Interpreter
                         .Select(a => a.Value).ToList();
                     interpreter.Evaluator.CreateVariable($"{groups[2]} as {groups[1]} closed", access, interpreter, this);
 
-                    var array = interpreter.InterpretLine(groups[3], access, this).TrimStart('{').TrimEnd('}');
-
+                    var array = RegexCollection.Store.ArrayValues.IsMatch(groups[3]) ? groups[3] : interpreter.InterpretLine(groups[3], access, this);
+                    array = array.TrimStart('{').TrimEnd('}');
 
                     foreach (var iterator in array.StringSplit(',').ToList())
                     {

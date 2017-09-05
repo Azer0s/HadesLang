@@ -1,3 +1,7 @@
 ﻿iterateFor[num a in range:[0,10]]
 out:a
 endIterateFor
+
+iterateFor[word a in {'Hello','World','Test'}]
+out:a
+endIterateFor
