@@ -19,17 +19,25 @@ namespace Interpreter
         public List<Methods> Functions = new List<Methods>();
         private readonly Dictionary<int, int> _lineMap;
         public string FAccess;
-        public FileInterpreter(string path)
+        public FileInterpreter(string path, List<string> customLines = null)
         {
-            try
+            if (IsNullOrEmpty(path) && customLines != null)
             {
-                Lines = File.ReadAllLines(path).ToList();
+                Lines = customLines;
                 _lineMap = new Dictionary<int, int>(Lines.Count);
             }
-            catch (Exception e)
+            else
             {
-                throw new Exception($"File {path} could not be read!");
-            }
+                try
+                {
+                    Lines = File.ReadAllLines(path).ToList();
+                    _lineMap = new Dictionary<int, int>(Lines.Count);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception($"File {path} could not be read!");
+                }
+            }   
 
             while (Lines.Any(a => a.StartsWith("%import")))
             {
