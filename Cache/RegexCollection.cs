@@ -187,6 +187,10 @@ public class RegexCollection
     /// Import - Same as include in C/C++
     /// </summary>
     public Regex Import { get; set; } = new Regex("^%import +(.*)%$",RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for simple // comment
+    /// </summary>
+    public Regex SingleLineComment { get; set; } = new Regex("\\/\\/.*", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

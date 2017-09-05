@@ -80,6 +80,12 @@ namespace Interpreter
                     var ignored = RegexCollection.Store.IgnoreTabsAndSpaces.Match(Lines[i]).Groups[1].Value;
                     if (!ignored.StartsWith("//"))
                     {
+                        if (ignored.Contains("//"))
+                        {
+                            ignored = RegexCollection.Store.SingleLineComment.Replace(ignored, "");
+                            ignored = ignored.Replace("\\/", "/");
+                        }
+
                         Lines[i] = ignored;
                         _lineMap[i] = c;
                     }
