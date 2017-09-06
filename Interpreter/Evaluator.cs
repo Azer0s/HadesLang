@@ -548,11 +548,14 @@ namespace Interpreter
         public string LoadFile(string lineToInterprete,string access, Interpreter interpreter)
         {
             var groups = RegexCollection.Store.Load.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
-            var path = groups[1];
+            var output = interpreter.Output;
+            interpreter.Output = new NoOutput();
+            var path = !IsNullOrEmpty(groups[2]) ? interpreter.InterpretLine(groups[2],access,null).TrimStart('\'').TrimEnd('\'') : groups[1];
+            interpreter.Output = output;
 
-            if (!IsNullOrEmpty(groups[2]))
+            if (!IsNullOrEmpty(groups[3]))
             {
-                return LoadAs(path, groups[2], access, interpreter);
+                return LoadAs(path, groups[3], access, interpreter);
             }
 
             var result = new FileInterpreter(path).Execute(interpreter,path);

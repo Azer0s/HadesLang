@@ -146,7 +146,7 @@ public class RegexCollection
     /// <summary>
     /// Load file
     /// </summary>
-    public Regex Load { get; set; } = new Regex("^load:\'([\\w\\.]*)\' *(?:as *([\\w]*))?$", RegexOptions.Compiled);
+    public Regex Load { get; set; } = new Regex("^load:(?:\'([\\w\\.]*)\'|([^\' ]*)) *(?:as *([\\w]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collector
     /// </summary>
