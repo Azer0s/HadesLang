@@ -170,7 +170,7 @@ public class RegexCollection
     /// <summary>
     /// Alias - Same as define in C/C++
     /// </summary>
-    public Regex Alias { get; set; } = new Regex("^%alias +(.*) +(.*)%$",RegexOptions.Compiled);
+    public Regex Alias { get; set; } = new Regex("^%alias +([\\w ]*) +\'?([^\']*)\'?%$", RegexOptions.Compiled);
     /// <summary>
     /// End of block
     /// </summary>

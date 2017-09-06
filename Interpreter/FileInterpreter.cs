@@ -71,6 +71,8 @@ namespace Interpreter
                 }
             }
 
+            //TODO Implement alias for file specific keywords
+
             FAccess = path;
             var c = 1;
             for (var i = 0; i < Lines.Count; i++, c++)

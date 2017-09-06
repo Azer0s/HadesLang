@@ -68,12 +68,16 @@ namespace Interpreter
                         {
                             throw new Exception($"Alias for {groups[2]} already defined!");
                         }
-                        Cache.Instance.Alias.Add(groups[2], groups[1]);
+                        Cache.Instance.Alias.Add(groups[2], groups[1].TrimEnd(' '));
                     }
                     catch (Exception e)
                     {
                         ExplicitOutput.WriteLine(e.Message);
                     }
+
+                    var aliasList = Cache.Instance.Alias.ToList();
+                    aliasList.Sort((firstPair, nextPair) => nextPair.Value.Length.CompareTo(firstPair.Value.Length));
+                    Cache.Instance.Alias = aliasList.ToDictionary(a=>a.Key,a=>a.Value);
                 }
                 return Empty;
             }
