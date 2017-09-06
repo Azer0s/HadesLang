@@ -39,39 +39,54 @@ namespace Interpreter
                 }
             }   
 
-            while (Lines.Any(a => a.StartsWith("%import")))
+            //Directives
+            while (Lines.Any(a => a.StartsWith("%")))
             {
-                var directives = Lines.Where(a => a.StartsWith("%import")).Select(a => a).ToList();
-
-                foreach (var directive in directives)
+                //Imports
+                while (Lines.Any(a => RegexCollection.Store.Import.IsMatch(a)))
                 {
-                    if (RegexCollection.Store.Import.IsMatch(directive))
-                    {
-                        var importPath = RegexCollection.Store.Import.Match(directive).Groups[1].Value;
-                        List<string> importedLines;
-                        try
-                        {
-                            importedLines = File.ReadLines(importPath).ToList();
-                        }
-                        catch (Exception e)
-                        {
-                            throw new Exception($"File {importPath} could not be read!");
-                        }
+                    var directives = Lines.Where(a => RegexCollection.Store.Import.IsMatch(a)).Select(a => a).ToList();
 
-                        if (importedLines.Count > 0)
-                        {
-                            Lines.InsertRange(Lines.IndexOf(directive), importedLines);
-                        }
-                        Lines.Remove(directive);
-                    }
-                    else
+                    foreach (var directive in directives)
                     {
-                        throw new Exception($"Invalid import directive {directive}");
+                        if (RegexCollection.Store.Import.IsMatch(directive))
+                        {
+                            var importPath = RegexCollection.Store.Import.Match(directive).Groups[1].Value;
+                            List<string> importedLines;
+                            try
+                            {
+                                importedLines = File.ReadLines(importPath).ToList();
+                            }
+                            catch (Exception e)
+                            {
+                                throw new Exception($"File {importPath} could not be read!");
+                            }
+
+                            if (importedLines.Count > 0)
+                            {
+                                Lines.InsertRange(Lines.IndexOf(directive), importedLines);
+                            }
+                            Lines.Remove(directive);
+                        }
+                        else
+                        {
+                            throw new Exception($"Invalid import directive {directive}");
+                        }
+                    }
+                }
+
+                //Alias
+                while (Lines.Any(a => RegexCollection.Store.Alias.IsMatch(a)))
+                {
+                    var directives = Lines.Where(a => RegexCollection.Store.Alias.IsMatch(a)).Select(a => a).ToList();
+
+                    foreach (var directive in directives)
+                    {
+                        Lines.Remove(directive);
+                        Evaluator.AliasManager.Register(directive);
                     }
                 }
             }
-
-            //TODO Implement alias for file specific keywords
 
             FAccess = path;
             var c = 1;
@@ -82,6 +97,7 @@ namespace Interpreter
                     var ignored = RegexCollection.Store.IgnoreTabsAndSpaces.Match(Lines[i]).Groups[1].Value;
                     if (!ignored.StartsWith("//"))
                     {
+                        ignored = Evaluator.AliasManager.AliasReplace(ignored);
                         if (ignored.Contains("//"))
                         {
                             ignored = RegexCollection.Store.SingleLineComment.Replace(ignored, "");

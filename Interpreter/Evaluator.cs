@@ -952,5 +952,39 @@ namespace Interpreter
 
             throw new Exception($"Object {groups[1]} does not exist!");
         }
+
+        public class AliasManager
+        {
+            public static void Register(string alias)
+            {
+                if (RegexCollection.Store.Alias.IsMatch(alias))
+                {
+                    try
+                    {
+                        var groups = RegexCollection.Store.Alias.Match(alias).Groups.OfType<Group>()
+                            .Select(a => a.Value).ToList();
+
+                        if (Cache.Instance.Alias.ContainsKey(groups[2]))
+                        {
+                            return;
+                        }
+                        Cache.Instance.Alias.Add(groups[2], groups[1].TrimEnd(' '));
+                    }
+                    catch (Exception e)
+                    {
+                        throw e;
+                    }
+
+                    var aliasList = Cache.Instance.Alias.ToList();
+                    aliasList.Sort((firstPair, nextPair) => nextPair.Value.Length.CompareTo(firstPair.Value.Length));
+                    Cache.Instance.Alias = aliasList.ToDictionary(a => a.Key, a => a.Value);
+                }
+            }
+
+            public static string AliasReplace(string input)
+            {
+                return Cache.Instance.Alias.Count > 0 ? Cache.Instance.Alias.Aggregate(input, (current, keyValuePair) => current.Replace(keyValuePair.Value, keyValuePair.Key)) : input;
+            }
+        }
     }
 }

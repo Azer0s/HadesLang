@@ -57,36 +57,19 @@ namespace Interpreter
             //Register aliases
             if (lineToInterprete.StartsWith("%") && lineToInterprete.EndsWith("%"))
             {
-                if (RegexCollection.Store.Alias.IsMatch(lineToInterprete))
+                try
                 {
-                    try
-                    {
-                        var groups = RegexCollection.Store.Alias.Match(lineToInterprete).Groups.OfType<Group>()
-                            .Select(a => a.Value).ToList();
-
-                        if (Cache.Instance.Alias.ContainsKey(groups[2]))
-                        {
-                            throw new Exception($"Alias for {groups[2]} already defined!");
-                        }
-                        Cache.Instance.Alias.Add(groups[2], groups[1].TrimEnd(' '));
-                    }
-                    catch (Exception e)
-                    {
-                        ExplicitOutput.WriteLine(e.Message);
-                    }
-
-                    var aliasList = Cache.Instance.Alias.ToList();
-                    aliasList.Sort((firstPair, nextPair) => nextPair.Value.Length.CompareTo(firstPair.Value.Length));
-                    Cache.Instance.Alias = aliasList.ToDictionary(a=>a.Key,a=>a.Value);
+                    Evaluator.AliasManager.Register(lineToInterprete);
+                }
+                catch (Exception e)
+                {
+                    ExplicitOutput.WriteLine(e.Message);
                 }
                 return Empty;
             }
 
             //Replacement for alias
-            if (Cache.Instance.Alias.Count > 0)
-            {
-                lineToInterprete = Cache.Instance.Alias.Aggregate(lineToInterprete, (current, keyValuePair) => current.Replace(keyValuePair.Value, keyValuePair.Key));
-            }
+            lineToInterprete = Evaluator.AliasManager.AliasReplace(lineToInterprete);
 
             //Alias info
             if (lineToInterprete == "aliasinfo")
