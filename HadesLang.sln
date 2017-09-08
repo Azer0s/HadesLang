@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HadesLang", "HadesLang\HadesLang.csproj", "{22C5F327-6C7C-416F-8886-8080CD4F2F5A}"
 EndProject
@@ -18,6 +18,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{DC57EFB8-D0DE-4777-8777-34FB7A0F7060}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug", "Debugger\Debug.csproj", "{3E8F583D-7044-4984-BF32-A0FFD09DB7E5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StdLib", "StdLib", "{21CA6D66-595C-491A-8F8B-11931BC22DE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "file", "file\file.csproj", "{3E25D65D-36B4-4F3F-85B1-A8C7587195BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,8 +61,18 @@ Global
 		{3E8F583D-7044-4984-BF32-A0FFD09DB7E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E8F583D-7044-4984-BF32-A0FFD09DB7E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E8F583D-7044-4984-BF32-A0FFD09DB7E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E25D65D-36B4-4F3F-85B1-A8C7587195BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E25D65D-36B4-4F3F-85B1-A8C7587195BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E25D65D-36B4-4F3F-85B1-A8C7587195BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E25D65D-36B4-4F3F-85B1-A8C7587195BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E25D65D-36B4-4F3F-85B1-A8C7587195BC} = {21CA6D66-595C-491A-8F8B-11931BC22DE7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A2B2540A-40C6-4063-801A-99678C61EC31}
 	EndGlobalSection
 EndGlobal

@@ -1,6 +1,7 @@
 ﻿d as num[*] closed = {1,2,3,4}
 c as num closed = add:[8,$d[2]]
 out:c
+put c
 
 func add[num a, num b]
 	put fib:[$a] + fib:[$b]

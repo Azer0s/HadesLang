@@ -2,6 +2,7 @@
 
 namespace Output
 {
+    /// <inheritdoc />
     /// <summary>
     /// Console IO
     /// </summary>

@@ -664,6 +664,12 @@ namespace Interpreter
                 return Empty;
             }
 
+            //Return string
+            if (RegexCollection.Store.IsPureWord.IsMatch(lineToInterprete))
+            {
+                return RegexCollection.Store.IsPureWord.Match(lineToInterprete).Groups[1].Value;
+            }
+
             //Calculation & string concat
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || 
                 lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && 
@@ -726,12 +732,6 @@ namespace Interpreter
             if (RegexCollection.Store.IsBit.IsMatch(lineToInterprete.ToLower()))
             {
                 return lineToInterprete.ToLower();
-            }
-
-            //Return string
-            if (RegexCollection.Store.IsWord.IsMatch(lineToInterprete))
-            {
-                return RegexCollection.Store.IsWord.Match(lineToInterprete).Groups[1].Value;
             }
 
             //Constants

@@ -34,11 +34,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for creating new variables
     /// </summary>
-    public Regex CreateVariable { get; set; } = new Regex("(\\w*) *as *(num|dec|word|bit) *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
+    public Regex CreateVariable { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit) *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for creating new arrays
     /// </summary>
-    public Regex CreateArray { get; set; } = new Regex("(\\w*) *as *(num|dec|word|bit)\\[([\\d]*|\\*)\\] *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
+    public Regex CreateArray { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit)\\[([\\d]*|\\*)\\] *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for assigning data to variables
     /// </summary>
@@ -58,7 +58,7 @@ public class RegexCollection
     /// <summary>
     /// Checks if a string contains or is of type word
     /// </summary>
-    public Regex IsWord { get; set; } = new Regex("\'([\\w ]*)\'", RegexOptions.Compiled);
+    public Regex IsWord { get; set; } = new Regex("\'([^\']*)\'", RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type num
     /// </summary>
@@ -126,7 +126,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for detecting array values
     /// </summary>
-    public Regex ArrayValues { get; set; } = new Regex("{(.*)}", RegexOptions.Compiled);
+    public Regex ArrayValues { get; set; } = new Regex("^{(.*)}", RegexOptions.Compiled);
     /// <summary>
     /// Regex for detecting single varnames
     /// </summary>
@@ -146,7 +146,7 @@ public class RegexCollection
     /// <summary>
     /// Load file
     /// </summary>
-    public Regex Load { get; set; } = new Regex("^load:(?:\'([\\w\\.]*)\'|([^\' ]*)) *(?:as *([\\w]*))?$", RegexOptions.Compiled);
+    public Regex Load { get; set; } = new Regex("^load:(?:\'([\\w\\.: \\\\]*)\'|([^\' ]*)) *(?:as *([\\w]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collector
     /// </summary>
@@ -191,6 +191,10 @@ public class RegexCollection
     /// Regex for simple // comment
     /// </summary>
     public Regex SingleLineComment { get; set; } = new Regex("\\/\\/.*", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for string as word
+    /// </summary>
+    public Regex IsPureWord { get; set; } = new Regex("^\'([^\']*)\'$");
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

@@ -84,6 +84,12 @@ namespace Testing
         }
 
         [Test]
+        public void FileTest()
+        {
+            Assert.AreEqual("23",_interpreter.InterpretLine("load:\'C:\\Users\\ariel\\Documents\\Visual Studio 2017\\Projects\\HadesLang\\Testing\\bin\\Debug\\fibrec.hades\'", "testing",null,""));
+        }
+
+        [Test]
         [TestCase("true", "sqrt(3) smallerIs 3")]
         [TestCase("false", "true imp false")]
         [TestCase("false", "(true and false) or (true and false)")]

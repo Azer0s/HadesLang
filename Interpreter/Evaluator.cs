@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Text.RegularExpressions;
 using org.mariuszgromada.math.mxparser;
@@ -702,9 +703,9 @@ namespace Interpreter
                     },
                     new Library
                     {
-                        Access = AccessTypes.CLOSED,
+                        Access = AccessTypes.REACHABLE_ALL,
                         DataType = DataTypes.NONE,
-                        LibObject = Activator.CreateInstance(Assembly.LoadFile(path).GetType("Library.Library"))
+                        LibObject = Activator.CreateInstanceFrom(path,$"{group[1]}.Library")
                     });
             }
             catch (Exception)
@@ -945,6 +946,22 @@ namespace Interpreter
             if (Exists(groups[1],access).Exists)
             {
                 var variable = GetVariable(groups[1], access);
+
+                if (variable is Library)
+                {
+                    var methodGroups = RegexCollection.Store.Function.Match(groups[2]).Groups.OfType<Group>().Select(a => a.Value).ToArray();
+
+                    MethodInfo mi = (variable as Library).LibObject.Unwrap().GetType().GetMethod(methodGroups[1]);
+
+                    var args = methodGroups[2].StringSplit(',', new[] {'\'', '[', ']', '(', ')'}).ToArray();
+
+                    for (var i = 0; i < args.Length; i++)
+                    {
+                        args[i] = interpreter.InterpretLine(args[i], access, null);
+                    }
+
+                    return mi.Invoke((variable as Library).LibObject.Unwrap(), args);
+                }
 
                 if (variable is FileInterpreter)
                 {
