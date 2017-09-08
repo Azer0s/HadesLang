@@ -49,9 +49,6 @@
     <Compile Include="Testing.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fibrec.hades">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
