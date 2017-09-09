@@ -660,6 +660,10 @@ namespace Interpreter
                         ? $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=undefined\n"
                         : $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}={kvpAsArray.Values.Select(a => $"\n    [{a.Key}]:{a.Value}").Aggregate(Empty, (current, s) => current + s)}\n");
                 }
+                else if (keyValuePair.Value is Library)
+                {
+                    sb.Append($"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=Library\n");
+                }
                 else
                 {
                     sb.Append($"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=Object\n");
