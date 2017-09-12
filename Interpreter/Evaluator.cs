@@ -99,7 +99,7 @@ namespace Interpreter
 
             for (var sp = 0; sp < split.Count; sp++)
             {
-                split[sp] = interpreter.InterpretLine(split[sp].TrimStart(' ').TrimEnd(' '),access,file);
+                split[sp] = interpreter.InterpretLine(split[sp].TrimStart(' ').TrimEnd(' '), access, file);
             }
 
             var success = false;
@@ -149,7 +149,7 @@ namespace Interpreter
             interpreter.MuteOut = false;
             if (success)
             {
-                return $"{groups[1]} is {{{Join(",",split)}}}";
+                return $"{groups[1]} is {{{Join(",", split)}}}";
             }
             throw new Exception($"{groups[1]} could not be set!");
         }
@@ -330,20 +330,28 @@ namespace Interpreter
         {
             var matches = RegexCollection.Store.Variable.Matches(lineToInterprete);
 
-            var result = lineToInterprete;
+            var stringDict = new Dictionary<string, string>();
+
+            foreach (Match variable in RegexCollection.Store.IsWord.Matches(lineToInterprete))
+            {
+                var guid = Guid.NewGuid().ToString().ToLower();
+                lineToInterprete = lineToInterprete.Replace(variable.Value, guid);
+                stringDict.Add(guid, variable.Value);
+            }
+
             foreach (Match match in matches)
             {
                 var variable = GetVariable(match.Groups[1].Value.TrimStart('$'), access);
 
                 if (variable is Variable)
                 {
-                    result = result.Replace(match.Groups[1].Value, (variable as Variable).Value);
+                    lineToInterprete = lineToInterprete.Replace(match.Groups[1].Value, (variable as Variable).Value);
                 }
                 else if (variable is Variables.Array)
                 {
-                    if (RegexCollection.Store.ArrayVariable.IsMatch(lineToInterprete))
+                    if (RegexCollection.Store.ArrayVariable.IsMatch(match.Value))
                     {
-                        result = result.Replace(match.Value, GetArrayValue(match.Value, access, interpreter, file));
+                        lineToInterprete = lineToInterprete.Replace(match.Value, GetArrayValue(match.Value, access, interpreter, file));
                     }
                     else
                     {
@@ -355,7 +363,7 @@ namespace Interpreter
                     throw new Exception($"Variable {match.Value} is an object!");
                 }
             }
-            return result;
+            return stringDict.Aggregate(lineToInterprete, (current, variable) => current.Replace(variable.Key, variable.Value)); ;
         }
 
         public string GetArrayValue(string name, string access, Interpreter interpreter, FileInterpreter file)
@@ -386,11 +394,11 @@ namespace Interpreter
             throw new Exception($"Could not get value of idex {groups[2]} in array {name}!");
         }
 
-        public string InDeCrease(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file,string altAccess)
+        public string InDeCrease(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file, string altAccess)
         {
             var groups = RegexCollection.Store.InDeCrease.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToArray();
             lineToInterprete = $"{groups[1]} = ${groups[1]} {groups[2]} 1";
-            return interpreter.InterpretLine(lineToInterprete, access, file,altAccess);
+            return interpreter.InterpretLine(lineToInterprete, access, file, altAccess);
         }
 
         public IVariable GetVariable(string variable, string access)
@@ -536,22 +544,22 @@ namespace Interpreter
             var result = Exists(varName, access);
             if (!result.Exists)
             {
-                Cache.Instance.Variables.Add(new Meta{Name = varName,Owner = access}, fileInterpreter);
+                Cache.Instance.Variables.Add(new Meta { Name = varName, Owner = access }, fileInterpreter);
             }
             else
             {
                 throw new Exception(result.Message);
             }
 
-            return fileInterpreter.Execute(interpreter,path).Value;
+            return fileInterpreter.Execute(interpreter, path).Value;
         }
 
-        public string LoadFile(string lineToInterprete,string access, Interpreter interpreter)
+        public string LoadFile(string lineToInterprete, string access, Interpreter interpreter)
         {
             var groups = RegexCollection.Store.Load.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
             var output = interpreter.Output;
             interpreter.Output = new NoOutput();
-            var path = !IsNullOrEmpty(groups[2]) ? interpreter.InterpretLine(groups[2],access,null).TrimStart('\'').TrimEnd('\'') : groups[1];
+            var path = !IsNullOrEmpty(groups[2]) ? interpreter.InterpretLine(groups[2], access, null).TrimStart('\'').TrimEnd('\'') : groups[1];
             interpreter.Output = output;
 
             if (!IsNullOrEmpty(groups[3]))
@@ -559,7 +567,7 @@ namespace Interpreter
                 return LoadAs(path, groups[3], access, interpreter);
             }
 
-            var result = new FileInterpreter(path).Execute(interpreter,path);
+            var result = new FileInterpreter(path).Execute(interpreter, path);
 
             if (Cache.Instance.EraseVars)
             {
@@ -607,9 +615,9 @@ namespace Interpreter
             throw new Exception($"Variable {variable} does not exist or the access was denied!");
         }
 
-        public string GetObjectVar(string obj, string varname,string acccess, Interpreter interpreter)
+        public string GetObjectVar(string obj, string varname, string acccess, Interpreter interpreter)
         {
-            if (!Exists(obj,acccess).Exists)
+            if (!Exists(obj, acccess).Exists)
             {
                 throw new Exception($"Object {obj} does not exist!");
             }
@@ -701,15 +709,15 @@ namespace Interpreter
             try
             {
                 Cache.Instance.Variables.Add(new Meta
-                    {
-                        Name = group[2].Value,
-                        Owner = access
-                    },
+                {
+                    Name = group[2].Value,
+                    Owner = access
+                },
                     new Library
                     {
                         Access = AccessTypes.REACHABLE_ALL,
                         DataType = DataTypes.NONE,
-                        LibObject = Activator.CreateInstanceFrom(path,$"{group[1]}.Library")
+                        LibObject = Activator.CreateInstanceFrom(path, $"{group[1]}.Library")
                     });
             }
             catch (Exception)
@@ -734,13 +742,13 @@ namespace Interpreter
                 {
                     if (s.EqualsFromList(Cache.Instance.CharList))
                     {
-                        throw new Exception($"Invalid concat: {Join("",args)}!");
+                        throw new Exception($"Invalid concat: {Join("", args)}!");
                     }
                     result += s.TrimStart('\'').TrimEnd('\'');
                 }
             }
 
-            return (true,$"'{result}'");
+            return (true, $"'{result}'");
         }
 
         public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
@@ -770,7 +778,7 @@ namespace Interpreter
 
             if (lineToInterprete.ContainsFromList(new List<string> { ":", "~" }))
             {
-                var split = lineToInterprete.StringSplit(' ', new[] { '\'', '[', ']' ,'(',')'}).ToArray();
+                var split = lineToInterprete.StringSplit(' ', new[] { '\'', '[', ']', '(', ')' }).ToArray();
 
                 lineToInterprete = Empty;
 
@@ -942,12 +950,12 @@ namespace Interpreter
 
         #endregion
 
-        public string CallMethod(string lineToInterprete, string access,Interpreter interpreter)
+        public string CallMethod(string lineToInterprete, string access, Interpreter interpreter)
         {
             var groups = RegexCollection.Store.MethodCall.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
 
-            if (Exists(groups[1],access).Exists)
+            if (Exists(groups[1], access).Exists)
             {
                 var variable = GetVariable(groups[1], access);
 
@@ -957,7 +965,7 @@ namespace Interpreter
 
                     MethodInfo mi = (variable as Library).LibObject.Unwrap().GetType().GetMethod(methodGroups[1]);
 
-                    var args = methodGroups[2].StringSplit(',', new[] {'\'', '[', ']', '(', ')'}).ToArray();
+                    var args = methodGroups[2].StringSplit(',', new[] { '\'', '[', ']', '(', ')' }).ToArray();
 
                     for (var i = 0; i < args.Length; i++)
                     {
@@ -1009,21 +1017,21 @@ namespace Interpreter
             {
                 if (Cache.Instance.Alias.Count > 0)
                 {
-                    var stringDict = new Dictionary<string,string>();
+                    var stringDict = new Dictionary<string, string>();
 
                     foreach (Match variable in RegexCollection.Store.IsWord.Matches(input))
                     {
                         var guid = Guid.NewGuid().ToString().ToLower();
                         input = input.Replace(variable.Value, guid);
-                        stringDict.Add(guid,variable.Value);
+                        stringDict.Add(guid, variable.Value);
                     }
 
-                    var dict = new Dictionary<string,string>();
+                    var dict = new Dictionary<string, string>();
                     foreach (var keyValuePair in Cache.Instance.Alias)
                     {
                         var guid = Guid.NewGuid().ToString().ToLower();
                         input = input.Replace(keyValuePair.Value, guid);
-                        dict.Add(guid,keyValuePair.Key);
+                        dict.Add(guid, keyValuePair.Key);
                     }
 
                     input = dict.Aggregate(input, (current, variable) => current.Replace(variable.Key, variable.Value));
