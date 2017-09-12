@@ -54,9 +54,6 @@ namespace Interpreter
 
             #region Alias
 
-            //Replacement for alias
-            lineToInterprete = Evaluator.AliasManager.AliasReplace(lineToInterprete);
-
             //Register aliases
             if (lineToInterprete.StartsWith("%") && lineToInterprete.EndsWith("%"))
             {
@@ -70,6 +67,9 @@ namespace Interpreter
                 }
                 return Empty;
             }
+
+            //Replacement for alias
+            lineToInterprete = Evaluator.AliasManager.AliasReplace(lineToInterprete);
 
             //Alias info
             if (lineToInterprete == "aliasinfo")

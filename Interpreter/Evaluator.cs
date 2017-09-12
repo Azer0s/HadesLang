@@ -1003,7 +1003,29 @@ namespace Interpreter
 
             public static string AliasReplace(string input)
             {
-                return Cache.Instance.Alias.Count > 0 ? Cache.Instance.Alias.Aggregate(input, (current, keyValuePair) => current.Replace(keyValuePair.Value, keyValuePair.Key)) : input;
+                if (Cache.Instance.Alias.Count > 0)
+                {
+                    var stringDict = new Dictionary<string,string>();
+
+                    foreach (Match variable in RegexCollection.Store.IsWord.Matches(input))
+                    {
+                        var guid = Guid.NewGuid().ToString().ToLower();
+                        input = input.Replace(variable.Value, guid);
+                        stringDict.Add(guid,variable.Value);
+                    }
+
+                    var dict = new Dictionary<string,string>();
+                    foreach (var keyValuePair in Cache.Instance.Alias)
+                    {
+                        var guid = Guid.NewGuid().ToString().ToLower();
+                        input = input.Replace(keyValuePair.Value, guid);
+                        dict.Add(guid,keyValuePair.Key);
+                    }
+
+                    input = dict.Aggregate(input, (current, variable) => current.Replace(variable.Key, variable.Value));
+                    input = stringDict.Aggregate(input, (current, variable) => current.Replace(variable.Key, variable.Value));
+                }
+                return input;
             }
         }
     }
