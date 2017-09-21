@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using StringExtension;
+// ReSharper disable InconsistentNaming
 
 namespace file
 {
