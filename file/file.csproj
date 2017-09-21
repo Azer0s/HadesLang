@@ -44,5 +44,11 @@
     <Compile Include="Library.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StringExtension\StringExtension.csproj">
+      <Project>{54df6e25-1617-49e2-9c26-86b2e86b372a}</Project>
+      <Name>StringExtension</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

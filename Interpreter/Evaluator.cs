@@ -957,14 +957,14 @@ namespace Interpreter
 
                     MethodInfo mi = (variable as Library).LibObject.Unwrap().GetType().GetMethod(methodGroups[1]);
 
-                    var args = methodGroups[2].StringSplit(',', new[] {'\'', '[', ']', '(', ')'}).ToArray();
+                    var args = methodGroups[2].StringSplit(',', new[] {'\'', '[', ']', '(', ')','{','}'}).ToArray();
 
                     for (var i = 0; i < args.Length; i++)
                     {
                         args[i] = interpreter.InterpretLine(args[i], access, null);
                     }
 
-                    return mi.Invoke((variable as Library).LibObject.Unwrap(), args);
+                    return mi.Invoke((variable as Library).LibObject.Unwrap(), args).ToString();
                 }
 
                 if (variable is FileInterpreter)
