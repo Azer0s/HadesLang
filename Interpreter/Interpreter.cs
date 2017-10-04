@@ -223,25 +223,11 @@ namespace Interpreter
                 var result = Empty;
                 try
                 {
-                    result = Evaluator.CallMethod(lineToInterprete, access, this);
+                    result = Evaluator.CallMethod(lineToInterprete, access, this,altAccess);
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            result = Evaluator.CallMethod(lineToInterprete, altAccess, this);
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
                 }
 
                 if (result != Empty)

@@ -950,7 +950,7 @@ namespace Interpreter
 
         #endregion
 
-        public string CallMethod(string lineToInterprete, string access, Interpreter interpreter)
+        public string CallMethod(string lineToInterprete, string access, Interpreter interpreter,string altAccess = "")
         {
             var groups = RegexCollection.Store.MethodCall.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
@@ -977,7 +977,11 @@ namespace Interpreter
 
                 if (variable is FileInterpreter)
                 {
-                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter);
+                    if (!IsNullOrEmpty(altAccess))
+                    {
+                        access = altAccess;
+                    }
+                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter,access);
                 }
                 throw new Exception($"Variable {groups[1]} is not of type object!");
             }

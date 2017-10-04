@@ -253,7 +253,7 @@ namespace Interpreter
             return (Empty,false);
         }
 
-        public string CallFunction(string function,Interpreter interpreter)
+        public string CallFunction(string function,Interpreter interpreter, string altAccess = "")
         {
             var groups = RegexCollection.Store.Function.Match(function).Groups.OfType<Group>().Select(a => a.Value)
                 .ToList();
@@ -270,10 +270,30 @@ namespace Interpreter
                     return $"Invalid function call: {function}!";
                 }
 
+                var eOutput = interpreter.ExplicitOutput;
+                var output = interpreter.Output;
+                interpreter.Output = new NoOutput();
+                interpreter.ExplicitOutput = new NoOutput();
                 for (var i = 0; i < args.Count; i++)
                 {
-                    interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}",access,interpreter,this);
+                    try
+                    {
+                        if (!IsNullOrEmpty(altAccess))
+                        {
+                            args[i] = interpreter.InterpretLine(args[i], altAccess, this);
+                        }
+
+                        interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", access, interpreter, this);
+                    }
+                    catch (Exception e)
+                    {
+                        interpreter.ExplicitOutput = eOutput;
+                        interpreter.Output = output;
+                        throw;
+                    }
                 }
+                interpreter.ExplicitOutput = eOutput;
+                interpreter.Output = output;
 
                 var result = Execute(interpreter, start: func.Postition.Item1+1, end: func.Postition.Item2,access:access);
 
