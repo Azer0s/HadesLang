@@ -37,7 +37,7 @@ endfunc
 ```
 ### main.hades
 ```vb
-load:'fibonacci.hades' as a
+with 'fibonacci.hades' as a
 b as num reachable = $a->fib:[7]
 out:b
 ```
