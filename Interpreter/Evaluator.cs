@@ -927,6 +927,7 @@ namespace Interpreter
 
         public string EvaluateOut(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
         {
+            lineToInterprete = lineToInterprete.TrimEnd(' ');
             var groups = RegexCollection.Store.Output.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
             var output = interpreter.GetOutput();
@@ -943,7 +944,7 @@ namespace Interpreter
             }
             interpreter.SetOutput(output.output,output.eOutput);
 
-            return $"'{result}'";
+            return $"'{result.Replace("\\/","/")}'";
         }
 
         #endregion

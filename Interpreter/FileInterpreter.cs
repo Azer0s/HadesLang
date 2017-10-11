@@ -101,7 +101,6 @@ namespace Interpreter
                         if (ignored.Contains("//"))
                         {
                             ignored = RegexCollection.Store.SingleLineComment.Replace(ignored, "");
-                            ignored = ignored.Replace("\\/", "/");
                         }
 
                         Lines[i] = ignored;
