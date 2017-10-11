@@ -72,9 +72,9 @@ public class RegexCollection
     /// </summary>
     public Regex IsBit { get; set; } = new Regex("^true|false", RegexOptions.Compiled);
     /// <summary>
-    /// Regex for including a library
+    /// Regex for including a library or a file
     /// </summary>
-    public Regex With { get; set; } = new Regex("^with *\'(\\w*)\' *as *(\\w*)", RegexOptions.Compiled);
+    public Regex With { get; set; } = new Regex("^with *(?:\'([\\w\\.: \\\\]*)\'|([^\' ]*)) *(?:as *([\\w]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for matching built-in functions
     /// </summary>
@@ -143,10 +143,6 @@ public class RegexCollection
     /// Regex for type keyword
     /// </summary>
     public Regex Type { get; set; } = new Regex("^d?type:([\\w' .]*)", RegexOptions.Compiled);
-    /// <summary>
-    /// Load file
-    /// </summary>
-    public Regex Load { get; set; } = new Regex("^load:(?:\'([\\w\\.: \\\\]*)\'|([^\' ]*)) *(?:as *([\\w]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collector
     /// </summary>

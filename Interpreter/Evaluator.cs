@@ -81,8 +81,8 @@ namespace Interpreter
 
         private string AssignToArray(string s, string access, Interpreter interpreter, FileInterpreter file)
         {
-            var output = interpreter.Output;
-            interpreter.Output = new NoOutput();
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
             interpreter.MuteOut = true;
             var groups = RegexCollection.Store.Assignment.Match(s).Groups.OfType<Group>().Select(a => a.Value).ToList();
             var result = RegexCollection.Store.ArrayValues.IsMatch(groups[2])
@@ -90,7 +90,7 @@ namespace Interpreter
                 : interpreter.InterpretLine(groups[2], access, file);
             if (!RegexCollection.Store.ArrayValues.IsMatch(result))
             {
-                interpreter.Output = output;
+                interpreter.SetOutput(output.output,output.eOutput);
                 interpreter.MuteOut = false;
                 throw new Exception("Invalid array format!");
             }
@@ -128,7 +128,7 @@ namespace Interpreter
                         return new KeyValuePair<int, string>(index - 1, group);
                     }
 
-                    interpreter.Output = output;
+                    interpreter.SetOutput(output.output, output.eOutput);
                     interpreter.MuteOut = false;
                     throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                 }).ToList();
@@ -139,13 +139,13 @@ namespace Interpreter
                 }
                 catch (Exception e)
                 {
-                    interpreter.Output = output;
+                    interpreter.SetOutput(output.output, output.eOutput);
                     interpreter.MuteOut = false;
                     throw;
                 }
             }
 
-            interpreter.Output = output;
+            interpreter.SetOutput(output.output, output.eOutput);
             interpreter.MuteOut = false;
             if (success)
             {
@@ -156,8 +156,8 @@ namespace Interpreter
 
         public string AssignToArrayAtPos(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
         {
-            var output = interpreter.Output;
-            interpreter.Output = new NoOutput();
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
             interpreter.MuteOut = true;
             var groups = RegexCollection.Store.ArrayAssignment.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
@@ -176,7 +176,7 @@ namespace Interpreter
                 }
                 catch (Exception e)
                 {
-                    interpreter.Output = output;
+                    interpreter.SetOutput(output.output,output.eOutput);
                     interpreter.MuteOut = false;
 
                     throw e;
@@ -190,7 +190,7 @@ namespace Interpreter
                     }
                     catch (Exception e)
                     {
-                        interpreter.Output = output;
+                        interpreter.SetOutput(output.output, output.eOutput);
                         interpreter.MuteOut = false;
 
                         throw e;
@@ -204,7 +204,7 @@ namespace Interpreter
                     }
                     catch (Exception e)
                     {
-                        interpreter.Output = output;
+                        interpreter.SetOutput(output.output, output.eOutput);
                         interpreter.MuteOut = false;
 
                         throw e;
@@ -218,7 +218,7 @@ namespace Interpreter
                     }
                     catch (Exception e)
                     {
-                        interpreter.Output = output;
+                        interpreter.SetOutput(output.output, output.eOutput);
                         interpreter.MuteOut = false;
 
                         throw e;
@@ -226,19 +226,19 @@ namespace Interpreter
                 }
                 else
                 {
-                    interpreter.Output = output;
+                    interpreter.SetOutput(output.output, output.eOutput);
                     interpreter.MuteOut = false;
 
                     throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                 }
 
-                interpreter.Output = output;
+                interpreter.SetOutput(output.output, output.eOutput);
                 interpreter.MuteOut = false;
 
                 return $"{groups[1]}[{position}] is {groups[3]}";
             }
 
-            interpreter.Output = output;
+            interpreter.SetOutput(output.output, output.eOutput);
             interpreter.MuteOut = false;
 
             throw new Exception($"{exists.Message}");
@@ -373,20 +373,20 @@ namespace Interpreter
 
             if (variable is Variables.Array)
             {
-                var output = interpreter.Output;
+                var output = interpreter.GetOutput();
                 var index = -1;
                 try
                 {
-                    interpreter.Output = new NoOutput();
+                    interpreter.SetOutput(new NoOutput(),output.output);
                     index = int.Parse(interpreter.InterpretLine(groups[2].Value, access, file));
                     var value = (variable as Variables.Array).Values[index];
-                    interpreter.Output = output;
+                    interpreter.SetOutput(output.output,output.eOutput);
 
                     return value;
                 }
                 catch (Exception)
                 {
-                    interpreter.Output = output;
+                    interpreter.SetOutput(output.output, output.eOutput);
                     throw new Exception($"Index {index} in array {groups[1].Value} is out of bounds!");
                 }
             }
@@ -423,12 +423,12 @@ namespace Interpreter
                 return AssignToArray(lineToInterprete, access, interpreter, file);
             }
 
-            var output = interpreter.Output;
-            interpreter.Output = new NoOutput();
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
             interpreter.MuteOut = true;
             var result = interpreter.InterpretLine(groups[2].Value, access, file);
             interpreter.MuteOut = false;
-            interpreter.Output = output;
+            interpreter.SetOutput(output.output, output.eOutput);
 
             var success = false;
 
@@ -554,17 +554,11 @@ namespace Interpreter
             return fileInterpreter.Execute(interpreter, path).Value;
         }
 
-        public string LoadFile(string lineToInterprete, string access, Interpreter interpreter)
+        public string LoadFile(string path, string varname, string access, Interpreter interpreter)
         {
-            var groups = RegexCollection.Store.Load.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
-            var output = interpreter.Output;
-            interpreter.Output = new NoOutput();
-            var path = !IsNullOrEmpty(groups[2]) ? interpreter.InterpretLine(groups[2], access, null).TrimStart('\'').TrimEnd('\'') : groups[1];
-            interpreter.Output = output;
-
-            if (!IsNullOrEmpty(groups[3]))
+            if (!IsNullOrEmpty(varname))
             {
-                return LoadAs(path, groups[3], access, interpreter);
+                return LoadAs(path, varname, access, interpreter);
             }
 
             var result = new FileInterpreter(path).Execute(interpreter, path);
@@ -638,11 +632,11 @@ namespace Interpreter
                     return (fileVariable as Variable).Value;
                 }
 
-                var output = interpreter.Output;
-                interpreter.Output = new NoOutput();
+                var output = interpreter.GetOutput();
+                interpreter.SetOutput(new NoOutput(), output.eOutput);
                 var fileInterpreter = varObj as FileInterpreter;
                 var result = interpreter.InterpretLine(varname, fileInterpreter.FAccess, fileInterpreter);
-                interpreter.Output = output;
+                interpreter.SetOutput(output.output, output.eOutput);
                 return result;
             }
             throw new Exception($"Variable {obj} is not of type object!");
@@ -690,42 +684,59 @@ namespace Interpreter
 
         #region Libraries
 
-        public string IncludeLib(string lineToInterprete, string access)
+        public string IncludeLib(string lineToInterprete, string access, Interpreter interpreter)
         {
-            var group = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().ToList();
+            var group = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
 
-            var exist = Exists(group[2].Value, access);
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), new NoOutput());
+            var result = interpreter.InterpretLine(group[2], access, null).Trim('\'');
+            result = IsNullOrEmpty(result) ? group[2] : result;
+            interpreter.SetOutput(output.output,output.eOutput);
+
+            var fn = IsNullOrEmpty(group[1]) ? result : group[1];
+            var varname = IsNullOrEmpty(group[3]) ? fn : group[3];
+
+            var file = new FileInfo(fn);
+
+            if (!IsNullOrEmpty(file.Extension))
+            {
+                return LoadFile(fn,group[3], access, interpreter);
+            }
+
+            var exist = Exists(varname, access);
             if (exist.Exists)
             {
-                return exist.Message;
+                throw new Exception(exist.Message);
             }
-            var path = $"{Cache.Instance.LibraryLocation}\\{group[1]}.dll";
+            var path = $"{Cache.Instance.LibraryLocation}\\{fn}.dll";
 
             if (!File.Exists(path))
             {
-                return $"Library {group[1]} does not exist!";
+                throw new Exception($"Library {fn} does not exist!");
             }
 
             try
             {
                 Cache.Instance.Variables.Add(new Meta
                 {
-                    Name = group[2].Value,
+                    Name = varname,
                     Owner = access
                 },
-                    new Library
-                    {
-                        Access = AccessTypes.REACHABLE_ALL,
-                        DataType = DataTypes.NONE,
-                        LibObject = Activator.CreateInstanceFrom(path, $"{group[1]}.Library")
-                    });
+                new Library
+                {
+                    Access = AccessTypes.REACHABLE_ALL,
+                    DataType = DataTypes.NONE,
+                    LibObject = Activator.CreateInstanceFrom(path, $"{fn}.Library")
+                });
             }
             catch (Exception)
             {
-                return $"Error while loading library {group[1]}!";
+                throw new Exception($"Error while loading library {fn}!");
             }
 
-            return $"Succesfully loaded library {group[1]}!";
+            interpreter.Output.WriteLine($"Succesfully loaded library {fn}!");
+            return Empty;
         }
 
         #endregion
@@ -787,13 +798,10 @@ namespace Interpreter
                     var repl = t.Replace("~", "->");
                     if (RegexCollection.Store.Function.IsMatch(repl) || RegexCollection.Store.MethodCall.IsMatch(repl) || RegexCollection.Store.VarCall.IsMatch(repl) || t.StartsWith("$"))
                     {
-                        var output = interpreter.Output;
-                        var eOutput = interpreter.ExplicitOutput;
-                        interpreter.Output = new NoOutput();
-                        interpreter.ExplicitOutput = new NoOutput();
+                        var output = interpreter.GetOutput();
+                        interpreter.SetOutput(new NoOutput(), new NoOutput());
                         lineToInterprete += interpreter.InterpretLine(repl, access, file);
-                        interpreter.Output = output;
-                        interpreter.ExplicitOutput = eOutput;
+                        interpreter.SetOutput(output.output,output.eOutput);
                     }
                     else
                     {
@@ -921,8 +929,8 @@ namespace Interpreter
         {
             var groups = RegexCollection.Store.Output.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
-            var output = interpreter.Output;
-            interpreter.Output = new NoOutput();
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
 
             string result;
             try
@@ -933,7 +941,7 @@ namespace Interpreter
             {
                 throw e;
             }
-            interpreter.Output = output;
+            interpreter.SetOutput(output.output,output.eOutput);
 
             return $"'{result}'";
         }

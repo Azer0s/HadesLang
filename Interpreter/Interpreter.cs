@@ -45,6 +45,17 @@ namespace Interpreter
             Cache.Instance.LoadFiles = new List<string>();
         }
 
+        public void SetOutput(IScriptOutput output, IScriptOutput explicitOutput)
+        {
+            Output = output;
+            ExplicitOutput = explicitOutput;
+        }
+
+        public (IScriptOutput output, IScriptOutput eOutput) GetOutput()
+        {
+            return (Output, ExplicitOutput);
+        }
+
         public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "",bool writeSettings = false)
         {
             if (IsNullOrEmpty(lineToInterprete) || RegexCollection.Store.End.IsMatch(lineToInterprete.ToLower()))
@@ -343,20 +354,6 @@ namespace Interpreter
                         ExplicitOutput.WriteLine(result);
                     }
                     return $"'{result}'";
-                }
-
-                //Load
-                if (RegexCollection.Store.Load.IsMatch(lineToInterprete))
-                {
-                    try
-                    {
-                        return Evaluator.LoadFile(lineToInterprete,access, this);
-                    }
-                    catch (Exception e)
-                    {
-                        ExplicitOutput.WriteLine(e.Message);
-                        return Empty;
-                    }
                 }
 
                 //Unload
@@ -707,11 +704,18 @@ namespace Interpreter
                 return Empty;
             }
 
-            //Include library
+            //Include library or file
             if (RegexCollection.Store.With.IsMatch(lineToInterprete))
             {
-                Output.WriteLine(Evaluator.IncludeLib(lineToInterprete, access));
-                return Empty;
+                try
+                {
+                    return Evaluator.IncludeLib(lineToInterprete, access,this);
+                }
+                catch (Exception e)
+                {
+                    ExplicitOutput.WriteLine(e.Message);
+                    return Empty;
+                }
             }
 
             //Bool type
