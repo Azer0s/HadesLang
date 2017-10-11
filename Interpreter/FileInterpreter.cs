@@ -124,8 +124,8 @@ namespace Interpreter
 
         public (string Value,bool Return) Execute(Interpreter interpreter, string access, int start = 0, int end = -1)
         {
-            var output = interpreter.Output;
-            interpreter.Output = new NoOutput();
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
 
             end = end != -1 ? end : Lines.Count;
 
@@ -163,7 +163,7 @@ namespace Interpreter
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
-                            interpreter.Output = output;
+                            interpreter.SetOutput(output.output, output.eOutput);
                             return result;
                         }
                     }
@@ -185,7 +185,7 @@ namespace Interpreter
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
-                            interpreter.Output = output;
+                            interpreter.SetOutput(output.output, output.eOutput);
                             return result;
                         }
                     }
@@ -212,7 +212,7 @@ namespace Interpreter
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
-                            interpreter.Output = output;
+                            interpreter.SetOutput(output.output, output.eOutput);
                             interpreter.Evaluator.Unload(groups[2], access);
                             return result;
                         }
@@ -227,7 +227,7 @@ namespace Interpreter
                 if (RegexCollection.Store.Put.IsMatch(Lines[i]))
                 {
                     var result = (interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value, access, this, FAccess), true);
-                    interpreter.Output = output;
+                    interpreter.SetOutput(output.output, output.eOutput);
                     return result;
                 }
 
@@ -242,13 +242,13 @@ namespace Interpreter
                     }
                     if (!IsNullOrEmpty(interresult))
                     {
-                        interpreter.Output = output;
+                        interpreter.SetOutput(output.output, output.eOutput);
                         return (interresult,false);
                     }
                 }
             }
 
-            interpreter.Output = output;
+            interpreter.SetOutput(output.output, output.eOutput);
             return (Empty,false);
         }
 
@@ -269,10 +269,8 @@ namespace Interpreter
                     return $"Invalid function call: {function}!";
                 }
 
-                var eOutput = interpreter.ExplicitOutput;
-                var output = interpreter.Output;
-                interpreter.Output = new NoOutput();
-                interpreter.ExplicitOutput = new NoOutput();
+                var output = interpreter.GetOutput();
+                interpreter.SetOutput(new NoOutput(), new NoOutput());
                 for (var i = 0; i < args.Count; i++)
                 {
                     try
@@ -286,13 +284,11 @@ namespace Interpreter
                     }
                     catch (Exception e)
                     {
-                        interpreter.ExplicitOutput = eOutput;
-                        interpreter.Output = output;
+                        interpreter.SetOutput(output.output, output.eOutput);
                         throw;
                     }
                 }
-                interpreter.ExplicitOutput = eOutput;
-                interpreter.Output = output;
+                interpreter.SetOutput(output.output, output.eOutput);
 
                 var result = Execute(interpreter, start: func.Postition.Item1+1, end: func.Postition.Item2,access:access);
 
