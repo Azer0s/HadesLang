@@ -86,7 +86,7 @@ namespace Testing
         [Test]
         public void FileTest()
         {
-            Assert.AreEqual("23",_interpreter.InterpretLine("load:\'C:\\Users\\ariel\\Documents\\Visual Studio 2017\\Projects\\HadesLang\\HadesLang\\fibrec.hades\'", "testing",null,""));
+            Assert.AreEqual("23",_interpreter.InterpretLine("with \'D:\\workspace\\HadesLang\\HadesLang\\fibrec.hades\'", "testing",null,""));
         }
 
         [Test]
