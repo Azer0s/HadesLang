@@ -54,7 +54,7 @@ Output will be Hello world
 ### foo.hades
 ```vb
 a as num reachable_all = 18
-load:'bar.hades' as b
+with 'bar.hades' as b
 $b->printA:[]
 ```
 ### bar.hades
