@@ -778,8 +778,21 @@ namespace Interpreter
                 }
                 if (variable is FileInterpreter)
                 {
-                    Output.WriteLine($"Variable {lineToInterprete} is an object!");
-                    return Empty;
+                    string guid;
+
+                    //Put into cache
+                    if (Cache.Instance.FileCache.ContainsValue(variable))
+                    {
+                        guid = Cache.Instance.FileCache.First(a => a.Value == variable).Key;
+                    }
+                    else
+                    {
+                        guid = Guid.NewGuid().ToString();
+                        Cache.Instance.FileCache.Add(guid, variable);
+                    }
+                    var reference = $"obj{guid}";
+                    Output.WriteLine(reference);
+                    return reference;
                 }
                 Output.WriteLine($"Invalid operation {lineToInterprete}");
             }

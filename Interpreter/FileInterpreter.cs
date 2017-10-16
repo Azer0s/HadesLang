@@ -17,8 +17,14 @@ namespace Interpreter
     {
         public List<string> Lines;
         public List<Methods> Functions = new List<Methods>();
-        private readonly Dictionary<int, int> _lineMap;
+        private Dictionary<int, int> _lineMap;
         public string FAccess;
+
+        public FileInterpreter()
+        {
+            //Default constructor
+        }
+
         public FileInterpreter(string path, List<string> customLines = null)
         {
             if (IsNullOrEmpty(path) && customLines != null)
@@ -353,6 +359,14 @@ namespace Interpreter
             }
 
             throw new Exception($"Couldnt get end of block: {Lines[line]}!");
+        }
+
+        public void Set(FileInterpreter obj)
+        {
+            FAccess = obj.FAccess;
+            Functions = obj.Functions;
+            Lines = obj.Lines;
+            _lineMap = obj._lineMap;
         }
     }
 }

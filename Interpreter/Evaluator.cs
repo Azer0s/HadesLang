@@ -30,7 +30,20 @@ namespace Interpreter
                 return exist.Message;
             }
 
-            Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = access }, new Variable { Access = TypeParser.ParseAccessType(groups[3]), DataType = TypeParser.ParseDataType(groups[2]) });
+            var dt = TypeParser.ParseDataType(groups[2]);
+            var variable = dt == DataTypes.OBJECT
+                ? (IVariable) new FileInterpreter
+                {
+                    Access = TypeParser.ParseAccessType(groups[3]),
+                    DataType = TypeParser.ParseDataType(groups[2])
+                }
+                : new Variable
+                {
+                    Access = TypeParser.ParseAccessType(groups[3]),
+                    DataType = TypeParser.ParseDataType(groups[2])
+                };
+
+            Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = access }, variable);
 
             try
             {
@@ -460,6 +473,11 @@ namespace Interpreter
                         throw new Exception($"Can't assign value of type {datatypeFromData} to variable of type {datatypeFromVariable}!");
                     }
                 }
+                else if (variable is FileInterpreter)
+                {
+                    success = SetVariable(groups[1].Value, result, access);
+                    result = "object";
+                }
                 else if (variable is Variables.Array)
                 {
                     return AssignToArray(lineToInterprete, access, interpreter, file);
@@ -479,20 +497,47 @@ namespace Interpreter
 
         private bool SetVariable(string name, string value, string access)
         {
-            Variable variable = null;
+            IVariable variable = null;
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
             {
                 var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL);
-                variable = Cache.Instance.Variables[reachableAllVar.Key] as Variable;
+
+                if (reachableAllVar.Value is FileInterpreter interpreter)
+                {
+                    variable = interpreter;
+                }
+                else
+                {
+                    variable = Cache.Instance.Variables[reachableAllVar.Key] as Variable;
+                }
             }
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == access))
             {
-                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = access }] as Variable;
+                var varFromCache = Cache.Instance.Variables[new Meta {Name = name, Owner = access}];
+
+                if (varFromCache is Variable)
+                {
+                    variable = varFromCache as Variable;
+                }
+                else if(varFromCache is FileInterpreter)
+                {
+                    variable = varFromCache as FileInterpreter;
+                }
             }
 
             if (variable != null)
             {
-                variable.Value = value;
+                // ReSharper disable once MergeCastWithTypeCheck
+                if (variable is Variable)
+                {
+                    ((Variable)variable).Value = value;
+                    // ReSharper disable once UseNullPropagation
+                }else if (variable is FileInterpreter)
+                {
+                    var key = value.Replace("obj", "");
+                    ((FileInterpreter) variable).Set(Cache.Instance.FileCache[key] as FileInterpreter);
+                    Cache.Instance.FileCache.Remove(key);
+                }
                 return true;
             }
 
@@ -518,6 +563,10 @@ namespace Interpreter
                     return DataTypes.BIT;
                 }
                 return DataTypes.WORD;
+            }
+            if (result.StartsWith("obj"))
+            {
+                return DataTypes.OBJECT;
             }
             if (RegexCollection.Store.IsNum.IsMatch(result))
             {
@@ -545,6 +594,12 @@ namespace Interpreter
             if (!result.Exists)
             {
                 Cache.Instance.Variables.Add(new Meta { Name = varName, Owner = access }, fileInterpreter);
+            }
+            else if (Cache.Instance.Variables.Any(a => a.Value is FileInterpreter && a.Key.Name == varName))
+            {
+                var guid = Guid.NewGuid().ToString();
+                Cache.Instance.FileCache.Add(guid,fileInterpreter);
+                AssignToVariable($"{varName} = obj{guid}", access, true, interpreter, null);
             }
             else
             {
@@ -664,11 +719,11 @@ namespace Interpreter
                 }
                 else if (keyValuePair.Value is Library)
                 {
-                    sb.Append($"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=Library\n");
+                    sb.Append($"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=library\n");
                 }
                 else
                 {
-                    sb.Append($"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=Object\n");
+                    sb.Append($"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=object\n");
                 }
             }
 
