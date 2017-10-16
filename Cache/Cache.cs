@@ -33,6 +33,10 @@ public sealed class Cache
     /// </summary>
     public List<Function> Functions { get; set; } = new List<Function>();
     /// <summary>
+    /// Cache for objects as return type
+    /// </summary>
+    public Dictionary<string,IVariable> FileCache { get; set; } = new Dictionary<string, IVariable>();
+    /// <summary>
     /// List of operators
     /// </summary>
     public List<string> CharList { get; set; } = new List<string> { "+", "-", "*", "/", "^","%","!","&&", "||", "-->", "~&&", "~||", "<--", "(+)", "-/>", "</-", "(", ")", "sin", "cos","tan","sqrt","integ"};

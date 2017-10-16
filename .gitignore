@@ -241,9 +241,7 @@ ModelManifest.xml
 # Paket dependency manager
 .paket/paket.exe
 
-#Config
-deflib
-
 # FAKE - F# Make
 .fake/
 /Lib/file.dll
+HadesLang/deflib
