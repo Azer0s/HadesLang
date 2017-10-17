@@ -160,18 +160,56 @@ namespace Interpreter
                 if (RegexCollection.Store.Case.IsMatch(Lines[i]))
                 {
                     var block = GetBlock("case", i, RegexCollection.Store.Case);
+                    (int start, int end) elseBlock = (0, 0);
+
+                    try
+                    {
+                        elseBlock = GetBlock("else", block.end + 1, RegexCollection.Store.Else);
+                    }
+                    catch (Exception e)
+                    {
+                        // ignored
+                    }
+
                     var groups = RegexCollection.Store.Case.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
-                    if (bool.Parse(interpreter.InterpretLine(groups[1],access,this,FAccess)))
+                    if (bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess)))
                     {
-                        var result = Execute(interpreter,access: access, start: block.start + 1, end: block.end);
+                        var result = Execute(interpreter, access: access, start: block.start + 1, end: block.end);
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
                             interpreter.SetOutput(output.output, output.eOutput);
                             return result;
                         }
+                    }
+                    else
+                    {
+                        //TODO: Add lines between endCase and else, execute
+
+                        if (elseBlock.end != 0)
+                        {
+                            try
+                            {
+                                var result = Execute(interpreter, access: access, start: elseBlock.start + 1, end: elseBlock.end);
+
+                                if (!IsNullOrEmpty(result.Value) && result.Return)
+                                {
+                                    interpreter.SetOutput(output.output, output.eOutput);
+                                    return result;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                // ignored
+                            }
+                        }
+                    }
+
+                    if (elseBlock.end != 0)
+                    {
+                        block = elseBlock;
                     }
 
                     i = block.end;
@@ -345,6 +383,7 @@ namespace Interpreter
                     buffer++;
                 }
 
+                //TODO: Maybe change to end
                 if (string.Equals(Lines[i].ToLower(), $"end{delimiter.ToLower()}", StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (buffer != 0)

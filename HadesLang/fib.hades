@@ -1,7 +1,8 @@
-﻿c as num closed = fib:[1,1]
+﻿c as num closed = fib:[1]
 out:c
 //Testing
-func fib[num a, num b]
+func fib[num a]
+	b as num closed = 1
 	asLongAs[true]
 		out:a
 		out:b
@@ -12,5 +13,5 @@ func fib[num a, num b]
 		case[$a bigger 10000]
 		put a
 		endCase
-	endAsLongAs
+	endaslongas
 endfunc
