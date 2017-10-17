@@ -161,10 +161,27 @@ namespace Interpreter
                 {
                     var block = GetBlock("case", i, RegexCollection.Store.Case);
                     (int start, int end) elseBlock = (0, 0);
+                    var elseLoc = 0;
 
                     try
                     {
-                        elseBlock = GetBlock("else", block.end + 1, RegexCollection.Store.Else);
+                        for (var j = block.end+1; j < Lines.Count; j++)
+                        {
+                            if (RegexCollection.Store.Case.IsMatch(Lines[j]))
+                            {
+                                break;
+                            }
+                            if (Lines[j] == "else")
+                            {
+                                elseLoc = j;
+                                break;
+                            }
+                        }
+
+                        if (elseLoc != 0)
+                        {
+                            elseBlock = GetBlock("else", elseLoc, RegexCollection.Store.Else);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -186,7 +203,17 @@ namespace Interpreter
                     }
                     else
                     {
-                        //TODO: Add lines between endCase and else, execute
+                        //Execute lines between endCase and else
+                        if (elseLoc > block.end)
+                        {
+                            var result = Execute(interpreter, access, block.end, elseLoc);
+
+                            if (!IsNullOrEmpty(result.Value) && result.Return)
+                            {
+                                interpreter.SetOutput(output.output, output.eOutput);
+                                return result;
+                            }
+                        }
 
                         if (elseBlock.end != 0)
                         {
