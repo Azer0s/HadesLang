@@ -170,7 +170,7 @@ public class RegexCollection
     /// <summary>
     /// End of block
     /// </summary>
-    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor)", RegexOptions.Compiled);
+    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor|else)", RegexOptions.Compiled);
     /// <summary>
     /// Values outside of function call
     /// </summary>

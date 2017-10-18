@@ -205,7 +205,7 @@ namespace Interpreter
 
                     if (bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess)))
                     {
-                        var result = Execute(interpreter, access: access, start: block.start + 1, end: block.end);
+                        var result = Execute(interpreter, access, block.start + 1, block.end);
 
                         //Return if put was called
                         if (!IsNullOrEmpty(result.Value) && result.Return)
@@ -237,7 +237,7 @@ namespace Interpreter
                         {
                             try
                             {
-                                var result = Execute(interpreter, access: access, start: elseBlock.start + 1, end: elseBlock.end);
+                                var result = Execute(interpreter, access, elseBlock.start + 1, end: elseBlock.end);
 
                                 if (!IsNullOrEmpty(result.Value) && result.Return)
                                 {
