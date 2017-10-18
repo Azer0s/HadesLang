@@ -165,6 +165,7 @@ namespace Interpreter
 
                     try
                     {
+                        //Get next else
                         for (var j = block.end+1; j < Lines.Count; j++)
                         {
                             if (RegexCollection.Store.Case.IsMatch(Lines[j]))
@@ -178,6 +179,7 @@ namespace Interpreter
                             }
                         }
 
+                        //If next else exists, get else block
                         if (elseLoc != 0)
                         {
                             elseBlock = GetBlock("else", elseLoc, RegexCollection.Store.Else);
@@ -191,10 +193,29 @@ namespace Interpreter
                     var groups = RegexCollection.Store.Case.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
+                    (string Value, bool Return) ExecuteBetween()
+                    {
+                        //Execute lines between endCase and else
+                        if (elseLoc > block.end)
+                        {
+                            return Execute(interpreter, access, block.end, elseLoc);
+                        }
+                        return ("", false);
+                    }
+
                     if (bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess)))
                     {
                         var result = Execute(interpreter, access: access, start: block.start + 1, end: block.end);
 
+                        //Return if put was called
+                        if (!IsNullOrEmpty(result.Value) && result.Return)
+                        {
+                            interpreter.SetOutput(output.output, output.eOutput);
+                            return result;
+                        }
+
+                        result = ExecuteBetween();
+                        //Return if put was called
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
                             interpreter.SetOutput(output.output, output.eOutput);
@@ -203,18 +224,15 @@ namespace Interpreter
                     }
                     else
                     {
-                        //Execute lines between endCase and else
-                        if (elseLoc > block.end)
+                        var betweenResult = ExecuteBetween();
+                        //Return if put was called
+                        if (!IsNullOrEmpty(betweenResult.Value) && betweenResult.Return)
                         {
-                            var result = Execute(interpreter, access, block.end, elseLoc);
-
-                            if (!IsNullOrEmpty(result.Value) && result.Return)
-                            {
-                                interpreter.SetOutput(output.output, output.eOutput);
-                                return result;
-                            }
+                            interpreter.SetOutput(output.output, output.eOutput);
+                            return betweenResult;
                         }
 
+                        //If else block exists
                         if (elseBlock.end != 0)
                         {
                             try
