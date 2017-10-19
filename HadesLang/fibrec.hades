@@ -8,9 +8,9 @@ func add[num a, num b]
 endfunc
 
 func fib[num n]
-	case[($n is 0) or ($n is 1)]
+	if[($n is 0) or ($n is 1)]
 		put n
-	endcase
+	endif
 
 	put fib:[$n -1] + fib:[$n-2]
 endfunc

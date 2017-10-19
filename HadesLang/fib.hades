@@ -3,15 +3,15 @@ out:c
 //Testing
 func fib[num a]
 	b as num closed = 1
-	asLongAs[true]
+	while[true]
 		out:a
 		out:b
 
 		a = $a + $b
 		b = $a + $b
 
-		case[$a bigger 10000]
-		put a
-		endCase
-	endaslongas
+		if[$a bigger 10000]
+			put a
+		endIf
+	endWhile
 endfunc
