@@ -442,7 +442,7 @@ namespace Interpreter
                     buffer++;
                 }
 
-                if (Lines[i] == "end")
+                if (Lines[i].TrimEnd(' ', '\t') == "end")
                 {
                     if (buffer != 0)
                     {
