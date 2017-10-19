@@ -18,15 +18,18 @@ namespace Interpreter
         public List<string> Lines;
         public List<Methods> Functions = new List<Methods>();
         private Dictionary<int, int> _lineMap;
+        private readonly Dictionary<int, int> _blockCache;
         public string FAccess;
 
         public FileInterpreter()
         {
             //Default constructor
+            _blockCache = new Dictionary<int, int>();
         }
 
         public FileInterpreter(string path, List<string> customLines = null)
         {
+            _blockCache = new Dictionary<int, int>();
             if (IsNullOrEmpty(path) && customLines != null)
             {
                 Lines = customLines;
@@ -335,16 +338,24 @@ namespace Interpreter
             }
         }
 
-        private (int start, int end) GetBlock(string delimiter, int line,Regex toCheck)
+        private (int start, int end) GetBlock(string delimiter, int line, Regex toCheck)
         {
+            //Blockcache
+            if (_blockCache.ContainsKey(line))
+            {
+                return (line, _blockCache[line]);
+            }
+
             var buffer = 0;
-            for (var i = line+1; i < Lines.Count; i++)
+
+            for (var i = line + 1; i < Lines.Count; i++)
             {
                 if (toCheck.IsMatch(Lines[i]))
                 {
                     buffer++;
                 }
 
+                //TODO: Maybe change to end
                 if (string.Equals(Lines[i].ToLower(), $"end{delimiter.ToLower()}", StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (buffer != 0)
@@ -353,6 +364,8 @@ namespace Interpreter
                     }
                     else
                     {
+                        //Add value to blockcache
+                        _blockCache.Add(line, i);
                         return (line, i);
                     }
                 }
