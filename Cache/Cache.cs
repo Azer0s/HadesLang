@@ -50,6 +50,7 @@ public sealed class Cache
         {"IMP","-->"},
         {"NAND","~&"},
         {"NOR","~|"},
+        {"INV","~" },
         {"CIMP","<--"},
         {"XOR","(+)" },
         {"NIMP","-/>" },
