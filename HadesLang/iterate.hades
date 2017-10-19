@@ -12,3 +12,16 @@ func it[num a]
 		out:b
 	end
 end
+
+func it2[num a]
+	for[num b in range:[0,$a]]
+		if[true]
+			out:'hi'
+		end
+			out:'ayy'
+		else
+			out:'hello'
+		end
+	end
+	put 22
+end

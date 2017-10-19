@@ -46,7 +46,7 @@ namespace Interpreter
                 {
                     throw new Exception($"File {path} could not be read!");
                 }
-            }   
+            }
 
             //Directives
             while (Lines.Any(a => a.StartsWith("%")))
@@ -131,7 +131,7 @@ namespace Interpreter
             LoadFunctions();
         }
 
-        public (string Value,bool Return) Execute(Interpreter interpreter, string access, int start = 0, int end = -1)
+        public (string Value, bool Return) Execute(Interpreter interpreter, string access, int start = 0, int end = -1)
         {
             var output = interpreter.GetOutput();
             interpreter.SetOutput(new NoOutput(), output.eOutput);
@@ -169,7 +169,7 @@ namespace Interpreter
                     try
                     {
                         //Get next else
-                        for (var j = block.end+1; j < Lines.Count; j++)
+                        for (var j = block.end + 1; j < Lines.Count; j++)
                         {
                             if (RegexCollection.Store.If.IsMatch(Lines[j]))
                             {
@@ -271,9 +271,9 @@ namespace Interpreter
                     var groups = RegexCollection.Store.While.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
-                    while (bool.Parse(interpreter.InterpretLine(groups[1], access,this,FAccess)))
+                    while (bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess)))
                     {
-                        var result = Execute(interpreter, start: block.start + 1, end: block.end,access:access);
+                        var result = Execute(interpreter, start: block.start + 1, end: block.end, access: access);
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
@@ -299,7 +299,7 @@ namespace Interpreter
 
                     foreach (var iterator in array.StringSplit(',').ToList())
                     {
-                        interpreter.Evaluator.AssignToVariable($"{groups[2]} = {iterator}", access, false, interpreter,this);
+                        interpreter.Evaluator.AssignToVariable($"{groups[2]} = {iterator}", access, false, interpreter, this);
                         var result = Execute(interpreter, start: block.start + 1, end: block.end, access: access);
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
@@ -323,7 +323,7 @@ namespace Interpreter
                     return result;
                 }
 
-                var interresult = interpreter.InterpretLine(Lines[i], access, this,FAccess);
+                var interresult = interpreter.InterpretLine(Lines[i], access, this, FAccess);
                 //Function call
                 if (RegexCollection.Store.Function.IsMatch(Lines[i]) && Functions.Any(a => a.Name == RegexCollection.Store.Function.Match(Lines[i]).Groups[1].Value))
                 {
@@ -335,16 +335,16 @@ namespace Interpreter
                     if (!IsNullOrEmpty(interresult))
                     {
                         interpreter.SetOutput(output.output, output.eOutput);
-                        return (interresult,false);
+                        return (interresult, false);
                     }
                 }
             }
 
             interpreter.SetOutput(output.output, output.eOutput);
-            return (Empty,false);
+            return (Empty, false);
         }
 
-        public string CallFunction(string function,Interpreter interpreter, string altAccess = "")
+        public string CallFunction(string function, Interpreter interpreter, string altAccess = "")
         {
             var groups = RegexCollection.Store.Function.Match(function).Groups.OfType<Group>().Select(a => a.Value)
                 .ToList();
@@ -382,7 +382,7 @@ namespace Interpreter
                 }
                 interpreter.SetOutput(output.output, output.eOutput);
 
-                var result = Execute(interpreter, start: func.Postition.Item1+1, end: func.Postition.Item2,access:access);
+                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, access: access);
 
                 interpreter.Evaluator.Unload("all", access);
 
@@ -411,11 +411,11 @@ namespace Interpreter
                         {
                             var argsGroups = RegexCollection.Store.Argument.Match(arg).Groups.OfType<Group>()
                                 .Select(a => a.Value).ToArray();
-                            arguments.Add(argsGroups[2],TypeParser.ParseDataType(arg.Split(' ')[0]));
+                            arguments.Add(argsGroups[2], TypeParser.ParseDataType(arg.Split(' ')[0]));
                         }
                     }
 
-                    Functions.Add(new Methods(groups[1],block.ToTuple(),arguments));
+                    Functions.Add(new Methods(groups[1], block.ToTuple(), arguments));
                 }
                 index++;
             }
@@ -433,10 +433,11 @@ namespace Interpreter
 
             for (var i = line + 1; i < Lines.Count; i++)
             {
-                if (RegexCollection.Store.For.IsMatch(Lines[i]) || 
-                    RegexCollection.Store.While.IsMatch(Lines[i]) || 
-                    RegexCollection.Store.FunctionDecleration.IsMatch(Lines[i]) || 
-                    RegexCollection.Store.If.IsMatch(Lines[i]))
+                if (RegexCollection.Store.For.IsMatch(Lines[i]) ||
+                    RegexCollection.Store.While.IsMatch(Lines[i]) ||
+                    RegexCollection.Store.FunctionDecleration.IsMatch(Lines[i]) ||
+                    RegexCollection.Store.If.IsMatch(Lines[i]) ||
+                    RegexCollection.Store.Else.IsMatch(Lines[i]))
                 {
                     buffer++;
                 }

@@ -178,7 +178,7 @@ public class RegexCollection
     /// <summary>
     /// Import - Same as include in C/C++
     /// </summary>
-    public Regex Import { get; set; } = new Regex("^%import +(.*)%$",RegexOptions.Compiled);
+    public Regex Import { get; set; } = new Regex("^%import +(.*)%$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for simple // comment
     /// </summary>
@@ -190,7 +190,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for else
     /// </summary>
-    public Regex Else { get; set; } = new Regex("^else *\\[(.*)\\]",RegexOptions.Compiled);
+    public Regex Else { get; set; } = new Regex("^else[ \\t]*$", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
