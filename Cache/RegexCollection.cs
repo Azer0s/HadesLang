@@ -50,7 +50,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for increase/decrease by one
     /// </summary>
-    public Regex InDeCrease { get; set; } = new Regex("^(\\w*)(?:-|\\+)(-|\\+)", RegexOptions.Compiled);
+    public Regex InDeCrease { get; set; } = new Regex("^\\$?(\\w*)(?:-|\\+)(-|\\+)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for assigning data to specific positions in an array
     /// </summary>
