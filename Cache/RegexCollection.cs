@@ -84,17 +84,17 @@ public class RegexCollection
     /// </summary>
     public Regex FunctionDecleration { get; set; } = new Regex("^func *(\\w*) *\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
-    /// Case statement
+    /// If statement
     /// </summary>
-    public Regex Case { get; set; } = new Regex("^case *\\[(.*)\\]", RegexOptions.Compiled);
+    public Regex If { get; set; } = new Regex("^if *\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Foreach
     /// </summary>
-    public Regex IterateFor { get; set; } = new Regex("^iterateFor\\[ *(num|dec|word|bit) *(\\w*) *in *(.*)\\]", RegexOptions.Compiled);
+    public Regex IterateFor { get; set; } = new Regex("^for\\[ *(num|dec|word|bit) *(\\w*) *in *(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Loop
     /// </summary>
-    public Regex AsLongAs { get; set; } = new Regex("^asLongAs *\\[(.*)\\]", RegexOptions.Compiled);
+    public Regex While { get; set; } = new Regex("^while *\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Return
     /// </summary>
@@ -170,7 +170,7 @@ public class RegexCollection
     /// <summary>
     /// End of block
     /// </summary>
-    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor|else)", RegexOptions.Compiled);
+    public Regex End { get; set; } = new Regex("^end(if|while|iteratefor|else)", RegexOptions.Compiled);
     /// <summary>
     /// Values outside of function call
     /// </summary>

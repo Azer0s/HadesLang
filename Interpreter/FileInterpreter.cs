@@ -159,10 +159,10 @@ namespace Interpreter
                     continue;
                 }
 
-                //Case
-                if (RegexCollection.Store.Case.IsMatch(Lines[i]))
+                //If
+                if (RegexCollection.Store.If.IsMatch(Lines[i]))
                 {
-                    var block = GetBlock("case", i, RegexCollection.Store.Case);
+                    var block = GetBlock("if", i, RegexCollection.Store.If);
                     (int start, int end) elseBlock = (0, 0);
                     var elseLoc = 0;
 
@@ -171,7 +171,7 @@ namespace Interpreter
                         //Get next else
                         for (var j = block.end+1; j < Lines.Count; j++)
                         {
-                            if (RegexCollection.Store.Case.IsMatch(Lines[j]))
+                            if (RegexCollection.Store.If.IsMatch(Lines[j]))
                             {
                                 break;
                             }
@@ -193,12 +193,12 @@ namespace Interpreter
                         // ignored
                     }
 
-                    var groups = RegexCollection.Store.Case.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
+                    var groups = RegexCollection.Store.If.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
                     (string Value, bool Return) ExecuteBetween()
                     {
-                        //Execute lines between endCase and else
+                        //Execute lines between endIf and else
                         if (elseLoc > block.end)
                         {
                             return Execute(interpreter, access, block.end, elseLoc);
@@ -264,11 +264,11 @@ namespace Interpreter
                     continue;
                 }
 
-                //AsLongAs
-                if (RegexCollection.Store.AsLongAs.IsMatch(Lines[i]))
+                //While
+                if (RegexCollection.Store.While.IsMatch(Lines[i]))
                 {
-                    var block = GetBlock("asLongAs", i, RegexCollection.Store.AsLongAs);
-                    var groups = RegexCollection.Store.AsLongAs.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
+                    var block = GetBlock("while", i, RegexCollection.Store.While);
+                    var groups = RegexCollection.Store.While.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
                     while (bool.Parse(interpreter.InterpretLine(groups[1], access,this,FAccess)))
@@ -289,7 +289,7 @@ namespace Interpreter
                 //IterateFor
                 if (RegexCollection.Store.IterateFor.IsMatch(Lines[i]))
                 {
-                    var block = GetBlock("iterateFor", i, RegexCollection.Store.IterateFor);
+                    var block = GetBlock("for", i, RegexCollection.Store.IterateFor);
                     var groups = RegexCollection.Store.IterateFor.Match(Lines[i]).Groups.OfType<Group>()
                         .Select(a => a.Value).ToList();
                     interpreter.Evaluator.CreateVariable($"{groups[2]} as {groups[1]} closed", access, interpreter, this);
