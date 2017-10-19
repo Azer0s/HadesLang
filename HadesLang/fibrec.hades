@@ -5,12 +5,12 @@ put c
 
 func add[num a, num b]
 	put fib:[$a] + fib:[$b]
-endfunc
+end
 
 func fib[num n]
 	if[($n is 0) or ($n is 1)]
 		put n
-	endif
+	end
 
 	put fib:[$n -1] + fib:[$n-2]
-endfunc
+end

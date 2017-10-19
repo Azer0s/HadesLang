@@ -1,15 +1,14 @@
 ﻿for[num a in range:[0,10]] //Testing
 	out:a
-endfor
-
+end
 %import fibrec.hades%
 
 for[word a in {'Hello','World','Test'}]
 	out:a
-endfor
+end
 
 func it[num a]
 	for[num b in range:[0,$a]]
 		out:b
-	endFor
-endFunc
+	end
+end

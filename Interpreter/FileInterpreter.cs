@@ -155,14 +155,14 @@ namespace Interpreter
                 //Function
                 if (RegexCollection.Store.FunctionDecleration.IsMatch(Lines[i]))
                 {
-                    i = GetBlock("func", i, RegexCollection.Store.FunctionDecleration).end;
+                    i = GetBlock(i).end;
                     continue;
                 }
 
                 //If
                 if (RegexCollection.Store.If.IsMatch(Lines[i]))
                 {
-                    var block = GetBlock("if", i, RegexCollection.Store.If);
+                    var block = GetBlock(i);
                     (int start, int end) elseBlock = (0, 0);
                     var elseLoc = 0;
 
@@ -185,7 +185,7 @@ namespace Interpreter
                         //If next else exists, get else block
                         if (elseLoc != 0)
                         {
-                            elseBlock = GetBlock("else", elseLoc, RegexCollection.Store.Else);
+                            elseBlock = GetBlock(elseLoc);
                         }
                     }
                     catch (Exception e)
@@ -198,7 +198,7 @@ namespace Interpreter
 
                     (string Value, bool Return) ExecuteBetween()
                     {
-                        //Execute lines between endIf and else
+                        //Execute lines between end and else
                         if (elseLoc > block.end)
                         {
                             return Execute(interpreter, access, block.end, elseLoc);
@@ -267,7 +267,7 @@ namespace Interpreter
                 //While
                 if (RegexCollection.Store.While.IsMatch(Lines[i]))
                 {
-                    var block = GetBlock("while", i, RegexCollection.Store.While);
+                    var block = GetBlock(i);
                     var groups = RegexCollection.Store.While.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
@@ -289,7 +289,7 @@ namespace Interpreter
                 //For
                 if (RegexCollection.Store.For.IsMatch(Lines[i]))
                 {
-                    var block = GetBlock("for", i, RegexCollection.Store.For);
+                    var block = GetBlock(i);
                     var groups = RegexCollection.Store.For.Match(Lines[i]).Groups.OfType<Group>()
                         .Select(a => a.Value).ToList();
                     interpreter.Evaluator.CreateVariable($"{groups[2]} as {groups[1]} closed", access, interpreter, this);
@@ -399,7 +399,7 @@ namespace Interpreter
                 //Function
                 if (RegexCollection.Store.FunctionDecleration.IsMatch(line))
                 {
-                    var block = GetBlock("func", index, RegexCollection.Store.FunctionDecleration);
+                    var block = GetBlock(index);
                     var groups = RegexCollection.Store.FunctionDecleration.Match(line).Groups.OfType<Group>()
                         .Select(a => a.Value).ToArray();
 
@@ -421,7 +421,7 @@ namespace Interpreter
             }
         }
 
-        private (int start, int end) GetBlock(string delimiter, int line, Regex toCheck)
+        private (int start, int end) GetBlock(int line)
         {
             //Blockcache
             if (_blockCache.ContainsKey(line))
@@ -433,13 +433,15 @@ namespace Interpreter
 
             for (var i = line + 1; i < Lines.Count; i++)
             {
-                if (toCheck.IsMatch(Lines[i]))
+                if (RegexCollection.Store.For.IsMatch(Lines[i]) || 
+                    RegexCollection.Store.While.IsMatch(Lines[i]) || 
+                    RegexCollection.Store.FunctionDecleration.IsMatch(Lines[i]) || 
+                    RegexCollection.Store.If.IsMatch(Lines[i]))
                 {
                     buffer++;
                 }
 
-                //TODO: Maybe change to end
-                if (string.Equals(Lines[i].ToLower(), $"end{delimiter.ToLower()}", StringComparison.CurrentCultureIgnoreCase))
+                if (Lines[i] == "end")
                 {
                     if (buffer != 0)
                     {

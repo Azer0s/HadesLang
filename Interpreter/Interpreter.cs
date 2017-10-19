@@ -58,7 +58,7 @@ namespace Interpreter
 
         public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "",bool writeSettings = false)
         {
-            if (IsNullOrEmpty(lineToInterprete) || RegexCollection.Store.End.IsMatch(lineToInterprete.ToLower()))
+            if (IsNullOrEmpty(lineToInterprete) || lineToInterprete == "end")
             {
                 return Empty;
             }
