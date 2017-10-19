@@ -168,10 +168,6 @@ public class RegexCollection
     /// </summary>
     public Regex Alias { get; set; } = new Regex("^%alias +([\\w ]*) +\'?([^\']*)\'?%$", RegexOptions.Compiled);
     /// <summary>
-    /// End of block
-    /// </summary>
-    public Regex End { get; set; } = new Regex("^end(if|while|for|else)", RegexOptions.Compiled);
-    /// <summary>
     /// Values outside of function call
     /// </summary>
     public Regex Outside { get; set; } = new Regex("(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);

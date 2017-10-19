@@ -12,6 +12,6 @@ func fib[num a]
 
 		if[$a bigger 10000]
 			put a
-		endIf
-	endWhile
-endfunc
+		end
+	end
+end

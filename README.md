@@ -30,10 +30,10 @@ out:'Hello world'
 func fib[num n]
     if[($n is 0) or ($n is 1)]
         put n
-    endIf
+    end
 
     put fib:[$n-1] + fib:[$n-2]
-endfunc
+end
 ```
 ### main.hades
 ```vb
@@ -61,7 +61,7 @@ $b->printA:[]
 ```vb
 func printA[]
     out:a
-endfunc
+end
 ```
 
 ## Tasking
@@ -70,8 +70,8 @@ task as t
     a as num closed = 0
     while [true]
         out:'Hello world'+$a
-    endWhile
-endTask
+    end
+end
 
 startTask:t
 ```
@@ -80,7 +80,7 @@ startTask:t
 ```vb
 if[sqrt(9) smallerIs 3]
     out:'The squareroot of 9 is smaller/equals 3'
-endIf
+end
 ```
 
 ## Unloading
