@@ -28,9 +28,9 @@ out:'Hello world'
 ### fibonacci.hades
 ```vb
 func fib[num n]
-    case[($n is 0) or ($n is 1)]
+    if[($n is 0) or ($n is 1)]
         put n
-    endcase
+    endIf
 
     put fib:[$n-1] + fib:[$n-2]
 endfunc
@@ -68,9 +68,9 @@ endfunc
 ```vb
 task as t
     a as num closed = 0
-    asLongAs [true]
+    while [true]
         out:'Hello world'+$a
-    endAsLongAs
+    endWhile
 endTask
 
 startTask:t
@@ -78,9 +78,9 @@ startTask:t
 
 ## Conditions
 ```vb
-case[sqrt(9) smallerIs 3]
+if[sqrt(9) smallerIs 3]
     out:'The squareroot of 9 is smaller/equals 3'
-endcase
+endIf
 ```
 
 ## Unloading
