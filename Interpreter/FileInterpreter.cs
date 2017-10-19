@@ -163,18 +163,101 @@ namespace Interpreter
                 if (RegexCollection.Store.Case.IsMatch(Lines[i]))
                 {
                     var block = GetBlock("case", i, RegexCollection.Store.Case);
+                    (int start, int end) elseBlock = (0, 0);
+                    var elseLoc = 0;
+
+                    try
+                    {
+                        //Get next else
+                        for (var j = block.end+1; j < Lines.Count; j++)
+                        {
+                            if (RegexCollection.Store.Case.IsMatch(Lines[j]))
+                            {
+                                break;
+                            }
+                            if (Lines[j] == "else")
+                            {
+                                elseLoc = j;
+                                break;
+                            }
+                        }
+
+                        //If next else exists, get else block
+                        if (elseLoc != 0)
+                        {
+                            elseBlock = GetBlock("else", elseLoc, RegexCollection.Store.Else);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // ignored
+                    }
+
                     var groups = RegexCollection.Store.Case.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
-                    if (bool.Parse(interpreter.InterpretLine(groups[1],access,this,FAccess)))
+                    (string Value, bool Return) ExecuteBetween()
                     {
-                        var result = Execute(interpreter,access: access, start: block.start + 1, end: block.end);
+                        //Execute lines between endCase and else
+                        if (elseLoc > block.end)
+                        {
+                            return Execute(interpreter, access, block.end, elseLoc);
+                        }
+                        return ("", false);
+                    }
 
+                    if (bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess)))
+                    {
+                        var result = Execute(interpreter, access, block.start + 1, block.end);
+
+                        //Return if put was called
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
                             interpreter.SetOutput(output.output, output.eOutput);
                             return result;
                         }
+
+                        result = ExecuteBetween();
+                        //Return if put was called
+                        if (!IsNullOrEmpty(result.Value) && result.Return)
+                        {
+                            interpreter.SetOutput(output.output, output.eOutput);
+                            return result;
+                        }
+                    }
+                    else
+                    {
+                        var betweenResult = ExecuteBetween();
+                        //Return if put was called
+                        if (!IsNullOrEmpty(betweenResult.Value) && betweenResult.Return)
+                        {
+                            interpreter.SetOutput(output.output, output.eOutput);
+                            return betweenResult;
+                        }
+
+                        //If else block exists
+                        if (elseBlock.end != 0)
+                        {
+                            try
+                            {
+                                var result = Execute(interpreter, access, elseBlock.start + 1, end: elseBlock.end);
+
+                                if (!IsNullOrEmpty(result.Value) && result.Return)
+                                {
+                                    interpreter.SetOutput(output.output, output.eOutput);
+                                    return result;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                // ignored
+                            }
+                        }
+                    }
+
+                    if (elseBlock.end != 0)
+                    {
+                        block = elseBlock;
                     }
 
                     i = block.end;

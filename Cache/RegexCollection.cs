@@ -170,7 +170,7 @@ public class RegexCollection
     /// <summary>
     /// End of block
     /// </summary>
-    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor)", RegexOptions.Compiled);
+    public Regex End { get; set; } = new Regex("^end(case|aslongas|iteratefor|else)", RegexOptions.Compiled);
     /// <summary>
     /// Values outside of function call
     /// </summary>
@@ -190,7 +190,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for string as word
     /// </summary>
-    public Regex IsPureWord { get; set; } = new Regex("^\'([^\']*)\'$");
+    public Regex IsPureWord { get; set; } = new Regex("^\'([^\']*)\'$", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for else
+    /// </summary>
+    public Regex Else { get; set; } = new Regex("^else *\\[(.*)\\]",RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
