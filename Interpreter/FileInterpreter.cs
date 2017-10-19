@@ -286,11 +286,11 @@ namespace Interpreter
                     continue;
                 }
 
-                //IterateFor
-                if (RegexCollection.Store.IterateFor.IsMatch(Lines[i]))
+                //For
+                if (RegexCollection.Store.For.IsMatch(Lines[i]))
                 {
-                    var block = GetBlock("for", i, RegexCollection.Store.IterateFor);
-                    var groups = RegexCollection.Store.IterateFor.Match(Lines[i]).Groups.OfType<Group>()
+                    var block = GetBlock("for", i, RegexCollection.Store.For);
+                    var groups = RegexCollection.Store.For.Match(Lines[i]).Groups.OfType<Group>()
                         .Select(a => a.Value).ToList();
                     interpreter.Evaluator.CreateVariable($"{groups[2]} as {groups[1]} closed", access, interpreter, this);
 

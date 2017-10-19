@@ -90,7 +90,7 @@ public class RegexCollection
     /// <summary>
     /// Foreach
     /// </summary>
-    public Regex IterateFor { get; set; } = new Regex("^for\\[ *(num|dec|word|bit) *(\\w*) *in *(.*)\\]", RegexOptions.Compiled);
+    public Regex For { get; set; } = new Regex("^for\\[ *(num|dec|word|bit) *(\\w*) *in *(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Loop
     /// </summary>
@@ -170,7 +170,7 @@ public class RegexCollection
     /// <summary>
     /// End of block
     /// </summary>
-    public Regex End { get; set; } = new Regex("^end(if|while|iteratefor|else)", RegexOptions.Compiled);
+    public Regex End { get; set; } = new Regex("^end(if|while|for|else)", RegexOptions.Compiled);
     /// <summary>
     /// Values outside of function call
     /// </summary>
