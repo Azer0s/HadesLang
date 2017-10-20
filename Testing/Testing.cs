@@ -13,6 +13,7 @@ namespace Testing
     public class Testingcs
     {
         private readonly Interpreter.Interpreter _interpreter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
+        private string prefix = "C:\\Users\\ariel\\workspace\\HadesLang\\HadesLang\\";
 
         [Test]
         public void AddTest()
@@ -36,6 +37,14 @@ namespace Testing
             _interpreter.InterpretLine($"{name} as {dataType} closed = {value}", "testing", null, "");
             Assert.AreEqual(value, _interpreter.InterpretLine(name, "testing", null, ""));
             _interpreter.InterpretLine($"uload:{name}", "testing", null, "");
+        }
+
+        [Test]
+        public void CallTest()
+        {
+            _interpreter.InterpretLine($"with \'{prefix}iterate.hades\' as a","testing",null);
+            _interpreter.InterpretLine($"with \'{prefix}fibrec.hades\' as b","testing",null);
+            _interpreter.InterpretLine("$a->test:[$b,10]", "testing", null);
         }
 
         [Test]
@@ -86,7 +95,7 @@ namespace Testing
         [Test]
         public void FileTest()
         {
-            Assert.AreEqual("23",_interpreter.InterpretLine("with \'D:\\workspace\\HadesLang\\HadesLang\\fibrec.hades\'", "testing",null,""));
+            Assert.AreEqual("23",_interpreter.InterpretLine($"with \'{prefix}fibrec.hades\'", "testing",null,""));
         }
 
         [Test]
