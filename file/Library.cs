@@ -13,7 +13,12 @@ namespace file
     {
         public string readAllLines(string path)
         {
-            return $"{{'{string.Join("','",File.ReadAllLines(path.TrimStart('\'').TrimEnd('\'')))}'}}";
+            var lines = File.ReadAllLines(path.TrimStart('\'').TrimEnd('\''));
+            for (var i = 0; i < lines.Length; i++)
+            {
+                lines[i] = lines[i].Replace("'", "\"");
+            }
+            return $"{{'{string.Join("','",lines)}'}}";
         }
 
         public string writeAllLines(string path, string data)
