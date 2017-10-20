@@ -13,7 +13,7 @@ namespace Testing
     public class Testingcs
     {
         private readonly Interpreter.Interpreter _interpreter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
-        private string prefix = "C:\\Users\\ariel\\workspace\\HadesLang\\HadesLang\\";
+        private string prefix = "D:\\workspace\\HadesLang\\HadesLang\\";
 
         [Test]
         public void AddTest()
@@ -44,7 +44,7 @@ namespace Testing
         {
             _interpreter.InterpretLine($"with \'{prefix}iterate.hades\' as a","testing",null);
             _interpreter.InterpretLine($"with \'{prefix}fibrec.hades\' as b","testing",null);
-            _interpreter.InterpretLine("$a->test:[$b,10]", "testing", null);
+            Assert.AreEqual("55",_interpreter.InterpretLine("$a->test:[$b,10]", "testing", null));
         }
 
         [Test]

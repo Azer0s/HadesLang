@@ -26,5 +26,7 @@ func it2[num a]
 end
 
 func test[object a,num b]
-	out:[$a->fib:[$b]]
+	c as num closed = $a->fib:[$b]
+	out:c
+	put c
 end

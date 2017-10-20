@@ -640,7 +640,14 @@ namespace Interpreter
             {
                 foreach (var keyValuePair in Cache.Instance.Variables.Where(a => a.Key.Owner == access).Select(a => a).ToList())
                 {
-                    Unload(keyValuePair.Key.Name, access);
+                    try
+                    {
+                        Unload(keyValuePair.Key.Name, access);
+                    }
+                    catch (Exception e)
+                    {
+                        //ignored
+                    }
                 }
 
                 return $"Unloaded all variables from {access}!";
@@ -649,7 +656,15 @@ namespace Interpreter
             var obj = GetVariable(variable, access);
             if (obj is FileInterpreter && Cache.Instance.EraseVars)
             {
-                Unload("all", (obj as FileInterpreter).FAccess);
+                if (!RegexCollection.Store.GUID.IsMatch(access))
+                {
+                    Unload("all", (obj as FileInterpreter).FAccess);
+                }
+                else
+                {
+                    Cache.Instance.Variables.Remove(new Meta {Name = variable, Owner = access});
+                    throw new Exception("Can´t unload object from method!");
+                }
             }
 
             if (VariableIsReachableAll(variable))
@@ -685,7 +700,7 @@ namespace Interpreter
                 }
                 else
                 {
-                    fileVariable = GetVariable(varname, (varObj as FileInterpreter).FAccess);
+                    fileVariable = GetVariable(varname.TrimStart('$'), (varObj as FileInterpreter).FAccess);
                 }
 
                 if (fileVariable != null)

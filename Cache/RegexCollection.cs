@@ -7,10 +7,16 @@ public class RegexCollection
     /// Lazy Store
     /// </summary>
     private static readonly Lazy<RegexCollection> Lazy = new Lazy<RegexCollection>(() => new RegexCollection());
+
     /// <summary>
     /// Cache instance
     /// </summary>
     public static RegexCollection Store => Lazy.Value;
+    /// <summary>
+    /// Regex for guids
+    /// </summary>
+    // ReSharper disable once InconsistentNaming
+    public Regex GUID { get; set; } = new Regex("^[{(]?[0-9a-f]{8}[-]?(?:[0-9a-f]{4}[-]?){3}[0-9a-f]{12}[)}]?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling scriptOutput
     /// </summary>
@@ -191,6 +197,10 @@ public class RegexCollection
     /// Regex for else
     /// </summary>
     public Regex Else { get; set; } = new Regex("^else[ \\t]*$", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for object reference codes
+    /// </summary>
+    public Regex ObjCode { get; set; } = new Regex("^obj[{(]?[0-9a-f]{8}[-]?(?:[0-9a-f]{4}[-]?){3}[0-9a-f]{12}[)}]?$",RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
