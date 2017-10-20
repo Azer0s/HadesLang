@@ -26,7 +26,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for arguments in function decleration
     /// </summary>
-    public Regex Argument { get; set; } = new Regex("^(word|num|dec|bit) +([\\w]*)", RegexOptions.Compiled);
+    public Regex Argument { get; set; } = new Regex("^(word|num|dec|bit|object) +([\\w]*)", RegexOptions.Compiled);
     /// <summary>
     /// Regex for dumping variables
     /// </summary>

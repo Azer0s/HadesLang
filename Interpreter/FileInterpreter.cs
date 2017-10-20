@@ -344,11 +344,11 @@ namespace Interpreter
             return (Empty, false);
         }
 
-        public string CallFunction(string function, Interpreter interpreter, string altAccess = "")
+        public string CallFunction(string function, Interpreter interpreter, string access = "", string altAccess = "")
         {
             var groups = RegexCollection.Store.Function.Match(function).Groups.OfType<Group>().Select(a => a.Value)
                 .ToList();
-            var access = Guid.NewGuid().ToString().ToLower();
+            var guid = Guid.NewGuid().ToString().ToLower();
             if (Functions.Any(a => a.Name == groups[1]))
             {
                 var func = Functions.First(a => a.Name == groups[1]);
@@ -367,12 +367,12 @@ namespace Interpreter
                 {
                     try
                     {
-                        if (!IsNullOrEmpty(altAccess))
+                        if (!IsNullOrEmpty(access))
                         {
-                            args[i] = interpreter.InterpretLine(args[i], altAccess, this);
+                            args[i] = interpreter.InterpretLine(args[i], access, this,altAccess);
                         }
 
-                        interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", access, interpreter, this);
+                        interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", guid, interpreter, this);
                     }
                     catch (Exception e)
                     {
@@ -382,9 +382,9 @@ namespace Interpreter
                 }
                 interpreter.SetOutput(output.output, output.eOutput);
 
-                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, access: access);
+                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, access: guid);
 
-                interpreter.Evaluator.Unload("all", access);
+                interpreter.Evaluator.Unload("all", guid);
 
                 return result.Value;
             }

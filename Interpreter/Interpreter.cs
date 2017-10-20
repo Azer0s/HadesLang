@@ -97,7 +97,10 @@ namespace Interpreter
 
             #endregion
 
-            altAccess = file != null ? file.FAccess : altAccess;
+            if (IsNullOrEmpty(altAccess))
+            {
+                altAccess = file != null ? file.FAccess : altAccess;
+            }
 
             //Variable decleration
             if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))

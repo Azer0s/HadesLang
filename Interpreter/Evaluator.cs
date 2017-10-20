@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using org.mariuszgromada.math.mxparser;
@@ -671,28 +672,42 @@ namespace Interpreter
                 throw new Exception($"Object {obj} does not exist!");
             }
 
+            varname = $"${varname.TrimStart('$')}";
             var varObj = GetVariable(obj, acccess);
 
             if (varObj is FileInterpreter)
             {
-                var fileVariable = GetVariable(varname, (varObj as FileInterpreter).FAccess);
-
-                if (fileVariable.Access == AccessTypes.CLOSED)
+                IVariable fileVariable = null;
+                var arrayValue = Empty;
+                if (RegexCollection.Store.ArrayVariable.IsMatch(varname))
                 {
-                    throw new Exception($"The access to variable {varname} was denied!");
+                    arrayValue = GetArrayValue(varname, (varObj as FileInterpreter).FAccess, interpreter, varObj as FileInterpreter);
+                }
+                else
+                {
+                    fileVariable = GetVariable(varname, (varObj as FileInterpreter).FAccess);
                 }
 
-                if (fileVariable is Variable)
+                if (fileVariable != null)
                 {
-                    return (fileVariable as Variable).Value;
-                }
+                    if (fileVariable.Access == AccessTypes.CLOSED)
+                    {
+                        throw new Exception($"The access to variable {varname} was denied!");
+                    }
 
-                var output = interpreter.GetOutput();
-                interpreter.SetOutput(new NoOutput(), output.eOutput);
-                var fileInterpreter = varObj as FileInterpreter;
-                var result = interpreter.InterpretLine(varname, fileInterpreter.FAccess, fileInterpreter);
-                interpreter.SetOutput(output.output, output.eOutput);
-                return result;
+                    if (fileVariable is Variable)
+                    {
+                        return (fileVariable as Variable).Value;
+                    }
+
+                    var output = interpreter.GetOutput();
+                    interpreter.SetOutput(new NoOutput(), output.eOutput);
+                    var fileInterpreter = varObj as FileInterpreter;
+                    var result = interpreter.InterpretLine(varname, fileInterpreter.FAccess, fileInterpreter);
+                    interpreter.SetOutput(output.output, output.eOutput);
+                    return result;
+                }
+                return arrayValue;
             }
             throw new Exception($"Variable {obj} is not of type object!");
         }
@@ -1041,11 +1056,7 @@ namespace Interpreter
 
                 if (variable is FileInterpreter)
                 {
-                    if (!IsNullOrEmpty(altAccess))
-                    {
-                        access = altAccess;
-                    }
-                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter,access);
+                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter,access,altAccess);
                 }
                 throw new Exception($"Variable {groups[1]} is not of type object!");
             }

@@ -1,7 +1,6 @@
 ﻿for[num a in range:[0,10]] //Testing
 	out:a
 end
-%import fibrec.hades%
 
 for[word a in {'Hello','World','Test'}]
 	out:a
@@ -24,4 +23,8 @@ func it2[num a]
 		end
 	end
 	put 22
+end
+
+func test[object a,num b]
+	out:[$a->fib:[$b]]
 end

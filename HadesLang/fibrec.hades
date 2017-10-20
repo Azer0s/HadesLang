@@ -1,5 +1,5 @@
-﻿d as num[*] closed = {1,2,3,4}
-c as num closed = add:[8,$d[2]]
+﻿d as num[*] reachable = {1,2,3,4}
+c as num reachable = add:[8,$d[2]]
 out:c
 put c
 
