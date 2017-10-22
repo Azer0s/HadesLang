@@ -15,7 +15,7 @@ namespace Output
 
         public void WriteLine(string input)
         {
-            Console.WriteLine(input);
+            Console.WriteLine(input.Replace("\\n","\n").Replace("\\t","\t"));
         }
 
         public void Clear()

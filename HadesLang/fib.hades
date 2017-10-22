@@ -15,3 +15,26 @@ func fib[num a]
 		end
 	end
 end
+
+func fizzbuzz[]
+	a as bit closed
+	b as bit closed
+	for[num i in range:[0,100]]
+		a = ($i % 3) is 0
+		b = ($i % 5) is 0
+
+		if[$a and $b]
+			out:'Fizzbuzz ' + $i
+		end
+		else
+			if[$a]
+				out:'Fizz ' + $i
+			end
+			else
+				if[$b]
+					out:'Buzz ' + $i
+				end
+			end
+		end
+	end
+end
