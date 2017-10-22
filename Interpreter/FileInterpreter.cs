@@ -159,8 +159,8 @@ namespace Interpreter
                     continue;
                 }
 
-                //If
-                if (RegexCollection.Store.If.IsMatch(Lines[i]))
+                //If or unless
+                if (RegexCollection.Store.IfOrUnless.IsMatch(Lines[i]))
                 {
                     var block = GetBlock(i);
                     (int start, int end) elseBlock = (0, 0);
@@ -171,7 +171,7 @@ namespace Interpreter
                         //Get next else
                         for (var j = block.end + 1; j < Lines.Count; j++)
                         {
-                            if (RegexCollection.Store.If.IsMatch(Lines[j]))
+                            if (RegexCollection.Store.IfOrUnless.IsMatch(Lines[j]))
                             {
                                 break;
                             }
@@ -193,7 +193,7 @@ namespace Interpreter
                         // ignored
                     }
 
-                    var groups = RegexCollection.Store.If.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
+                    var groups = RegexCollection.Store.IfOrUnless.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
 
                     (string Value, bool Return) ExecuteBetween()
@@ -206,7 +206,11 @@ namespace Interpreter
                         return ("", false);
                     }
 
-                    if (bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess)))
+                    var eval = Lines[i].StartsWith("if")
+                        ? bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess))
+                        : !bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess));
+
+                    if (eval)
                     {
                         var result = Execute(interpreter, access, block.start + 1, block.end);
 
@@ -436,7 +440,7 @@ namespace Interpreter
                 if (RegexCollection.Store.For.IsMatch(Lines[i]) ||
                     RegexCollection.Store.While.IsMatch(Lines[i]) ||
                     RegexCollection.Store.FunctionDecleration.IsMatch(Lines[i]) ||
-                    RegexCollection.Store.If.IsMatch(Lines[i]) ||
+                    RegexCollection.Store.IfOrUnless.IsMatch(Lines[i]) ||
                     RegexCollection.Store.Else.IsMatch(Lines[i]))
                 {
                     buffer++;

@@ -90,9 +90,9 @@ public class RegexCollection
     /// </summary>
     public Regex FunctionDecleration { get; set; } = new Regex("^func *(\\w*) *\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
-    /// If statement
+    /// If or unless statement
     /// </summary>
-    public Regex If { get; set; } = new Regex("^if *\\[(.*)\\]", RegexOptions.Compiled);
+    public Regex IfOrUnless { get; set; } = new Regex("^(?:if|unless) *\\[(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Foreach
     /// </summary>
