@@ -105,6 +105,15 @@ namespace Testing
         }
 
         [Test]
+        [TestCase("'NUM'", "32")]
+        [TestCase("'BIT'", "true")]
+        [TestCase("'DEC'", "3.2")]
+        public void RawTest(string expected, string data)
+        {
+            Assert.AreEqual(expected, _interpreter.InterpretLine($"out:[dtype:[raw:['{data}']]]", "testing", null));
+        }
+
+        [Test]
         [TestCase("true", "sqrt(3) smallerIs 3")]
         [TestCase("false", "true imp false")]
         [TestCase("false", "(true and false) or (true and false)")]
