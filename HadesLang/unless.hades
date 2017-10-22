@@ -1,0 +1,19 @@
+﻿unless[false]
+	out:'Hi'
+end
+	
+	out:'Between'
+
+else
+	out:'Hello'
+end
+
+unless[true]
+	out:'Hi'
+end
+	
+	out:'Between'
+
+else
+	out:'Hello'
+end
