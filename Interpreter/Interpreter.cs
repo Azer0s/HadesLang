@@ -292,7 +292,7 @@ namespace Interpreter
             if (RegexCollection.Store.Function.IsMatch(lineToInterprete) &&
                 !lineToInterprete.Remainder(RegexCollection.Store.Outside)
                 .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys)) &&
-                lineToInterprete.IsValidFunction())
+                (lineToInterprete.IsValidFunction() || lineToInterprete.NestedFunction(RegexCollection.Store.FunctionParam)))
             {
                 //Exit
                 if (RegexCollection.Store.Exit.IsMatch(lineToInterprete))
@@ -451,19 +451,23 @@ namespace Interpreter
                 if (RegexCollection.Store.Type.IsMatch(lineToInterprete))
                 {
                     string result;
+                    var typeGroup = RegexCollection.Store.Type.Match(lineToInterprete).Groups.OfType<Group>()
+                        .Select(a => a.Value).ToList();
+                    var toCheck = IsNullOrEmpty(typeGroup[1]) ? typeGroup[2] : typeGroup[1]; 
+
                     if (lineToInterprete.StartsWith("d"))
                     {
-                        if (Evaluator.DataTypeFromData(lineToInterprete, true) == DataTypes.WORD)
+                        var content = toCheck;
+                        if (!RegexCollection.Store.IsPureWord.IsMatch(toCheck))
                         {
-                            Output.WriteLine(DataTypes.WORD.ToString());
-                            return DataTypes.WORD.ToString();
+                            content = InterpretLine(toCheck, access, file, altAccess);
                         }
-                        result = Evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access, file, altAccess), true).ToString();
+                        result = Evaluator.DataTypeFromData(content, true).ToString();
                     }
                     else
                     {
                         result = Evaluator
-                            .GetVariable(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access)
+                            .GetVariable(toCheck, access)
                             .DataType.ToString();
                     }
 

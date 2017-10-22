@@ -44,6 +44,13 @@ namespace StringExtension
             return string.Join("",groups);
         }
 
+        public static bool NestedFunction(this string source,Regex function)
+        {
+            var repls = function.Replace(source,
+                match =>
+                    match.Groups[1].Value + ":#");
+            return repls.Split(':').Length == 2 && repls.EndsWith("#");
+        }
 
         public static bool IsValidFunction(this string source)
         {
