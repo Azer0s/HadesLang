@@ -15,6 +15,12 @@ namespace Testing
         private readonly Interpreter.Interpreter _interpreter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
         private string prefix = "D:\\workspace\\HadesLang\\HadesLang\\";
 
+        [TearDown]
+        public void TearDown()
+        {
+            _interpreter.InterpretLine("uload:all", "testing", null);
+        }
+
         [Test]
         public void AddTest()
         {

@@ -56,7 +56,7 @@ namespace Interpreter
             return (Output, ExplicitOutput);
         }
 
-        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "",bool writeSettings = false)
+        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "", bool writeSettings = false)
         {
             if (IsNullOrEmpty(lineToInterprete) || lineToInterprete == "end")
             {
@@ -289,10 +289,10 @@ namespace Interpreter
             }
 
             //Function
-            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && 
+            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) &&
                 !lineToInterprete.Remainder(RegexCollection.Store.Outside)
-                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys)) && 
-                lineToInterprete.IsValidFunction())
+                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys)) &&
+                (lineToInterprete.IsValidFunction() || lineToInterprete.NestedFunction(RegexCollection.Store.FunctionParam)))
             {
                 //Exit
                 if (RegexCollection.Store.Exit.IsMatch(lineToInterprete))
@@ -387,6 +387,14 @@ namespace Interpreter
                     return Empty;
                 }
 
+                //Raw
+                if (RegexCollection.Store.Raw.IsMatch(lineToInterprete))
+                {
+                    var result = Evaluator.Raw(lineToInterprete, access, altAccess, this, file);
+                    Output.WriteLine(result);
+                    return result;
+                }
+
                 //Range
                 if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
                 {
@@ -428,34 +436,7 @@ namespace Interpreter
                 //Input
                 if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
                 {
-                    (string Value, string Message) result;
-                    try
-                    {
-                        result = Evaluator.Input(lineToInterprete, access, Output, this, file);
-                        
-                    }
-                    catch (Exception e)
-                    {
-                        try
-                        {
-                            if (!IsNullOrEmpty(altAccess))
-                            {
-                                result = Evaluator.Input(lineToInterprete, altAccess, Output, this, file);
-                            }
-                            else
-                            {
-                                throw e;
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            ExplicitOutput.WriteLine(exception.Message);
-                            return Empty;
-                        }
-                    }
-
-                    Output.WriteLine(result.Message);
-                    return result.Value;
+                    return $"'{ExplicitOutput.ReadLine()}'";
                 }
 
                 //Random number
@@ -470,19 +451,23 @@ namespace Interpreter
                 if (RegexCollection.Store.Type.IsMatch(lineToInterprete))
                 {
                     string result;
+                    var typeGroup = RegexCollection.Store.Type.Match(lineToInterprete).Groups.OfType<Group>()
+                        .Select(a => a.Value).ToList();
+                    var toCheck = IsNullOrEmpty(typeGroup[1]) ? typeGroup[2] : typeGroup[1]; 
+
                     if (lineToInterprete.StartsWith("d"))
                     {
-                        if (Evaluator.DataTypeFromData(lineToInterprete, true) == DataTypes.WORD)
+                        var content = toCheck;
+                        if (!RegexCollection.Store.IsPureWord.IsMatch(toCheck))
                         {
-                            Output.WriteLine(DataTypes.WORD.ToString());
-                            return DataTypes.WORD.ToString();
+                            content = InterpretLine(toCheck, access, file, altAccess);
                         }
-                        result = Evaluator.DataTypeFromData(InterpretLine(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access, file, altAccess), true).ToString();
+                        result = Evaluator.DataTypeFromData(content, true).ToString();
                     }
                     else
                     {
                         result = Evaluator
-                            .GetVariable(RegexCollection.Store.Type.Match(lineToInterprete).Groups[1].Value, access)
+                            .GetVariable(toCheck, access)
                             .DataType.ToString();
                     }
 
@@ -593,7 +578,7 @@ namespace Interpreter
                         }
                         return Empty;
                     }
-                }   
+                }
 
                 #endregion
 
@@ -657,11 +642,11 @@ namespace Interpreter
             }
 
             //Calculation & string concat
-            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || 
-                lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && 
-                (!RegexCollection.Store.IsWord.IsMatch(lineToInterprete) || 
+            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) ||
+                lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) &&
+                (!RegexCollection.Store.IsWord.IsMatch(lineToInterprete) ||
                 lineToInterprete.Remainder(RegexCollection.Store.IsWord)
-                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys.ToList())) && 
+                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys.ToList())) &&
                 !lineToInterprete.StartsWith("#")))
             {
                 (bool Success, string Result) calculationResult;

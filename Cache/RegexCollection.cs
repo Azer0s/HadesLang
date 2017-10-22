@@ -120,7 +120,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for input
     /// </summary>
-    public Regex Input { get; set; } = new Regex("^in:(\\w*)", RegexOptions.Compiled);
+    public Regex Raw { get; set; } = new Regex("^raw:(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
+    /// <summary>
+    /// Regex for input
+    /// </summary>
+    public Regex Input { get; set; } = new Regex("^in:\\[ *\\]", RegexOptions.Compiled);
     /// <summary>
     /// Regex for output/conversion to word datatype
     /// </summary>
@@ -148,7 +152,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for type keyword
     /// </summary>
-    public Regex Type { get; set; } = new Regex("^d?type:([\\w' .]*)", RegexOptions.Compiled);
+    public Regex Type { get; set; } = new Regex("^d?type:(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
     /// <summary>
     /// Regex for toggling the Hades garbage collector
     /// </summary>
@@ -200,7 +204,9 @@ public class RegexCollection
     /// <summary>
     /// Regex for object reference codes
     /// </summary>
-    public Regex ObjCode { get; set; } = new Regex("^obj[{(]?[0-9a-f]{8}[-]?(?:[0-9a-f]{4}[-]?){3}[0-9a-f]{12}[)}]?$",RegexOptions.Compiled);
+    public Regex ObjCode { get; set; } = new Regex("^obj[{(]?[0-9a-f]{8}[-]?(?:[0-9a-f]{4}[-]?){3}[0-9a-f]{12}[)}]?$", RegexOptions.Compiled);
+
+    public Regex FunctionParam { get; set; } = new Regex("(\\w*):\\[([^\\]]*)\\]+", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

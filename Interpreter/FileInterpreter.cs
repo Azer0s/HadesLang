@@ -206,9 +206,18 @@ namespace Interpreter
                         return ("", false);
                     }
 
-                    var eval = Lines[i].StartsWith("if")
-                        ? bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess))
-                        : !bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess));
+                    bool eval;
+                    try
+                    {
+                        eval = Lines[i].StartsWith("if")
+                            ? bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess))
+                            : !bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess));
+                    }
+                    catch (Exception e)
+                    {
+                        interpreter.ExplicitOutput.WriteLine("Value was not recognized as a valid bit!");
+                        return (Empty, true);
+                    }
 
                     if (eval)
                     {
