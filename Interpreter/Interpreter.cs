@@ -56,7 +56,7 @@ namespace Interpreter
             return (Output, ExplicitOutput);
         }
 
-        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "",bool writeSettings = false)
+        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "", bool writeSettings = false)
         {
             if (IsNullOrEmpty(lineToInterprete) || lineToInterprete == "end")
             {
@@ -289,9 +289,9 @@ namespace Interpreter
             }
 
             //Function
-            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) && 
+            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) &&
                 !lineToInterprete.Remainder(RegexCollection.Store.Outside)
-                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys)) && 
+                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys)) &&
                 lineToInterprete.IsValidFunction())
             {
                 //Exit
@@ -387,6 +387,14 @@ namespace Interpreter
                     return Empty;
                 }
 
+                //Raw
+                if (RegexCollection.Store.Raw.IsMatch(lineToInterprete))
+                {
+                    var result = Evaluator.Raw(lineToInterprete, access, altAccess, this, file);
+                    Output.WriteLine(result);
+                    return result;
+                }
+
                 //Range
                 if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
                 {
@@ -428,34 +436,7 @@ namespace Interpreter
                 //Input
                 if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
                 {
-                    (string Value, string Message) result;
-                    try
-                    {
-                        result = Evaluator.Input(lineToInterprete, access, Output, this, file);
-                        
-                    }
-                    catch (Exception e)
-                    {
-                        try
-                        {
-                            if (!IsNullOrEmpty(altAccess))
-                            {
-                                result = Evaluator.Input(lineToInterprete, altAccess, Output, this, file);
-                            }
-                            else
-                            {
-                                throw e;
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            ExplicitOutput.WriteLine(exception.Message);
-                            return Empty;
-                        }
-                    }
-
-                    Output.WriteLine(result.Message);
-                    return result.Value;
+                    return $"'{ExplicitOutput.ReadLine()}'";
                 }
 
                 //Random number
@@ -593,7 +574,7 @@ namespace Interpreter
                         }
                         return Empty;
                     }
-                }   
+                }
 
                 #endregion
 
@@ -657,11 +638,11 @@ namespace Interpreter
             }
 
             //Calculation & string concat
-            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) || 
-                lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) && 
-                (!RegexCollection.Store.IsWord.IsMatch(lineToInterprete) || 
+            if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) ||
+                lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) &&
+                (!RegexCollection.Store.IsWord.IsMatch(lineToInterprete) ||
                 lineToInterprete.Remainder(RegexCollection.Store.IsWord)
-                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys.ToList())) && 
+                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys.ToList())) &&
                 !lineToInterprete.StartsWith("#")))
             {
                 (bool Success, string Result) calculationResult;
