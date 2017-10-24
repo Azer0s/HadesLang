@@ -202,7 +202,12 @@ namespace Interpreter
                         //Execute lines between end and else
                         if (elseLoc > block.end)
                         {
-                            return Execute(interpreter,scopes, block.end, elseLoc);
+                            var guid = Guid.NewGuid().ToString();
+                            scopes.Insert(0,guid);
+                            var result = Execute(interpreter, scopes, block.end, elseLoc);
+                            interpreter.Evaluator.Unload("all", scopes);
+                            scopes.RemoveAt(0);
+                            return result;
                         }
                         return ("", false);
                     }
@@ -222,7 +227,11 @@ namespace Interpreter
 
                     if (eval)
                     {
-                        var result = Execute(interpreter, scopes, block.start + 1, block.end);
+                        var guid = Guid.NewGuid().ToString();
+                        scopes.Insert(0, guid);
+                        var result = Execute(interpreter, scopes, block.start+1, block.end);
+                        interpreter.Evaluator.Unload("all", scopes);
+                        scopes.RemoveAt(0);
 
                         //Return if put was called
                         if (!IsNullOrEmpty(result.Value) && result.Return)
@@ -254,7 +263,11 @@ namespace Interpreter
                         {
                             try
                             {
-                                var result = Execute(interpreter, scopes, elseBlock.start + 1, end: elseBlock.end);
+                                var guid = Guid.NewGuid().ToString();
+                                scopes.Insert(0, guid);
+                                var result = Execute(interpreter, scopes, elseBlock.start + 1, elseBlock.end);
+                                interpreter.Evaluator.Unload("all", scopes);
+                                scopes.RemoveAt(0);
 
                                 if (!IsNullOrEmpty(result.Value) && result.Return)
                                 {

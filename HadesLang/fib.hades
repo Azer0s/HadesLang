@@ -12,6 +12,7 @@ func fib[num a]
 		b = $a + $b
 
 		if[$a bigger 10000]
+			af as bit closed
 			put a
 		end
 	end
