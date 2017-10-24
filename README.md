@@ -16,6 +16,7 @@ var interpreter = new Interpreter(new ConsoleOutput(),new ConsoleOutput());
 interpreter.RegisterFunction(new Function("print", a =>
 {
     a.ToList().ForEach(Console.WriteLine);
+    return string.Empty;
 }));
 ```
 
