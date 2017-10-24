@@ -42,11 +42,11 @@ namespace Interpreter
                     }
 
                     var fi = new FileInterpreter(null,lines);
-                    fi.Execute(interpreter, "console");
+                    fi.Execute(interpreter, new List<string>{"console"});
                 }
                 else
                 {
-                    interpreter.InterpretLine(input, "console", null, "", "", true);
+                    interpreter.InterpretLine(input, new List<string> { "console" }, null,true);
                 }
             }
         }

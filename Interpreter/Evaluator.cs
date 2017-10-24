@@ -20,12 +20,12 @@ namespace Interpreter
     {
         #region Variables
 
-        public string CreateVariable(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
+        public string CreateVariable(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var groups = RegexCollection.Store.CreateVariable.Match(lineToInterprete).Groups.OfType<Group>()
                 .Where(a => !string.IsNullOrEmpty(a.Value)).Select(a => a.Value).ToList();
 
-            var exist = Exists(groups[1], access);
+            var exist = Exists(groups[1], scopes);
             if (exist.Exists)
             {
                 return exist.Message;
@@ -44,11 +44,11 @@ namespace Interpreter
                     DataType = TypeParser.ParseDataType(groups[2])
                 };
 
-            Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = access }, variable);
+            Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = scopes[0] }, variable);
 
             try
             {
-                return groups.Count == 5 ? AssignToVariable($"{groups[1]} = {groups[4]}", access, true, interpreter, file) : $"{groups[1]} is undefined";
+                return groups.Count == 5 ? AssignToVariable($"{groups[1]} = {groups[4]}", scopes, true, interpreter, file) : $"{groups[1]} is undefined";
             }
             catch (Exception e)
             {
@@ -56,18 +56,18 @@ namespace Interpreter
             }
         }
 
-        public string CreateArray(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
+        public string CreateArray(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var groups = RegexCollection.Store.CreateArray.Match(lineToInterprete).Groups.OfType<Group>()
                 .Where(a => !string.IsNullOrEmpty(a.Value)).Select(a => a.Value).ToList();
 
-            var exist = Exists(groups[1], access);
+            var exist = Exists(groups[1], scopes);
             if (exist.Exists)
             {
                 return exist.Message;
             }
 
-            Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = access },
+            Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = scopes[0] },
                 groups[3] == "*"
                     ? new Variables.Array
                     {
@@ -85,7 +85,7 @@ namespace Interpreter
 
             try
             {
-                return groups.Count == 6 ? AssignToArray($"{groups[1]} = {groups[5]}", access, interpreter, file) : $"{groups[1]} is undefined";
+                return groups.Count == 6 ? AssignToArray($"{groups[1]} = {groups[5]}", scopes, interpreter, file) : $"{groups[1]} is undefined";
             }
             catch (Exception e)
             {
@@ -93,7 +93,7 @@ namespace Interpreter
             }
         }
 
-        private string AssignToArray(string s, string access, Interpreter interpreter, FileInterpreter file)
+        private string AssignToArray(string s, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var output = interpreter.GetOutput();
             interpreter.SetOutput(new NoOutput(), output.eOutput);
@@ -101,7 +101,7 @@ namespace Interpreter
             var groups = RegexCollection.Store.Assignment.Match(s).Groups.OfType<Group>().Select(a => a.Value).ToList();
             var result = RegexCollection.Store.ArrayValues.IsMatch(groups[2])
                 ? groups[2]
-                : interpreter.InterpretLine(groups[2], access, file);
+                : interpreter.InterpretLine(groups[2], scopes, file);
             if (!RegexCollection.Store.ArrayValues.IsMatch(result))
             {
                 interpreter.SetOutput(output.output, output.eOutput);
@@ -113,13 +113,13 @@ namespace Interpreter
 
             for (var sp = 0; sp < split.Count; sp++)
             {
-                split[sp] = interpreter.InterpretLine(split[sp].TrimStart(' ').TrimEnd(' '), access, file);
+                split[sp] = interpreter.InterpretLine(split[sp].TrimStart(' ').TrimEnd(' '), scopes, file);
             }
 
             var success = false;
-            if (Exists(groups[1], access).Exists)
+            if (Exists(groups[1], scopes).Exists)
             {
-                var variable = GetVariable(groups[1], access);
+                var variable = GetVariable(groups[1], scopes);
                 var datatypeFromVariable = variable.DataType;
 
                 var index = 0;
@@ -149,7 +149,7 @@ namespace Interpreter
 
                 try
                 {
-                    success = SetArray(groups[1], access, list.ToDictionary(pair => pair.Key, pair => pair.Value.TrimStart(' ')));
+                    success = SetArray(groups[1],scopes, list.ToDictionary(pair => pair.Key, pair => pair.Value.TrimStart(' ')));
                 }
                 catch (Exception e)
                 {
@@ -168,7 +168,7 @@ namespace Interpreter
             throw new Exception($"{groups[1]} could not be set!");
         }
 
-        public string AssignToArrayAtPos(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
+        public string AssignToArrayAtPos(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var output = interpreter.GetOutput();
             interpreter.SetOutput(new NoOutput(), output.eOutput);
@@ -176,17 +176,17 @@ namespace Interpreter
             var groups = RegexCollection.Store.ArrayAssignment.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
 
-            var exists = Exists(groups[1], access);
+            var exists = Exists(groups[1], scopes);
             if (exists.Exists)
             {
-                var variable = GetVariable(groups[1], access);
+                var variable = GetVariable(groups[1], scopes);
                 var datatypeFromVariable = variable.DataType;
-                groups[3] = interpreter.InterpretLine(groups[3], access, file);
+                groups[3] = interpreter.InterpretLine(groups[3], scopes, file);
                 var datatypeFromData = DataTypeFromData(groups[3], false);
                 int position;
                 try
                 {
-                    position = int.Parse(interpreter.InterpretLine(groups[2], access, file));
+                    position = int.Parse(interpreter.InterpretLine(groups[2], scopes, file));
                 }
                 catch (Exception e)
                 {
@@ -200,7 +200,7 @@ namespace Interpreter
                 {
                     try
                     {
-                        SetArrayAtPos(groups[1], access, $"'{groups[3].TrimStart('\'').TrimEnd('\'')}'", position);
+                        SetArrayAtPos(groups[1], scopes, $"'{groups[3].TrimStart('\'').TrimEnd('\'')}'", position);
                     }
                     catch (Exception e)
                     {
@@ -214,7 +214,7 @@ namespace Interpreter
                 {
                     try
                     {
-                        SetArrayAtPos(groups[1], access, $"{groups[3].Replace(" ", "")}.0", position);
+                        SetArrayAtPos(groups[1], scopes, $"{groups[3].Replace(" ", "")}.0", position);
                     }
                     catch (Exception e)
                     {
@@ -228,7 +228,7 @@ namespace Interpreter
                 {
                     try
                     {
-                        SetArrayAtPos(groups[1], access, groups[3], position);
+                        SetArrayAtPos(groups[1], scopes, groups[3], position);
                     }
                     catch (Exception e)
                     {
@@ -258,7 +258,7 @@ namespace Interpreter
             throw new Exception($"{exists.Message}");
         }
 
-        private void SetArrayAtPos(string name, string access, string value, int position)
+        private void SetArrayAtPos(string name, List<string> scopes, string value, int position)
         {
             Variables.Array variable;
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
@@ -268,14 +268,30 @@ namespace Interpreter
                                                         a.Value.Access == AccessTypes.REACHABLE_ALL);
                 variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
             }
-            else if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == access))
-            {
-                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = access }] as Variables.Array;
-            }
             else
             {
-                throw new Exception($"Variable {name} does not exist or the access was denied!");
+                var owner = Empty;
 
+                foreach (var scope in scopes)
+                {
+                    owner = Cache.Instance.Variables.FirstOrDefault(a =>
+                        a.Key.Name == name && a.Key.Owner == scope).Key.Owner;
+
+                    if (!IsNullOrEmpty(owner))
+                    {
+                        break;
+                    }
+                }
+                
+                if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == owner))
+                {
+                    variable = Cache.Instance.Variables[new Meta { Name = name, Owner = owner }] as Variables.Array;
+                }
+                else
+                {
+                    throw new Exception($"Variable {name} does not exist or the access was denied!");
+
+                }
             }
 
             if (variable != null && position < variable.Capacity)
@@ -295,7 +311,7 @@ namespace Interpreter
             }
         }
 
-        private bool SetArray(string name, string access, Dictionary<int, string> values)
+        private bool SetArray(string name, List<string> scopes, Dictionary<int, string> values)
         {
             Variables.Array variable = null;
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
@@ -303,9 +319,21 @@ namespace Interpreter
                 var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL);
                 variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
             }
-            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == access))
+            var owner = Empty;
+
+            foreach (var scope in scopes)
             {
-                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = access }] as Variables.Array;
+                owner = Cache.Instance.Variables.FirstOrDefault(a =>
+                    a.Key.Name == name && a.Key.Owner == scope).Key.Owner;
+
+                if (!IsNullOrEmpty(owner))
+                {
+                    break;
+                }
+            }
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == owner))
+            {
+                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = owner }] as Variables.Array;
             }
 
             if (variable != null)
@@ -320,14 +348,27 @@ namespace Interpreter
             throw new Exception($"Variable {name} does not exist or the access was denied!");
         }
 
-        public (bool Exists, string Message) Exists(string name, string access)
+        public (bool Exists, string Message) Exists(string name, List<string> scopes)
         {
             if (VariableIsReachableAll(name))
             {
                 return (true, "Variable already defined as reachable_all!");
             }
 
-            if (Cache.Instance.Variables.ContainsKey(new Meta { Name = name, Owner = access }))
+            var owner = Empty;
+
+            foreach (var scope in scopes)
+            {
+                owner = Cache.Instance.Variables.FirstOrDefault(a =>
+                    a.Key.Name == name && a.Key.Owner == scope).Key.Owner;
+
+                if (!IsNullOrEmpty(owner))
+                {
+                    break;
+                }
+            }
+
+            if (Cache.Instance.Variables.ContainsKey(new Meta { Name = name, Owner = owner}))
             {
                 return (true, "Variable already exists!");
             }
@@ -340,7 +381,7 @@ namespace Interpreter
             return Cache.Instance.Variables.Any(a => a.Key.Name == varname && a.Value.Access == AccessTypes.REACHABLE_ALL);
         }
 
-        public string ReplaceWithVars(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
+        public string ReplaceWithVars(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var matches = RegexCollection.Store.Variable.Matches(lineToInterprete);
 
@@ -355,7 +396,7 @@ namespace Interpreter
 
             foreach (Match match in matches)
             {
-                var variable = GetVariable(match.Groups[1].Value.TrimStart('$'), access);
+                var variable = GetVariable(match.Groups[1].Value.TrimStart('$'), scopes);
 
                 if (variable is Variable)
                 {
@@ -365,7 +406,7 @@ namespace Interpreter
                 {
                     if (RegexCollection.Store.ArrayVariable.IsMatch(match.Value))
                     {
-                        lineToInterprete = lineToInterprete.Replace(match.Value, GetArrayValue(match.Value, access, interpreter, file));
+                        lineToInterprete = lineToInterprete.Replace(match.Value, GetArrayValue(match.Value, scopes, interpreter, file));
                     }
                     else
                     {
@@ -380,10 +421,10 @@ namespace Interpreter
             return stringDict.Aggregate(lineToInterprete, (current, variable) => current.Replace(variable.Key, variable.Value)); ;
         }
 
-        public string GetArrayValue(string name, string access, Interpreter interpreter, FileInterpreter file)
+        public string GetArrayValue(string name, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var groups = RegexCollection.Store.ArrayVariable.Match(name).Groups;
-            var variable = GetVariable(groups[1].Value.TrimStart('$'), access);
+            var variable = GetVariable(groups[1].Value.TrimStart('$'), scopes);
 
             if (variable is Variables.Array)
             {
@@ -392,7 +433,7 @@ namespace Interpreter
                 try
                 {
                     interpreter.SetOutput(new NoOutput(), output.output);
-                    index = int.Parse(interpreter.InterpretLine(groups[2].Value, access, file));
+                    index = int.Parse(interpreter.InterpretLine(groups[2].Value, scopes, file));
                     var value = (variable as Variables.Array).Values[index];
                     interpreter.SetOutput(output.output, output.eOutput);
 
@@ -408,47 +449,60 @@ namespace Interpreter
             throw new Exception($"Could not get value of idex {groups[2]} in array {name}!");
         }
 
-        public string InDeCrease(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file, string altAccess)
+        public string InDeCrease(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var groups = RegexCollection.Store.InDeCrease.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToArray();
             lineToInterprete = $"{groups[1]} = ${groups[1]} {groups[2]} 1";
-            return interpreter.InterpretLine(lineToInterprete, access, file, altAccess);
+            return interpreter.InterpretLine(lineToInterprete, scopes, file);
         }
 
-        public IVariable GetVariable(string variable, string access)
+        public IVariable GetVariable(string variable, List<string> scopes)
         {
             if (VariableIsReachableAll(variable))
             {
                 return Cache.Instance.Variables.First(a => a.Key.Name == variable).Value;
             }
-            if (Exists(variable, access).Exists)
+            if (Exists(variable, scopes).Exists)
             {
-                return Cache.Instance.Variables[new Meta { Name = variable, Owner = access }];
+                foreach (var scope in scopes)
+                {
+                    try
+                    {
+                        if (Cache.Instance.Variables.Any(a => a.Key.Owner == scope && a.Key.Name == variable))
+                        {
+                            return Cache.Instance.Variables[new Meta { Name = variable, Owner = scope }];
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        //ignored
+                    }
+                }
             }
             throw new Exception($"Variable {variable} does not exist or the access was denied!");
         }
 
-        public string AssignToVariable(string lineToInterprete, string access, bool hardCompare, Interpreter interpreter, FileInterpreter file)
+        public string AssignToVariable(string lineToInterprete, List<string> scopes, bool hardCompare, Interpreter interpreter, FileInterpreter file)
         {
             var groups = RegexCollection.Store.Assignment.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
 
             if (RegexCollection.Store.ArrayValues.IsMatch(groups[2].Value))
             {
-                return AssignToArray(lineToInterprete, access, interpreter, file);
+                return AssignToArray(lineToInterprete, scopes, interpreter, file);
             }
 
             var output = interpreter.GetOutput();
             interpreter.SetOutput(new NoOutput(), output.eOutput);
             interpreter.MuteOut = true;
-            var result = interpreter.InterpretLine(groups[2].Value, access, file);
+            var result = interpreter.InterpretLine(groups[2].Value, scopes, file);
             interpreter.MuteOut = false;
             interpreter.SetOutput(output.output, output.eOutput);
 
             var success = false;
 
-            if (Exists(groups[1].Value, access).Exists)
+            if (Exists(groups[1].Value, scopes).Exists)
             {
-                var variable = GetVariable(groups[1].Value, access);
+                var variable = GetVariable(groups[1].Value, scopes);
 
                 if (variable is Variable)
                 {
@@ -458,16 +512,16 @@ namespace Interpreter
                     if (datatypeFromVariable == DataTypes.WORD)
                     {
                         result = $"'{result.TrimStart('\'').TrimEnd('\'')}'";
-                        success = SetVariable(groups[1].Value, result, access);
+                        success = SetVariable(groups[1].Value, result, scopes);
                     }
                     else if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
                     {
                         result = $"{result.Replace(" ", "")}.0";
-                        success = SetVariable(groups[1].Value, result, access);
+                        success = SetVariable(groups[1].Value, result, scopes);
                     }
                     else if (datatypeFromData == datatypeFromVariable)
                     {
-                        success = SetVariable(groups[1].Value, result, access);
+                        success = SetVariable(groups[1].Value, result, scopes);
                     }
                     else
                     {
@@ -476,12 +530,12 @@ namespace Interpreter
                 }
                 else if (variable is FileInterpreter)
                 {
-                    success = SetVariable(groups[1].Value, result, access);
+                    success = SetVariable(groups[1].Value, result, scopes);
                     result = "object";
                 }
                 else if (variable is Variables.Array)
                 {
-                    return AssignToArray(lineToInterprete, access, interpreter, file);
+                    return AssignToArray(lineToInterprete,scopes, interpreter, file);
                 }
                 else
                 {
@@ -496,7 +550,7 @@ namespace Interpreter
             throw new Exception($"{groups[1]} could not be set!");
         }
 
-        private bool SetVariable(string name, string value, string access)
+        private bool SetVariable(string name, string value, List<string> scopes)
         {
             IVariable variable = null;
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
@@ -512,9 +566,23 @@ namespace Interpreter
                     variable = Cache.Instance.Variables[reachableAllVar.Key] as Variable;
                 }
             }
-            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == access))
+
+            var owner = Empty;
+
+            foreach (var scope in scopes)
             {
-                var varFromCache = Cache.Instance.Variables[new Meta {Name = name, Owner = access}];
+                owner = Cache.Instance.Variables.FirstOrDefault(a =>
+                    a.Key.Name == name && a.Key.Owner == scope).Key.Owner;
+
+                if (!IsNullOrEmpty(owner))
+                {
+                    break;
+                }
+            }
+
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == owner))
+            {
+                var varFromCache = Cache.Instance.Variables[new Meta {Name = name, Owner = owner}];
 
                 if (varFromCache is Variable)
                 {
@@ -588,42 +656,42 @@ namespace Interpreter
             return DataTypes.NONE;
         }
 
-        public string LoadAs(string path, string varName, string access, Interpreter interpreter)
+        public string LoadAs(string path, string varName, List<string> scopes, Interpreter interpreter)
         {
             var fileInterpreter = new FileInterpreter(path);
-            var result = Exists(varName, access);
+            var result = Exists(varName, scopes);
             if (!result.Exists)
             {
-                Cache.Instance.Variables.Add(new Meta { Name = varName, Owner = access }, fileInterpreter);
+                Cache.Instance.Variables.Add(new Meta { Name = varName, Owner = scopes[0] }, fileInterpreter);
             }
             else if (Cache.Instance.Variables.Any(a => a.Value is FileInterpreter && a.Key.Name == varName))
             {
                 var guid = Guid.NewGuid().ToString();
                 Cache.Instance.FileCache.Add(guid,fileInterpreter);
-                AssignToVariable($"{varName} = obj{guid}", access, true, interpreter, null);
+                AssignToVariable($"{varName} = obj{guid}", scopes, true, interpreter, null);
             }
             else
             {
                 throw new Exception(result.Message);
             }
 
-            return fileInterpreter.Execute(interpreter, path).Value;
+            return fileInterpreter.Execute(interpreter, new List<string>{path}).Value;
         }
 
-        public string LoadFile(string path, string varname, string access, Interpreter interpreter)
+        public string LoadFile(string path, string varname, List<string> scopes, Interpreter interpreter)
         {
             if (!IsNullOrEmpty(varname))
             {
-                return LoadAs(path, varname, access, interpreter);
+                return LoadAs(path, varname, scopes, interpreter);
             }
 
-            var result = new FileInterpreter(path).Execute(interpreter, path);
+            var result = new FileInterpreter(path).Execute(interpreter, new List<string> { path });
 
             if (Cache.Instance.EraseVars)
             {
                 try
                 {
-                    Unload("all", path);
+                    Unload("all", new List<string>{path});
                 }
                 catch (Exception e)
                 {
@@ -634,15 +702,15 @@ namespace Interpreter
             return result.Value;
         }
 
-        public string Unload(string variable, string access)
+        public string Unload(string variable, List<string> scopes)
         {
             if (variable == "all")
             {
-                foreach (var keyValuePair in Cache.Instance.Variables.Where(a => a.Key.Owner == access).Select(a => a).ToList())
+                foreach (var keyValuePair in Cache.Instance.Variables.Where(a => a.Key.Owner == scopes[0]).Select(a => a).ToList())
                 {
                     try
                     {
-                        Unload(keyValuePair.Key.Name, access);
+                        Unload(keyValuePair.Key.Name, scopes);
                     }
                     catch (Exception e)
                     {
@@ -650,19 +718,33 @@ namespace Interpreter
                     }
                 }
 
-                return $"Unloaded all variables from {access}!";
+                return $"Unloaded all variables from {scopes[0]}!";
             }
 
-            var obj = GetVariable(variable, access);
+            var obj = GetVariable(variable, scopes);
+
+            var owner = Empty;
+
+            foreach (var scope in scopes)
+            {
+                owner = Cache.Instance.Variables.FirstOrDefault(a =>
+                    a.Key.Name == variable && a.Key.Owner == scope).Key.Owner;
+
+                if (!IsNullOrEmpty(owner))
+                {
+                    break;
+                }
+            }
+
             if (obj is FileInterpreter && Cache.Instance.EraseVars)
             {
-                if (!RegexCollection.Store.GUID.IsMatch(access))
+                if (!RegexCollection.Store.GUID.IsMatch(owner))
                 {
-                    Unload("all", (obj as FileInterpreter).FAccess);
+                    Unload("all", new List<string>{(obj as FileInterpreter).FAccess});
                 }
                 else
                 {
-                    Cache.Instance.Variables.Remove(new Meta {Name = variable, Owner = access});
+                    Cache.Instance.Variables.Remove(new Meta {Name = variable, Owner = owner});
                     throw new Exception("Can´t unload object from method!");
                 }
             }
@@ -672,23 +754,23 @@ namespace Interpreter
                 Cache.Instance.Variables.Remove(Cache.Instance.Variables.First(a => a.Key.Name == variable).Key);
                 return $"Unloaded variable {variable}!";
             }
-            if (Exists(variable, access).Exists)
+            if (Exists(variable, scopes).Exists)
             {
-                Cache.Instance.Variables.Remove(new Meta { Name = variable, Owner = access });
+                Cache.Instance.Variables.Remove(new Meta { Name = variable, Owner = owner });
                 return $"Unloaded variable {variable}!";
             }
             throw new Exception($"Variable {variable} does not exist or the access was denied!");
         }
 
-        public string GetObjectVar(string obj, string varname, string acccess, Interpreter interpreter)
+        public string GetObjectVar(string obj, string varname, List<string> scopes, Interpreter interpreter)
         {
-            if (!Exists(obj, acccess).Exists)
+            if (!Exists(obj, scopes).Exists)
             {
                 throw new Exception($"Object {obj} does not exist!");
             }
 
             varname = $"${varname.TrimStart('$')}";
-            var varObj = GetVariable(obj, acccess);
+            var varObj = GetVariable(obj,scopes);
 
             if (varObj is FileInterpreter)
             {
@@ -696,11 +778,11 @@ namespace Interpreter
                 var arrayValue = Empty;
                 if (RegexCollection.Store.ArrayVariable.IsMatch(varname))
                 {
-                    arrayValue = GetArrayValue(varname, (varObj as FileInterpreter).FAccess, interpreter, varObj as FileInterpreter);
+                    arrayValue = GetArrayValue(varname, new List<string>{(varObj as FileInterpreter).FAccess }, interpreter, varObj as FileInterpreter);
                 }
                 else
                 {
-                    fileVariable = GetVariable(varname.TrimStart('$'), (varObj as FileInterpreter).FAccess);
+                    fileVariable = GetVariable(varname.TrimStart('$'), new List<string> { (varObj as FileInterpreter).FAccess });
                 }
 
                 if (fileVariable != null)
@@ -718,7 +800,7 @@ namespace Interpreter
                     var output = interpreter.GetOutput();
                     interpreter.SetOutput(new NoOutput(), output.eOutput);
                     var fileInterpreter = varObj as FileInterpreter;
-                    var result = interpreter.InterpretLine(varname, fileInterpreter.FAccess, fileInterpreter);
+                    var result = interpreter.InterpretLine(varname, new List<string> { fileInterpreter.FAccess }, fileInterpreter);
                     interpreter.SetOutput(output.output, output.eOutput);
                     return result;
                 }
@@ -769,13 +851,13 @@ namespace Interpreter
 
         #region Libraries
 
-        public string IncludeLib(string lineToInterprete, string access, Interpreter interpreter)
+        public string IncludeLib(string lineToInterprete, List<string> scopes, Interpreter interpreter)
         {
             var group = RegexCollection.Store.With.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
 
             var output = interpreter.GetOutput();
             interpreter.SetOutput(new NoOutput(), new NoOutput());
-            var result = interpreter.InterpretLine(group[2], access, null).Trim('\'');
+            var result = interpreter.InterpretLine(group[2], scopes, null).Trim('\'');
             result = IsNullOrEmpty(result) ? group[2] : result;
             interpreter.SetOutput(output.output,output.eOutput);
 
@@ -786,10 +868,10 @@ namespace Interpreter
 
             if (!IsNullOrEmpty(file.Extension))
             {
-                return LoadFile(fn,group[3], access, interpreter);
+                return LoadFile(fn,group[3], scopes, interpreter);
             }
 
-            var exist = Exists(varname, access);
+            var exist = Exists(varname, scopes);
             if (exist.Exists)
             {
                 throw new Exception(exist.Message);
@@ -806,7 +888,7 @@ namespace Interpreter
                 Cache.Instance.Variables.Add(new Meta
                 {
                     Name = varname,
-                    Owner = access
+                    Owner = scopes[0]
                 },
                 new Library
                 {
@@ -847,7 +929,7 @@ namespace Interpreter
             return (true, $"'{result}'");
         }
 
-        public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
+        public (bool Success, string Result) EvaluateCalculation(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             if (lineToInterprete.Trim().StartsWith("'") && lineToInterprete.Trim().EndsWith("'"))
             {
@@ -859,7 +941,7 @@ namespace Interpreter
 
             try
             {
-                lineToInterprete = ReplaceWithVars(lineToInterprete, access, interpreter, file);
+                lineToInterprete = ReplaceWithVars(lineToInterprete, scopes, interpreter, file);
             }
             catch (Exception e)
             {
@@ -885,7 +967,7 @@ namespace Interpreter
                     {
                         var output = interpreter.GetOutput();
                         interpreter.SetOutput(new NoOutput(), new NoOutput());
-                        lineToInterprete += interpreter.InterpretLine(repl, access, file);
+                        lineToInterprete += interpreter.InterpretLine(repl, scopes, file);
                         interpreter.SetOutput(output.output,output.eOutput);
                     }
                     else
@@ -996,7 +1078,7 @@ namespace Interpreter
             Environment.Exit(int.Parse(RegexCollection.Store.Exit.Match(lineToInterprete).Groups[1].Value));
         }
 
-        public string Raw(string lineToInterprete, string access, string altAccess, Interpreter interpreter, FileInterpreter file)
+        public string Raw(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             var output = interpreter.GetOutput();
             interpreter.SetOutput(new NoOutput(), output.eOutput);
@@ -1004,7 +1086,7 @@ namespace Interpreter
             string result;
             try
             {
-                result = interpreter.InterpretLine(RegexCollection.Store.Raw.Match(lineToInterprete).Groups[1].Value, access, file, altAccess);
+                result = interpreter.InterpretLine(RegexCollection.Store.Raw.Match(lineToInterprete).Groups[1].Value, scopes, file);
             }
             catch (Exception e)
             {
@@ -1016,7 +1098,7 @@ namespace Interpreter
             return result.Trim('\'');
         }
 
-        public string EvaluateOut(string lineToInterprete, string access, Interpreter interpreter, FileInterpreter file)
+        public string EvaluateOut(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
             lineToInterprete = lineToInterprete.TrimEnd(' ');
             var groups = RegexCollection.Store.Output.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
@@ -1027,7 +1109,7 @@ namespace Interpreter
             string result;
             try
             {
-                result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value, access, file);
+                result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value, scopes, file);
             }
             catch (Exception e)
             {
@@ -1051,14 +1133,14 @@ namespace Interpreter
 
         #endregion
 
-        public string CallMethod(string lineToInterprete, string access, Interpreter interpreter, string altAccess = "")
+        public string CallMethod(string lineToInterprete, List<string> scopes, Interpreter interpreter, string altAccess = "")
         {
             var groups = RegexCollection.Store.MethodCall.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
 
-            if (Exists(groups[1], access).Exists)
+            if (Exists(groups[1], scopes).Exists)
             {
-                var variable = GetVariable(groups[1], access);
+                var variable = GetVariable(groups[1],scopes);
 
                 if (variable is Library)
                 {
@@ -1070,7 +1152,7 @@ namespace Interpreter
 
                     for (var i = 0; i < args.Length; i++)
                     {
-                        args[i] = interpreter.InterpretLine(args[i], access, null);
+                        args[i] = interpreter.InterpretLine(args[i], scopes, null);
                     }
 
                     return mi.Invoke((variable as Library).LibObject.Unwrap(), args);
@@ -1078,7 +1160,7 @@ namespace Interpreter
 
                 if (variable is FileInterpreter)
                 {
-                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter,access,altAccess);
+                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter,scopes);
                 }
                 throw new Exception($"Variable {groups[1]} is not of type object!");
             }

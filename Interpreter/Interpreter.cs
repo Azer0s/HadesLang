@@ -56,7 +56,7 @@ namespace Interpreter
             return (Output, ExplicitOutput);
         }
 
-        public string InterpretLine(string lineToInterprete, string access, FileInterpreter file, string altAccess = "", string function = "", bool writeSettings = false)
+        public string InterpretLine(string lineToInterprete, List<string> scopes, FileInterpreter file, bool writeSettings = false)
         {
             if (IsNullOrEmpty(lineToInterprete) || lineToInterprete == "end")
             {
@@ -97,9 +97,9 @@ namespace Interpreter
 
             #endregion
 
-            if (IsNullOrEmpty(altAccess))
+            if (file != null && !scopes.Contains(file.FAccess))
             {
-                altAccess = file != null ? file.FAccess : altAccess;
+                scopes.Add(file.FAccess);
             }
 
             //Variable decleration
@@ -107,25 +107,11 @@ namespace Interpreter
             {
                 try
                 {
-                    Output.WriteLine(Evaluator.CreateVariable(lineToInterprete, access, this, file));
+                    Output.WriteLine(Evaluator.CreateVariable(lineToInterprete, scopes, this, file));
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            Output.WriteLine(Evaluator.CreateVariable(lineToInterprete, altAccess, this, file));
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
                 }
                 return Empty;
             }
@@ -135,25 +121,11 @@ namespace Interpreter
             {
                 try
                 {
-                    Output.WriteLine(Evaluator.CreateArray(lineToInterprete, access, this, file));
+                    Output.WriteLine(Evaluator.CreateArray(lineToInterprete, scopes, this, file));
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            Output.WriteLine(Evaluator.CreateArray(lineToInterprete, altAccess, this, file));
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                    }
+                        ExplicitOutput.WriteLine(e.Message);
                 }
                 return Empty;
             }
@@ -163,25 +135,11 @@ namespace Interpreter
             {
                 try
                 {
-                    Output.WriteLine(Evaluator.AssignToArrayAtPos(lineToInterprete, access, this, file));
+                    Output.WriteLine(Evaluator.AssignToArrayAtPos(lineToInterprete, scopes, this, file));
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            Output.WriteLine(Evaluator.AssignToArrayAtPos(lineToInterprete, altAccess, this, file));
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
                 }
                 return Empty;
             }
@@ -191,25 +149,11 @@ namespace Interpreter
             {
                 try
                 {
-                    Output.WriteLine(Evaluator.AssignToVariable(lineToInterprete, access, true, this, file));
+                    Output.WriteLine(Evaluator.AssignToVariable(lineToInterprete, scopes, true, this, file));
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            Output.WriteLine(Evaluator.AssignToVariable(lineToInterprete, altAccess, true, this, file));
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
                 }
                 return Empty;
             }
@@ -224,11 +168,11 @@ namespace Interpreter
                 var eOutput = ExplicitOutput;
                 Output = new NoOutput();
                 ExplicitOutput = new NoOutput();
-                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {InterpretLine(groups[3], access, file, altAccess)}";
+                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {InterpretLine(groups[3], scopes, file)}";
                 Output = output;
                 ExplicitOutput = eOutput;
 
-                return InterpretLine(lineToInterprete, access, file, altAccess);
+                return InterpretLine(lineToInterprete, scopes, file);
             }
 
             //Method calls
@@ -237,7 +181,7 @@ namespace Interpreter
                 var result = Empty;
                 try
                 {
-                    result = Evaluator.CallMethod(lineToInterprete, access, this,altAccess);
+                    result = Evaluator.CallMethod(lineToInterprete, scopes, this);
                 }
                 catch (Exception e)
                 {
@@ -260,25 +204,11 @@ namespace Interpreter
 
                 try
                 {
-                    result = Evaluator.GetObjectVar(groups[1], groups[2], access, this);
+                    result = Evaluator.GetObjectVar(groups[1], groups[2], scopes, this);
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            result = Evaluator.GetObjectVar(groups[1], groups[2], altAccess, this);
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
                 }
 
                 if (result != Empty)
@@ -309,7 +239,7 @@ namespace Interpreter
                     {
                         try
                         {
-                            return file.CallFunction(lineToInterprete, this);
+                            return file.CallFunction(lineToInterprete, this,scopes);
                         }
                         catch (Exception)
                         {
@@ -331,26 +261,12 @@ namespace Interpreter
                     string result;
                     try
                     {
-                        result = Evaluator.EvaluateOut(lineToInterprete, access, this, file).TrimStart('\'').TrimEnd('\'');
+                        result = Evaluator.EvaluateOut(lineToInterprete, scopes, this, file).TrimStart('\'').TrimEnd('\'');
                     }
                     catch (Exception e)
                     {
-                        try
-                        {
-                            if (!IsNullOrEmpty(altAccess))
-                            {
-                                result = Evaluator.EvaluateOut(lineToInterprete, altAccess, this, file).TrimStart('\'').TrimEnd('\'');
-                            }
-                            else
-                            {
-                                throw e;
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            ExplicitOutput.WriteLine(exception.Message);
-                            return Empty;
-                        }
+                        ExplicitOutput.WriteLine(e.Message);
+                        return Empty;
                     }
                     if (!MuteOut)
                     {
@@ -364,25 +280,11 @@ namespace Interpreter
                 {
                     try
                     {
-                        Output.WriteLine(Evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, access));
+                        Output.WriteLine(Evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, scopes));
                     }
                     catch (Exception e)
                     {
-                        try
-                        {
-                            if (!IsNullOrEmpty(altAccess))
-                            {
-                                Output.WriteLine(Evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, altAccess));
-                            }
-                            else
-                            {
-                                throw e;
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            ExplicitOutput.WriteLine(e.Message);
-                        }
+                        ExplicitOutput.WriteLine(e.Message);
                     }
                     return Empty;
                 }
@@ -390,7 +292,7 @@ namespace Interpreter
                 //Raw
                 if (RegexCollection.Store.Raw.IsMatch(lineToInterprete))
                 {
-                    var result = Evaluator.Raw(lineToInterprete, access, altAccess, this, file);
+                    var result = Evaluator.Raw(lineToInterprete, scopes, this, file);
                     Output.WriteLine(result);
                     return result;
                 }
@@ -400,26 +302,12 @@ namespace Interpreter
                 {
                     try
                     {
-                        lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, access, this, file);
+                        lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, scopes, this, file);
                     }
                     catch (Exception e)
                     {
-                        try
-                        {
-                            if (!IsNullOrEmpty(altAccess))
-                            {
-                                lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, altAccess, this, file);
-                            }
-                            else
-                            {
-                                throw e;
-                            }
-                        }
-                        catch (Exception e1)
-                        {
-                            ExplicitOutput.WriteLine(e1.Message);
-                            return Empty;
-                        }
+                        ExplicitOutput.WriteLine(e.Message);
+                        return Empty;
                     }
 
                     var range = RegexCollection.Store.Range.Match(lineToInterprete).Groups.OfType<Group>()
@@ -460,14 +348,14 @@ namespace Interpreter
                         var content = toCheck;
                         if (!RegexCollection.Store.IsPureWord.IsMatch(toCheck))
                         {
-                            content = InterpretLine(toCheck, access, file, altAccess);
+                            content = InterpretLine(toCheck, scopes, file);
                         }
                         result = Evaluator.DataTypeFromData(content, true).ToString();
                     }
                     else
                     {
                         result = Evaluator
-                            .GetVariable(toCheck, access)
+                            .GetVariable(toCheck, scopes)
                             .DataType.ToString();
                     }
 
@@ -478,7 +366,7 @@ namespace Interpreter
                 //Exists
                 if (RegexCollection.Store.Exists.IsMatch(lineToInterprete))
                 {
-                    var result = Evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value, access).Exists.ToString().ToLower();
+                    var result = Evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value, scopes).Exists.ToString().ToLower();
                     Output.WriteLine(result);
                     return result;
                 }
@@ -593,26 +481,12 @@ namespace Interpreter
                 var value = Empty;
                 try
                 {
-                    value = Evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", access, this, file);
+                    value = Evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", scopes, this, file);
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            value = Evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", altAccess, this, file);
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                        return value;
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
+                    return value;
                 }
                 Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
                 return value;
@@ -625,7 +499,7 @@ namespace Interpreter
                 {
                     var eOutput = ExplicitOutput;
                     ExplicitOutput = new NoOutput();
-                    Evaluator.InDeCrease(lineToInterprete, access, this, file,altAccess);
+                    Evaluator.InDeCrease(lineToInterprete, scopes, this, file);
                     ExplicitOutput = eOutput;
                 }
                 catch (Exception e)
@@ -652,26 +526,12 @@ namespace Interpreter
                 (bool Success, string Result) calculationResult;
                 try
                 {
-                    calculationResult = Evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(", "int(").Replace("%", "#"), access, this, file);
+                    calculationResult = Evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(", "int(").Replace("%", "#"), scopes, this, file);
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            calculationResult = Evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(", "int(").Replace("%", "#"), altAccess, this, file);
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(exception.Message);
-                        return Empty;
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
+                    return Empty;
                 }
 
                 if (calculationResult.Result != Empty)
@@ -697,7 +557,7 @@ namespace Interpreter
             {
                 try
                 {
-                    return Evaluator.IncludeLib(lineToInterprete, access,this);
+                    return Evaluator.IncludeLib(lineToInterprete, scopes,this);
                 }
                 catch (Exception e)
                 {
@@ -729,26 +589,12 @@ namespace Interpreter
                 IVariable variable = null;
                 try
                 {
-                    variable = Evaluator.GetVariable(lineToInterprete.TrimStart('$'), access);
+                    variable = Evaluator.GetVariable(lineToInterprete.TrimStart('$'), scopes);
                 }
                 catch (Exception e)
                 {
-                    try
-                    {
-                        if (!IsNullOrEmpty(altAccess))
-                        {
-                            variable = Evaluator.GetVariable(lineToInterprete.TrimStart('$'), altAccess);
-                        }
-                        else
-                        {
-                            throw e;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        ExplicitOutput.WriteLine(e.Message);
-                        return Empty;
-                    }
+                    ExplicitOutput.WriteLine(e.Message);
+                    return Empty;
                 }
                 if (variable is Variable)
                 {
@@ -792,11 +638,11 @@ namespace Interpreter
                 var eOutput = ExplicitOutput;
                 Output = new NoOutput();
                 ExplicitOutput = new NoOutput();
-                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value, access, file, altAccess).TrimStart('\'').TrimEnd('\'');
+                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,scopes, file).TrimStart('\'').TrimEnd('\'');
                 Output = output;
                 ExplicitOutput = eOutput;
 
-                return InterpretLine(valueToInterpret, access, file, altAccess);
+                return InterpretLine(valueToInterpret,scopes, file);
             }
 
             return lineToInterprete;
