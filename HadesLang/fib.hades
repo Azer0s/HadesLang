@@ -4,6 +4,7 @@ out:c
 func fib[num a]
 	b as num closed = 1
 	while[true]
+		d as bit closed
 		out:a
 		out:b
 
@@ -11,17 +12,16 @@ func fib[num a]
 		b = $a + $b
 
 		if[$a bigger 10000]
+			af as bit closed
 			put a
 		end
 	end
 end
 
 func fizzbuzz[]
-	a as bit closed
-	b as bit closed
 	for[num i in range:[0,100]]
-		a = ($i % 3) is 0
-		b = ($i % 5) is 0
+		a as bit closed = ($i % 3) is 0
+		b as bit closed = ($i % 5) is 0
 
 		if[$a and $b]
 			out:'Fizzbuzz ' + $i

@@ -131,7 +131,7 @@ namespace Interpreter
             LoadFunctions();
         }
 
-        public (string Value, bool Return) Execute(Interpreter interpreter, string access, int start = 0, int end = -1)
+        public (string Value, bool Return) Execute(Interpreter interpreter, List<string> scopes, int start = 0, int end = -1)
         {
             var output = interpreter.GetOutput();
             interpreter.SetOutput(new NoOutput(), output.eOutput);
@@ -162,6 +162,7 @@ namespace Interpreter
                 //If or unless
                 if (RegexCollection.Store.IfOrUnless.IsMatch(Lines[i]))
                 {
+                    //TODO: Add scoping
                     var block = GetBlock(i);
                     (int start, int end) elseBlock = (0, 0);
                     var elseLoc = 0;
@@ -201,7 +202,12 @@ namespace Interpreter
                         //Execute lines between end and else
                         if (elseLoc > block.end)
                         {
-                            return Execute(interpreter, access, block.end, elseLoc);
+                            var guid = Guid.NewGuid().ToString();
+                            scopes.Insert(0,guid);
+                            var result = Execute(interpreter, scopes, block.end, elseLoc);
+                            interpreter.Evaluator.Unload("all", scopes);
+                            scopes.RemoveAt(0);
+                            return result;
                         }
                         return ("", false);
                     }
@@ -210,8 +216,8 @@ namespace Interpreter
                     try
                     {
                         eval = Lines[i].StartsWith("if")
-                            ? bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess))
-                            : !bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess));
+                            ? bool.Parse(interpreter.InterpretLine(groups[1], scopes, this))
+                            : !bool.Parse(interpreter.InterpretLine(groups[1], scopes, this));
                     }
                     catch (Exception e)
                     {
@@ -221,7 +227,11 @@ namespace Interpreter
 
                     if (eval)
                     {
-                        var result = Execute(interpreter, access, block.start + 1, block.end);
+                        var guid = Guid.NewGuid().ToString();
+                        scopes.Insert(0, guid);
+                        var result = Execute(interpreter, scopes, block.start+1, block.end);
+                        interpreter.Evaluator.Unload("all", scopes);
+                        scopes.RemoveAt(0);
 
                         //Return if put was called
                         if (!IsNullOrEmpty(result.Value) && result.Return)
@@ -253,7 +263,11 @@ namespace Interpreter
                         {
                             try
                             {
-                                var result = Execute(interpreter, access, elseBlock.start + 1, end: elseBlock.end);
+                                var guid = Guid.NewGuid().ToString();
+                                scopes.Insert(0, guid);
+                                var result = Execute(interpreter, scopes, elseBlock.start + 1, elseBlock.end);
+                                interpreter.Evaluator.Unload("all", scopes);
+                                scopes.RemoveAt(0);
 
                                 if (!IsNullOrEmpty(result.Value) && result.Return)
                                 {
@@ -283,17 +297,23 @@ namespace Interpreter
                     var block = GetBlock(i);
                     var groups = RegexCollection.Store.While.Match(Lines[i]).Groups.OfType<Group>().Select(a => a.Value)
                         .ToArray();
+                    var guid = Guid.NewGuid().ToString();
+                    scopes.Insert(0, guid);
 
-                    while (bool.Parse(interpreter.InterpretLine(groups[1], access, this, FAccess)))
+                    while (bool.Parse(interpreter.InterpretLine(groups[1], scopes, this)))
                     {
-                        var result = Execute(interpreter, start: block.start + 1, end: block.end, access: access);
+                        var result = Execute(interpreter, start: block.start + 1, end: block.end, scopes:scopes);
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
                             interpreter.SetOutput(output.output, output.eOutput);
+                            interpreter.Evaluator.Unload("all", scopes);
+                            scopes.RemoveAt(0);
                             return result;
                         }
+                        interpreter.Evaluator.Unload("all", scopes);
                     }
+                    scopes.RemoveAt(0);
 
                     i = block.end;
                     continue;
@@ -305,24 +325,38 @@ namespace Interpreter
                     var block = GetBlock(i);
                     var groups = RegexCollection.Store.For.Match(Lines[i]).Groups.OfType<Group>()
                         .Select(a => a.Value).ToList();
-                    interpreter.Evaluator.CreateVariable($"{groups[2]} as {groups[1]} closed", access, interpreter, this);
+                    var guid = Guid.NewGuid().ToString();
+                    scopes.Insert(0,guid);
+                    interpreter.Evaluator.CreateVariable($"{groups[2]} as {groups[1]} closed", scopes, interpreter, this);
 
-                    var array = RegexCollection.Store.ArrayValues.IsMatch(groups[3]) ? groups[3] : interpreter.InterpretLine(groups[3], access, this);
+                    var array = RegexCollection.Store.ArrayValues.IsMatch(groups[3]) ? groups[3] : interpreter.InterpretLine(groups[3], scopes, this);
                     array = array.TrimStart('{').TrimEnd('}');
+
+                    void forUnload()
+                    {
+                        scopes.RemoveAt(0);
+                        interpreter.Evaluator.Unload(groups[2], scopes);
+                        scopes.RemoveAt(0);
+                    }
 
                     foreach (var iterator in array.StringSplit(',').ToList())
                     {
-                        interpreter.Evaluator.AssignToVariable($"{groups[2]} = {iterator}", access, false, interpreter, this);
-                        var result = Execute(interpreter, start: block.start + 1, end: block.end, access: access);
+                        var tempId = Guid.NewGuid().ToString();
+                        scopes.Insert(0,tempId);
+
+                        interpreter.Evaluator.AssignToVariable($"{groups[2]} = {iterator}", scopes, false, interpreter, this);
+                        var result = Execute(interpreter, start: block.start + 1, end: block.end, scopes:scopes);
 
                         if (!IsNullOrEmpty(result.Value) && result.Return)
                         {
                             interpreter.SetOutput(output.output, output.eOutput);
-                            interpreter.Evaluator.Unload(groups[2], access);
+                            forUnload();
                             return result;
                         }
+
+                        interpreter.Evaluator.Unload("all", scopes);
                     }
-                    interpreter.Evaluator.Unload(groups[2], access);
+                    forUnload();
                     i = block.end;
                     continue;
                 }
@@ -331,16 +365,16 @@ namespace Interpreter
                 //Put
                 if (RegexCollection.Store.Put.IsMatch(Lines[i]))
                 {
-                    var result = (interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value, access, this, FAccess), true);
+                    var result = (interpreter.InterpretLine(RegexCollection.Store.Put.Match(Lines[i]).Groups[1].Value, scopes, this), true);
                     interpreter.SetOutput(output.output, output.eOutput);
                     return result;
                 }
 
-                var interresult = interpreter.InterpretLine(Lines[i], access, this, FAccess);
+                var interresult = interpreter.InterpretLine(Lines[i], scopes, this);
                 //Function call
                 if (RegexCollection.Store.Function.IsMatch(Lines[i]) && Functions.Any(a => a.Name == RegexCollection.Store.Function.Match(Lines[i]).Groups[1].Value))
                 {
-                    var result = Execute(interpreter, access, i + 1);
+                    var result = Execute(interpreter, scopes, i + 1);
                     if (!IsNullOrEmpty(result.Value) && result.Return)
                     {
                         return result;
@@ -357,7 +391,7 @@ namespace Interpreter
             return (Empty, false);
         }
 
-        public string CallFunction(string function, Interpreter interpreter, string access = "", string altAccess = "")
+        public string CallFunction(string function, Interpreter interpreter, List<string> scopes)
         {
             var groups = RegexCollection.Store.Function.Match(function).Groups.OfType<Group>().Select(a => a.Value)
                 .ToList();
@@ -380,12 +414,9 @@ namespace Interpreter
                 {
                     try
                     {
-                        if (!IsNullOrEmpty(access))
-                        {
-                            args[i] = interpreter.InterpretLine(args[i], access, this,altAccess);
-                        }
+                        args[i] = interpreter.InterpretLine(args[i], scopes, this);
 
-                        interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", guid, interpreter, this);
+                        interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", new List<string>{guid}, interpreter, this);
                     }
                     catch (Exception e)
                     {
@@ -395,9 +426,17 @@ namespace Interpreter
                 }
                 interpreter.SetOutput(output.output, output.eOutput);
 
-                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, access: guid);
+                var last = scopes.Last();
+                scopes.RemoveAt(scopes.Count-1);
+                scopes.Insert(0,FAccess);
+                scopes.Insert(0,guid);
+                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, scopes:scopes);
+                scopes.RemoveAt(0);
+                scopes.RemoveAt(0);
+                scopes.Add(last);
+                
 
-                interpreter.Evaluator.Unload("all", guid);
+                interpreter.Evaluator.Unload("all", new List<string> { guid });
 
                 return result.Value;
             }
