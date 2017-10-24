@@ -1125,10 +1125,10 @@ namespace Interpreter
 
         #region Custom functions
 
-        public void CallCustomFunction(Group[] groups)
+        public string CallCustomFunction(Group[] groups)
         {
             var firstOrDefault = Cache.Instance.Functions.FirstOrDefault(a => a.Name == groups[1].Value);
-            firstOrDefault?.Execute(groups[2].Value.StringSplit(',').Select(a => a.Replace("'", "")));
+            return firstOrDefault?.Execute(groups[2].Value.StringSplit(',').Select(a => a.Replace("'", "")));
         }
 
         #endregion

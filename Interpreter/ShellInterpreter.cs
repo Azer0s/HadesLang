@@ -15,7 +15,10 @@ namespace Interpreter
             interpreter.RegisterFunction(new Function("print", a =>
             {
                 a.ToList().ForEach(Console.WriteLine);
+                return "";
             }));
+
+            interpreter.RegisterFunction(new Function("helloworld", a => "Hello world"));
 
             if (path != null)
             {

@@ -251,8 +251,7 @@ namespace Interpreter
                 //Custom functions
                 if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
                 {
-                    Evaluator.CallCustomFunction(groups);
-                    return Empty;
+                    return Evaluator.CallCustomFunction(groups); ;
                 }
 
                 //Out
