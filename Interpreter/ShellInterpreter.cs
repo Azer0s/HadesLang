@@ -20,6 +20,8 @@ namespace Interpreter
             if (path != null)
             {
                 //File interpreter
+                interpreter.ExplicitOutput.WriteLine(new FileInterpreter(path).Execute(interpreter, new List<string> {"console"}).Value);
+                return;
             }
 
             while (true)
