@@ -51,8 +51,17 @@ namespace Testing
         public void FibTest()
         {
             _interpreter.InterpretLine($"with '{prefix}fib.hades' as a", new List<string> {"testing"}, null);
-            _interpreter.InterpretLine("$a->test:[]", new List<string> {"testing"}, null);
             Assert.AreEqual("5",_interpreter.InterpretLine("$a->test:[]", new List<string> { "testing" }, null));
+        }
+
+        [Test]
+        [TestCase("Test","11")]
+        [TestCase("18","9")]
+        [TestCase("Hello world", "325")]
+        public void GuardTest(string expected, string value)
+        {
+            _interpreter.InterpretLine($"with '{prefix}fib.hades' as a", new List<string> { "testing" }, null);
+            Assert.AreEqual(expected, _interpreter.InterpretLine($"$a->t1:[{value}]", new List<string> { "testing" }, null));
         }
 
         [Test]

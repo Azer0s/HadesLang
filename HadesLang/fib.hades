@@ -42,14 +42,26 @@ end
 
 func test[]
 	a as bit closed = true
-	//fizzbuzz:[]
+	fizzbuzz:[]
 	t1:[1]
-	s as num closed = t1:[2,3]
-	put s
+	b as num closed = t1:[2,3]
+	put b
 end
 
-func t1[num a]
-	out:a
+func t1[num a] requires $a is 325
+	out:'Hello world'
+	put 'Hello world'
+end
+
+func t1[num a] requires $a smaller 10
+	b as num closed = $a * 2
+	out:b
+	put $b
+end
+
+func t1[num a] requires $a is 11
+	out:'22'
+	put 'Test'
 end
 
 func t1[num a, num b]

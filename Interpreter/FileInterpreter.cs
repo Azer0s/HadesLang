@@ -370,20 +370,67 @@ namespace Interpreter
                     return result;
                 }
 
-                var interresult = interpreter.InterpretLine(Lines[i], scopes, this);
-                //Function call
-                if (RegexCollection.Store.Function.IsMatch(Lines[i]) && Functions.Any(a => a.Name == RegexCollection.Store.Function.Match(Lines[i]).Groups[1].Value))
-                {
-                    if (!IsNullOrEmpty(interresult))
-                    {
-                        interpreter.SetOutput(output.output, output.eOutput);
-                        return (interresult, false);
-                    }
-                }
+                interpreter.InterpretLine(Lines[i], scopes, this);
             }
 
             interpreter.SetOutput(output.output, output.eOutput);
             return (Empty, false);
+        }
+
+        private Methods GetMethodForGuard(Interpreter interpreter,List<Methods> methods, List<string> scopes, List<string> args)
+        {
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), new NoOutput());
+            foreach (var method in methods)
+            {
+                var guid = Guid.NewGuid().ToString();
+                try
+                {
+                    SetArgVariables(interpreter, scopes, args, method.Parameters.ToList(), guid);
+
+                    var tempScopes = scopes.ToList();
+                    tempScopes.Clear();
+                    tempScopes.Insert(0, FAccess);
+                    tempScopes.Insert(0, guid);
+
+                    if (bool.Parse(interpreter.InterpretLine(method.Guard, tempScopes, this)))
+                    {
+                        interpreter.SetOutput(output.output, output.eOutput);
+                        return method;
+                    }
+                }
+                catch (Exception)
+                {
+                    //ignored
+                }
+                finally
+                {
+                    interpreter.Evaluator.Unload("all", new List<string> { guid });
+                }
+            }
+            interpreter.SetOutput(output.output, output.eOutput);
+            throw new Exception("No function with valid guard found!");
+        }
+
+        private void SetArgVariables(Interpreter interpreter,List<string> scopes,List<string> args, List<KeyValuePair<string, DataTypes>> expectedArgs, string id)
+        {
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), new NoOutput());
+            for (var i = 0; i < args.Count; i++)
+            {
+                try
+                {
+                    args[i] = interpreter.InterpretLine(args[i], scopes, this);
+
+                    interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", new List<string> { id }, interpreter, this);
+                }
+                catch (Exception e)
+                {
+                    interpreter.SetOutput(output.output, output.eOutput);
+                    throw;
+                }
+            }
+            interpreter.SetOutput(output.output, output.eOutput);
         }
 
         public string CallFunction(string function, Interpreter interpreter, List<string> scopes)
@@ -394,27 +441,25 @@ namespace Interpreter
             var args = groups[2].StringSplit(',').ToList();
             if (Functions.Any(a => a.Name == groups[1] && a.Parameters.Count == args.Count))
             {
-                var func = Functions.First(a => a.Name == groups[1] && a.Parameters.Count == args.Count);
-                var expectedArgs = func.Parameters.ToList();
+                var funcs = Functions.Where(a => a.Name == groups[1] && a.Parameters.Count == args.Count).ToList();
+                Methods func = null;
 
-                var output = interpreter.GetOutput();
-                interpreter.SetOutput(new NoOutput(), new NoOutput());
-                for (var i = 0; i < args.Count; i++)
+                if (funcs.Count > 1)
                 {
-                    try
+                    if (funcs.Any(method => IsNullOrEmpty(method.Guard)))
                     {
-                        args[i] = interpreter.InterpretLine(args[i], scopes, this);
+                        throw new Exception($"Undefined function guard for {function}");
+                    }
 
-                        interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", new List<string>{guid}, interpreter, this);
-                    }
-                    catch (Exception e)
-                    {
-                        interpreter.SetOutput(output.output, output.eOutput);
-                        throw;
-                    }
+                    func = GetMethodForGuard(interpreter,funcs,scopes,args);
                 }
-                interpreter.SetOutput(output.output, output.eOutput);
+                else
+                {
+                    func = funcs.First();
+                }
 
+                SetArgVariables(interpreter,scopes,args, func.Parameters.ToList(),guid);
+                
                 var tempScopes = scopes.ToList();
                 tempScopes.Clear();
                 tempScopes.Insert(0,FAccess);
