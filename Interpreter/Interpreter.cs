@@ -43,6 +43,9 @@ namespace Interpreter
             Cache.Instance.Variables = new Dictionary<Meta, IVariable>();
             Cache.Instance.Functions = new List<Function>();
             Cache.Instance.LoadFiles = new List<string>();
+            Cache.Instance.ReplacementWithoutBinary = Cache.Instance.Replacement
+                .Where(a => !a.Key.StartsWith("@") && a.Key != "LSHIFT" && a.Key != "RSHIFT")
+                .ToDictionary(a => a.Key, a => a.Value);
         }
 
         public void SetOutput(IScriptOutput output, IScriptOutput explicitOutput)

@@ -993,8 +993,11 @@ namespace Interpreter
             {
                 if (args[i].ToUpper().EqualsFromList(Cache.Instance.Replacement.Keys))
                 {
+                    if (args[i].ToUpper().EqualsFromList(Cache.Instance.ReplacementWithoutBinary.Keys))
+                    {
+                        isBool = true;
+                    }
                     args[i] = Cache.Instance.Replacement[args[i].ToUpper()];
-                    isBool = true;
                 }
                 if (args[i].ToLower() == "true")
                 {
