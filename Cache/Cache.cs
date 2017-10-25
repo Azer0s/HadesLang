@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Variables;
 
@@ -46,13 +47,16 @@ public sealed class Cache
     public Dictionary<string, string> Replacement { get; set; } = new Dictionary<string, string>
     {
         {"AND","&"},
+        {"@AND","@&"},
         {"OR","|"},
+        {"@OR","@|"},
         {"IMP","-->"},
         {"NAND","~&"},
         {"NOR","~|"},
         {"INV","~" },
         {"CIMP","<--"},
         {"XOR","(+)" },
+        {"@XOR","@^"},
         {"NIMP","-/>" },
         {"CNIMP","</-" },
         {"SMALLER","<"},
@@ -60,8 +64,15 @@ public sealed class Cache
         {"SMALLERIS","<="},
         {"BIGGERIS",">="},
         {"IS","=="},
-        {"NOT","!="}
+        {"NOT","!="},
+        {"LSHIFT","@<<"},
+        {"RSHIFT","@>>"}
     };
+
+    /// <summary>
+    /// Dictionary for replacing operators as string to operator as sign (without binary opeators)
+    /// </summary>
+    public Dictionary<string, string> ReplacementWithoutBinary { get; set; }
     /// <summary>
     /// List of loaded files 
     /// </summary>
