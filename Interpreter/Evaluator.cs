@@ -1133,7 +1133,7 @@ namespace Interpreter
 
         #endregion
 
-        public string CallMethod(string lineToInterprete, List<string> scopes, Interpreter interpreter, string altAccess = "")
+        public string CallMethod(string lineToInterprete, List<string> scopes, Interpreter interpreter)
         {
             var groups = RegexCollection.Store.MethodCall.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();

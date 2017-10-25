@@ -88,7 +88,7 @@ public class RegexCollection
     /// <summary>
     /// Function decleration
     /// </summary>
-    public Regex FunctionDecleration { get; set; } = new Regex("^func *(\\w*) *\\[(.*)\\]", RegexOptions.Compiled);
+    public Regex FunctionDecleration { get; set; } = new Regex("^func +(\\w*) *\\[(.*)\\](?: +requires +(.*))?", RegexOptions.Compiled);
     /// <summary>
     /// If or unless statement
     /// </summary>
