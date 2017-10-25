@@ -99,7 +99,7 @@ namespace Interpreter
 
             if (file != null && !scopes.Contains(file.FAccess))
             {
-                scopes.Add(file.FAccess);
+                scopes.Insert(0,file.FAccess);
             }
 
             //Variable decleration

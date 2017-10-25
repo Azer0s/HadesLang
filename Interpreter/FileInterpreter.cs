@@ -426,15 +426,10 @@ namespace Interpreter
                 }
                 interpreter.SetOutput(output.output, output.eOutput);
 
-                var last = scopes.Last();
-                scopes.RemoveAt(scopes.Count-1);
+                scopes.Clear();
                 scopes.Insert(0,FAccess);
                 scopes.Insert(0,guid);
-                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, scopes:scopes);
-                scopes.RemoveAt(0);
-                scopes.RemoveAt(0);
-                scopes.Add(last);
-                
+                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, scopes:scopes);                
 
                 interpreter.Evaluator.Unload("all", new List<string> { guid });
 

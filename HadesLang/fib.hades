@@ -19,6 +19,7 @@ func fib[num a]
 end
 
 func fizzbuzz[]
+	out:a
 	for[num i in range:[0,100]]
 		a as bit closed = ($i % 3) is 0
 		b as bit closed = ($i % 5) is 0
@@ -37,4 +38,9 @@ func fizzbuzz[]
 			end
 		end
 	end
+end
+
+func test[]
+	a as bit closed = true
+	fizzbuzz:[]
 end
