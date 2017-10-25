@@ -65,6 +65,22 @@ func printA[]
 end
 ```
 
+## Method guards
+```vb
+func t1[num a] requires $a smaller 10
+  out:'a is smaller 10'
+end
+
+func t1[num a] requires $a is 11
+  out:'a is 11'
+end
+
+t1:[11] //Output will be: a is 11
+t1:[9] //Output will be: a is smaller 10
+t1:[100] //No method will be called
+```
+
+
 ## Tasking
 ```vb
 task as t
