@@ -70,7 +70,7 @@ public sealed class Cache
     };
 
     /// <summary>
-    /// Dictionary for replacing operators as string to operator as sign (without binary opeators)
+    /// Dictionary for replacing operators as string to operator as sign (without binary operators)
     /// </summary>
     public Dictionary<string, string> ReplacementWithoutBinary { get; set; }
     /// <summary>
