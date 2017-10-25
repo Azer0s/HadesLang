@@ -1,4 +1,5 @@
 ﻿using System;
+using static System.String;
 
 namespace Output
 {
@@ -10,12 +11,18 @@ namespace Output
     {
         public void Write(string input)
         {
-            Console.Write(input);
+            if (!IsNullOrEmpty(input))
+            {
+                Console.Write(input.Replace("\\n", "\n").Replace("\\t", "\t"));
+            }
         }
 
         public void WriteLine(string input)
         {
-            Console.WriteLine(input.Replace("\\n","\n").Replace("\\t","\t"));
+            if (!IsNullOrEmpty(input))
+            {
+                Console.WriteLine(input.Replace("\\n", "\n").Replace("\\t", "\t"));
+            }
         }
 
         public void Clear()

@@ -10,6 +10,7 @@ namespace Variables
             Name = name;
             Postition = postition;
             Parameters = parameters;
+            Guard = guard;
         }
 
         public string Name { get; set; }
