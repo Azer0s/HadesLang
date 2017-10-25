@@ -13,7 +13,7 @@ namespace Testing
     public class Testingcs
     {
         private readonly Interpreter.Interpreter _interpreter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
-        private string prefix = "C:\\Users\\ariel\\workspace\\HadesLang\\HadesLang\\";
+        private string prefix = "D:\\workspace\\HadesLang\\HadesLang\\";
 
         [TearDown]
         public void TearDown()
@@ -45,6 +45,14 @@ namespace Testing
             _interpreter.InterpretLine($"{name} as {dataType} closed = {value}", new List<string>{"testing"}, null);
             Assert.AreEqual(value, _interpreter.InterpretLine(name, new List<string>{"testing"}, null));
             _interpreter.InterpretLine($"uload:{name}", new List<string>{"testing"}, null);
+        }
+
+        [Test]
+        public void FibTest()
+        {
+            _interpreter.InterpretLine($"with '{prefix}fib.hades' as a", new List<string> {"testing"}, null);
+            _interpreter.InterpretLine("$a->test:[]", new List<string> {"testing"}, null);
+            Assert.AreEqual("5",_interpreter.InterpretLine("$a->test:[]", new List<string> { "testing" }, null));
         }
 
         [Test]

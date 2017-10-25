@@ -42,5 +42,22 @@ end
 
 func test[]
 	a as bit closed = true
-	fizzbuzz:[]
+	//fizzbuzz:[]
+	t1:[1]
+	s as num closed = t1:[2,3]
+	put s
 end
+
+func t1[num a]
+	out:a
+end
+
+func t1[num a, num b]
+	out:a
+	out:b
+	s as num closed = $a + $b
+	out:s
+	put s
+end
+
+out:'Hello world'

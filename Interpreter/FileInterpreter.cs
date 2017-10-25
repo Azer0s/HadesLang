@@ -374,11 +374,6 @@ namespace Interpreter
                 //Function call
                 if (RegexCollection.Store.Function.IsMatch(Lines[i]) && Functions.Any(a => a.Name == RegexCollection.Store.Function.Match(Lines[i]).Groups[1].Value))
                 {
-                    var result = Execute(interpreter, scopes, i + 1);
-                    if (!IsNullOrEmpty(result.Value) && result.Return)
-                    {
-                        return result;
-                    }
                     if (!IsNullOrEmpty(interresult))
                     {
                         interpreter.SetOutput(output.output, output.eOutput);
@@ -396,17 +391,11 @@ namespace Interpreter
             var groups = RegexCollection.Store.Function.Match(function).Groups.OfType<Group>().Select(a => a.Value)
                 .ToList();
             var guid = Guid.NewGuid().ToString().ToLower();
-            if (Functions.Any(a => a.Name == groups[1]))
+            var args = groups[2].StringSplit(',').ToList();
+            if (Functions.Any(a => a.Name == groups[1] && a.Parameters.Count == args.Count))
             {
-                var func = Functions.First(a => a.Name == groups[1]);
-
+                var func = Functions.First(a => a.Name == groups[1] && a.Parameters.Count == args.Count);
                 var expectedArgs = func.Parameters.ToList();
-                var args = groups[2].StringSplit(',').ToList();
-
-                if (expectedArgs.Count != args.Count)
-                {
-                    return $"Invalid function call: {function}!";
-                }
 
                 var output = interpreter.GetOutput();
                 interpreter.SetOutput(new NoOutput(), new NoOutput());
@@ -426,10 +415,11 @@ namespace Interpreter
                 }
                 interpreter.SetOutput(output.output, output.eOutput);
 
-                scopes.Clear();
-                scopes.Insert(0,FAccess);
-                scopes.Insert(0,guid);
-                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, scopes:scopes);                
+                var tempScopes = scopes.ToList();
+                tempScopes.Clear();
+                tempScopes.Insert(0,FAccess);
+                tempScopes.Insert(0,guid);
+                var result = Execute(interpreter, start: func.Postition.Item1 + 1, end: func.Postition.Item2, scopes:tempScopes);
 
                 interpreter.Evaluator.Unload("all", new List<string> { guid });
 
@@ -462,7 +452,7 @@ namespace Interpreter
                         }
                     }
 
-                    Functions.Add(new Methods(groups[1], block.ToTuple(), arguments));
+                    Functions.Add(new Methods(groups[1], block.ToTuple(), arguments, groups[3]));
                 }
                 index++;
             }
