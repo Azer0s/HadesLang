@@ -22,8 +22,7 @@ namespace Interpreter
 
         public string CreateVariable(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
-            var groups = RegexCollection.Store.CreateVariable.Match(lineToInterprete).Groups.OfType<Group>()
-                .Where(a => !string.IsNullOrEmpty(a.Value)).Select(a => a.Value).ToList();
+            var groups = RegexCollection.Store.CreateVariable.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
 
             var exist = Exists(groups[1], scopes);
             if (exist.Exists)
@@ -48,7 +47,7 @@ namespace Interpreter
 
             try
             {
-                return groups.Count == 5 ? AssignToVariable($"{groups[1]} = {groups[4]}", scopes, true, interpreter, file) : $"{groups[1]} is undefined";
+                return !IsNullOrEmpty(groups[4]) ? AssignToVariable($"{groups[1]} = {groups[4]}", scopes, true, interpreter, file) : $"{groups[1]} is undefined";
             }
             catch (Exception e)
             {
@@ -58,8 +57,7 @@ namespace Interpreter
 
         public string CreateArray(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
         {
-            var groups = RegexCollection.Store.CreateArray.Match(lineToInterprete).Groups.OfType<Group>()
-                .Where(a => !string.IsNullOrEmpty(a.Value)).Select(a => a.Value).ToList();
+            var groups = RegexCollection.Store.CreateArray.Match(lineToInterprete).Groups.OfType<Group>().Select(a => a.Value).ToList();
 
             var exist = Exists(groups[1], scopes);
             if (exist.Exists)
@@ -85,7 +83,7 @@ namespace Interpreter
 
             try
             {
-                return groups.Count == 6 ? AssignToArray($"{groups[1]} = {groups[5]}", scopes, interpreter, file) : $"{groups[1]} is undefined";
+                return !IsNullOrEmpty(groups[5]) ? AssignToArray($"{groups[1]} = {groups[5]}", scopes, interpreter, file) : $"{groups[1]} is undefined";
             }
             catch (Exception e)
             {
