@@ -46,6 +46,18 @@ namespace Interpreter
             Cache.Instance.ReplacementWithoutBinary = Cache.Instance.Replacement
                 .Where(a => !a.Key.StartsWith("@") && a.Key != "LSHIFT" && a.Key != "RSHIFT")
                 .ToDictionary(a => a.Key, a => a.Value);
+
+            //Add constants to CallCache
+            Cache.Instance.CallCache.Add("e",(s, l, f) =>
+            {
+                Output.WriteLine(Math.E.ToString(CultureInfo.InvariantCulture));
+                return Math.E.ToString(CultureInfo.InvariantCulture);
+            });
+            Cache.Instance.CallCache.Add("pi", (s, l, f) =>
+            {
+                Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
+                return Math.PI.ToString(CultureInfo.InvariantCulture);
+            });
         }
 
         public void SetOutput(IScriptOutput output, IScriptOutput explicitOutput)
@@ -65,6 +77,8 @@ namespace Interpreter
             {
                 return Empty;
             }
+
+            //TODO pipeline operator
 
             #region Alias
 
@@ -100,125 +114,69 @@ namespace Interpreter
 
             #endregion
 
+            //FAccess addition
             if (file != null && !scopes.Contains(file.FAccess))
             {
                 scopes.Insert(0,file.FAccess);
             }
 
+            //Call cached call
+            if (Cache.Instance.CallCache.ContainsKey(lineToInterprete))
+            {
+                var result = Cache.Instance.CallCache[lineToInterprete].Invoke(lineToInterprete, scopes, file);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
             //Variable decleration
             if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))
             {
-                try
-                {
-                    Output.WriteLine(Evaluator.CreateVariable(lineToInterprete, scopes, this, file));
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                }
-                return Empty;
+                Cache.Instance.CallCache.Add(lineToInterprete,VarDecleration);
+                return VarDecleration(lineToInterprete, scopes, file);
             }
 
             //Array decleration
             if (RegexCollection.Store.CreateArray.IsMatch(lineToInterprete))
             {
-                try
-                {
-                    Output.WriteLine(Evaluator.CreateArray(lineToInterprete, scopes, this, file));
-                }
-                catch (Exception e)
-                {
-                        ExplicitOutput.WriteLine(e.Message);
-                }
-                return Empty;
+                Cache.Instance.CallCache.Add(lineToInterprete,ArrayDecleration);
+                return ArrayDecleration(lineToInterprete, scopes, file);
             }
 
             //Array assignment
             if (RegexCollection.Store.ArrayAssignment.IsMatch(lineToInterprete))
             {
-                try
-                {
-                    Output.WriteLine(Evaluator.AssignToArrayAtPos(lineToInterprete, scopes, this, file));
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                }
-                return Empty;
+                Cache.Instance.CallCache.Add(lineToInterprete,ArrayAssignment);
+                return ArrayAssignment(lineToInterprete, scopes, file);
             }
 
             //Variable assignment
             if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
             {
-                try
-                {
-                    Output.WriteLine(Evaluator.AssignToVariable(lineToInterprete, scopes, true, this, file));
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                }
-                return Empty;
+                Cache.Instance.CallCache.Add(lineToInterprete,VarAssignment);
+                return VarAssignment(lineToInterprete, scopes, file);
             }
 
             //Operator assignment
             if (RegexCollection.Store.OpAssignment.IsMatch(lineToInterprete))
             {
-                var groups = RegexCollection.Store.OpAssignment.Match(lineToInterprete).Groups.OfType<Group>()
-                    .Select(a => a.Value).ToArray();
-
-                var output = Output;
-                var eOutput = ExplicitOutput;
-                Output = new NoOutput();
-                ExplicitOutput = new NoOutput();
-                lineToInterprete = $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {InterpretLine(groups[3], scopes, file)}";
-                Output = output;
-                ExplicitOutput = eOutput;
-
-                return InterpretLine(lineToInterprete, scopes, file);
+                Cache.Instance.CallCache.Add(lineToInterprete,OperatorAssignment);
+                return OperatorAssignment(lineToInterprete, scopes, file);
             }
 
             //Method calls
             if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
             {
-                var result = Empty;
-                try
-                {
-                    result = Evaluator.CallMethod(lineToInterprete, scopes, this);
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                }
-
-                if (result != Empty)
-                {
-                    Output.WriteLine(result);
-                }
-                return result;
+                Cache.Instance.CallCache.Add(lineToInterprete,MethodCalls);
+                return MethodCalls(lineToInterprete, scopes,file);
             }
 
             //Var call
             if (RegexCollection.Store.VarCall.IsMatch(lineToInterprete))
             {
-                var groups = RegexCollection.Store.VarCall.Match(lineToInterprete).Groups.OfType<Group>()
-                    .Select(a => a.Value).ToList();
-                var result = Empty;
-
-                try
-                {
-                    result = Evaluator.GetObjectVar(groups[1], groups[2], scopes, this);
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                }
-
-                if (result != Empty)
-                {
-                    Output.WriteLine(result);
-                }
-                return result;
+                Cache.Instance.CallCache.Add(lineToInterprete,VarCall);
+                return VarCall(lineToInterprete, scopes,file);
             }
 
             //Function
@@ -254,71 +212,36 @@ namespace Interpreter
                 //Custom functions
                 if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
                 {
-                    return Evaluator.CallCustomFunction(groups); ;
+                    Cache.Instance.CallCache.Add(lineToInterprete,CallCustomFunction);
+                    return CallCustomFunction(lineToInterprete,scopes,file);
                 }
 
                 //Out
                 if (RegexCollection.Store.Output.IsMatch(lineToInterprete))
                 {
-                    string result;
-                    try
-                    {
-                        result = Evaluator.EvaluateOut(lineToInterprete, scopes, this, file).TrimStart('\'').TrimEnd('\'');
-                    }
-                    catch (Exception e)
-                    {
-                        ExplicitOutput.WriteLine(e.Message);
-                        return Empty;
-                    }
-                    if (!MuteOut)
-                    {
-                        ExplicitOutput.WriteLine(result);
-                    }
-                    return $"'{result}'";
+                    Cache.Instance.CallCache.Add(lineToInterprete,CallOut);
+                    return CallOut(lineToInterprete, scopes, file);
                 }
 
                 //Unload
                 if (RegexCollection.Store.Unload.IsMatch(lineToInterprete))
                 {
-                    try
-                    {
-                        Output.WriteLine(Evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value, scopes));
-                    }
-                    catch (Exception e)
-                    {
-                        ExplicitOutput.WriteLine(e.Message);
-                    }
-                    return Empty;
+                    Cache.Instance.CallCache.Add(lineToInterprete,Unload);
+                    return Unload(lineToInterprete, scopes,file);
                 }
 
                 //Raw
                 if (RegexCollection.Store.Raw.IsMatch(lineToInterprete))
                 {
-                    var result = Evaluator.Raw(lineToInterprete, scopes, this, file);
-                    Output.WriteLine(result);
-                    return result;
+                    Cache.Instance.CallCache.Add(lineToInterprete,CallRaw);
+                    return CallRaw(lineToInterprete, scopes, file);
                 }
 
                 //Range
                 if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
                 {
-                    try
-                    {
-                        lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, scopes, this, file);
-                    }
-                    catch (Exception e)
-                    {
-                        ExplicitOutput.WriteLine(e.Message);
-                        return Empty;
-                    }
-
-                    var range = RegexCollection.Store.Range.Match(lineToInterprete).Groups.OfType<Group>()
-                        .Select(a => a.Value).ToList();
-                    var rangeArray = $"{{{Join(",", Enumerable.Range(int.Parse(range[1]), int.Parse(range[2])))}}}";
-
-                    Output.WriteLine(rangeArray);
-
-                    return rangeArray;
+                    Cache.Instance.CallCache.Add(lineToInterprete,GetRange);
+                    return GetRange(lineToInterprete, scopes, file);
                 }
 
                 #region Console-Specific
@@ -326,53 +249,32 @@ namespace Interpreter
                 //Input
                 if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
                 {
-                    return $"'{ExplicitOutput.ReadLine()}'";
+                    Cache.Instance.CallCache.Add(lineToInterprete,GetInput);
+                    return GetInput(lineToInterprete,scopes,file);
                 }
 
                 //Random number
                 if (RegexCollection.Store.RandomNum.IsMatch(lineToInterprete))
                 {
-                    var result = new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value)).ToString();
-                    Output.WriteLine(result);
-                    return result;
+                    Cache.Instance.CallCache.Add(lineToInterprete,GetRandomNumber);
+                    return GetRandomNumber(lineToInterprete,scopes,file);
                 }
 
                 //Type/dtype
                 if (RegexCollection.Store.Type.IsMatch(lineToInterprete))
                 {
-                    string result;
-                    var typeGroup = RegexCollection.Store.Type.Match(lineToInterprete).Groups.OfType<Group>()
-                        .Select(a => a.Value).ToList();
-                    var toCheck = IsNullOrEmpty(typeGroup[1]) ? typeGroup[2] : typeGroup[1]; 
-
-                    if (lineToInterprete.StartsWith("d"))
-                    {
-                        var content = toCheck;
-                        if (!RegexCollection.Store.IsPureWord.IsMatch(toCheck))
-                        {
-                            content = InterpretLine(toCheck, scopes, file);
-                        }
-                        result = Evaluator.DataTypeFromData(content, true).ToString();
-                    }
-                    else
-                    {
-                        result = Evaluator
-                            .GetVariable(toCheck, scopes)
-                            .DataType.ToString();
-                    }
-
-                    Output.WriteLine(result);
-                    return result;
+                    Cache.Instance.CallCache.Add(lineToInterprete,GetType);
+                    return GetType(lineToInterprete, scopes, file);
                 }
 
                 //Exists
                 if (RegexCollection.Store.Exists.IsMatch(lineToInterprete))
                 {
-                    var result = Evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value, scopes).Exists.ToString().ToLower();
-                    Output.WriteLine(result);
-                    return result;
+                    Cache.Instance.CallCache.Add(lineToInterprete,Exists);
+                    return Exists(lineToInterprete, scopes,file);
                 }
 
+                //Not in callcache
                 #region Settings
 
                 if (writeSettings)
@@ -480,41 +382,22 @@ namespace Interpreter
             //Return array value
             if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}") && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete.Remainder(RegexCollection.Store.Variable)))
             {
-                var value = Empty;
-                try
-                {
-                    value = Evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", scopes, this, file);
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                    return value;
-                }
-                Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
-                return value;
+                Cache.Instance.CallCache.Add(lineToInterprete,GetArrayValue);
+                return GetArrayValue(lineToInterprete, scopes, file);
             }
 
             //In/Decrease
             if (RegexCollection.Store.InDeCrease.IsMatch(lineToInterprete))
             {
-                try
-                {
-                    var eOutput = ExplicitOutput;
-                    ExplicitOutput = new NoOutput();
-                    Evaluator.InDeCrease(lineToInterprete, scopes, this, file);
-                    ExplicitOutput = eOutput;
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                }
-                return Empty;
+                Cache.Instance.CallCache.Add(lineToInterprete,InDecrease);
+                return InDecrease(lineToInterprete, scopes, file);
             }
 
             //Return string
             if (RegexCollection.Store.IsPureWord.IsMatch(lineToInterprete))
             {
-                return RegexCollection.Store.IsPureWord.Match(lineToInterprete).Groups[1].Value;
+                Cache.Instance.CallCache.Add(lineToInterprete,ReturnWordValue);
+                return ReturnWordValue(lineToInterprete,scopes,file);
             }
 
             //Calculation & string concat
@@ -525,130 +408,444 @@ namespace Interpreter
                 .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys.ToList())) &&
                 !lineToInterprete.StartsWith("#")))
             {
-                (bool Success, string Result) calculationResult;
-                try
+                var result = Calculate(lineToInterprete, scopes, file);
+                if (result != null)
                 {
-                    calculationResult = Evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(", "int(").Replace("%", "#"), scopes, this, file);
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                    return Empty;
-                }
-
-                if (calculationResult.Result != Empty)
-                {
-                    Output.WriteLine(calculationResult.Result);
-                }
-
-                if (calculationResult.Result != "NaN")
-                {
-                    return calculationResult.Result;
+                    try
+                    {
+                        Cache.Instance.CallCache.Add(lineToInterprete, Calculate);
+                    }
+                    catch (Exception e)
+                    {
+                        //ignored
+                    }
+                    return result;
                 }
             }
 
             //Clear console
             if (lineToInterprete.ToLower().Replace(" ", "") == "clear")
             {
-                Output.Clear();
-                return Empty;
+                Cache.Instance.CallCache.Add(lineToInterprete,Clear);
+                return Clear(lineToInterprete,scopes,file);
             }
 
             //Include library or file
             if (RegexCollection.Store.With.IsMatch(lineToInterprete))
             {
-                try
-                {
-                    return Evaluator.IncludeLib(lineToInterprete, scopes,this);
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                    return Empty;
-                }
+                Cache.Instance.CallCache.Add(lineToInterprete,IncludeLibOrFile);
+                return IncludeLibOrFile(lineToInterprete, scopes,file);
             }
 
             //Bool type
             if (RegexCollection.Store.IsBit.IsMatch(lineToInterprete.ToLower()))
             {
-                return lineToInterprete.ToLower();
-            }
-
-            //Constants
-            switch (lineToInterprete)
-            {
-                case "e":
-                    Output.WriteLine(Math.E.ToString(CultureInfo.InvariantCulture));
-                    return Math.E.ToString(CultureInfo.InvariantCulture);
-                case "pi":
-                    Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
-                    return Math.PI.ToString(CultureInfo.InvariantCulture);
+                var fn = new Func<string, List<string>, IVariable, string>(((l, s, f) => l.ToLower()));
+                Cache.Instance.CallCache.Add(lineToInterprete,fn);
+                return fn.Invoke(lineToInterprete,scopes,file);
             }
 
             //Return var value
             if (RegexCollection.Store.Variable.IsMatch(lineToInterprete) || RegexCollection.Store.SingleName.IsMatch(lineToInterprete))
             {
-                IVariable variable = null;
-                try
+                var result = GetVarValue(lineToInterprete, scopes,file);
+                if (result != null)
                 {
-                    variable = Evaluator.GetVariable(lineToInterprete.TrimStart('$'), scopes);
-                }
-                catch (Exception e)
-                {
-                    ExplicitOutput.WriteLine(e.Message);
-                    return Empty;
-                }
-                if (variable is Variable)
-                {
-                    var o = variable as Variable;
-                    Output.WriteLine(o.Value);
-                    return o.Value;
-                }
-                if (variable is Variables.Array)
-                {
-                    var o = variable as Variables.Array;
-                    var result = o.Values.Aggregate("{", (current, keyValuePair) => current + $"{keyValuePair.Value},")
-                                     .TrimEnd(',') + "}";
-                    Output.WriteLine(result);
+                    try
+                    {
+                        Cache.Instance.CallCache.Add(lineToInterprete, GetVarValue);
+                    }
+                    catch (Exception e)
+                    {
+                        //ignored
+                    }
                     return result;
                 }
-                if (variable is FileInterpreter)
-                {
-                    string guid;
-
-                    //Put into cache
-                    if (Cache.Instance.FileCache.ContainsValue(variable))
-                    {
-                        guid = Cache.Instance.FileCache.First(a => a.Value == variable).Key;
-                    }
-                    else
-                    {
-                        guid = Guid.NewGuid().ToString();
-                        Cache.Instance.FileCache.Add(guid, variable);
-                    }
-                    var reference = $"obj{guid}";
-                    Output.WriteLine(reference);
-                    return reference;
-                }
-                Output.WriteLine($"Invalid operation {lineToInterprete}");
             }
 
             //Force through
             if (RegexCollection.Store.ForceThrough.IsMatch(lineToInterprete))
             {
-                var output = Output;
-                var eOutput = ExplicitOutput;
-                Output = new NoOutput();
-                ExplicitOutput = new NoOutput();
-                var valueToInterpret = InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value,scopes, file).TrimStart('\'').TrimEnd('\'');
-                Output = output;
-                ExplicitOutput = eOutput;
-
-                return InterpretLine(valueToInterpret,scopes, file);
+                Cache.Instance.CallCache.Add(lineToInterprete, ForceThrough);
+                return ForceThrough(lineToInterprete, scopes, file);
             }
 
             return lineToInterprete;
         }
+
+        #region Implementation
+
+        private string ArrayDecleration(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                Output.WriteLine(Evaluator.CreateArray(lineToInterprete, scopes, this, file as FileInterpreter));
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+            return Empty;
+        }
+
+        private string VarDecleration(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                Output.WriteLine(Evaluator.CreateVariable(lineToInterprete, scopes, this, file as FileInterpreter));
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+            return Empty;
+        }
+
+        private string VarAssignment(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                Output.WriteLine(Evaluator.AssignToVariable(lineToInterprete, scopes, true, this, file as FileInterpreter));
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+            return Empty;
+        }
+
+        private string ArrayAssignment(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                Output.WriteLine(Evaluator.AssignToArrayAtPos(lineToInterprete, scopes, this, file as FileInterpreter));
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+            return Empty;
+        }
+
+        private string OperatorAssignment(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var groups = RegexCollection.Store.OpAssignment.Match(lineToInterprete).Groups.OfType<Group>()
+                .Select(a => a.Value).ToArray();
+
+            var output = Output;
+            var eOutput = ExplicitOutput;
+            Output = new NoOutput();
+            ExplicitOutput = new NoOutput();
+            lineToInterprete =
+                $"{groups[1]} = ${groups[1].TrimStart('$')} {groups[2]} {InterpretLine(groups[3], scopes, file as FileInterpreter)}";
+            Output = output;
+            ExplicitOutput = eOutput;
+
+            return InterpretLine(lineToInterprete, scopes, file as FileInterpreter);
+        }
+
+        private string MethodCalls(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var result = Empty;
+            try
+            {
+                result = Evaluator.CallMethod(lineToInterprete, scopes, this);
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+
+            if (result != Empty)
+            {
+                Output.WriteLine(result);
+            }
+            return result;
+        }
+
+        private string VarCall(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var groups = RegexCollection.Store.VarCall.Match(lineToInterprete).Groups.OfType<Group>()
+                .Select(a => a.Value).ToList();
+            var result = Empty;
+
+            try
+            {
+                result = Evaluator.GetObjectVar(groups[1], groups[2], scopes, this);
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+
+            if (result != Empty)
+            {
+                Output.WriteLine(result);
+            }
+            return result;
+        }
+
+        private string CallOut(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            string result;
+            try
+            {
+                result = Evaluator.EvaluateOut(lineToInterprete, scopes, this, file as FileInterpreter).TrimStart('\'').TrimEnd('\'');
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+                return Empty;
+            }
+            if (!MuteOut)
+            {
+                ExplicitOutput.WriteLine(result);
+            }
+            return $"'{result}'";
+        }
+
+        private string CallCustomFunction(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var groups = RegexCollection.Store.Function.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
+            return Evaluator.CallCustomFunction(groups);
+        }
+
+        private string Unload(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                Output.WriteLine(Evaluator.Unload(RegexCollection.Store.Unload.Match(lineToInterprete).Groups[1].Value,
+                    scopes));
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+            return Empty;
+        }
+
+        private string CallRaw(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var result = Evaluator.Raw(lineToInterprete, scopes, this, file as FileInterpreter);
+            Output.WriteLine(result);
+            return result;
+        }
+
+        private string GetRange(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, scopes, this, file as FileInterpreter);
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+                return Empty;
+            }
+
+            var range = RegexCollection.Store.Range.Match(lineToInterprete).Groups.OfType<Group>()
+                .Select(a => a.Value).ToList();
+            var rangeArray = $"{{{Join(",", Enumerable.Range(int.Parse(range[1]), int.Parse(range[2])))}}}";
+
+            Output.WriteLine(rangeArray);
+
+            return rangeArray;
+        }
+
+        private string GetInput(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            return $"'{ExplicitOutput.ReadLine()}'";
+        }
+
+        private string GetRandomNumber(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var result = new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value))
+                .ToString();
+            Output.WriteLine(result);
+            return result;
+        }
+
+        private string GetType(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            string result;
+            var typeGroup = RegexCollection.Store.Type.Match(lineToInterprete).Groups.OfType<Group>()
+                .Select(a => a.Value).ToList();
+            var toCheck = IsNullOrEmpty(typeGroup[1]) ? typeGroup[2] : typeGroup[1];
+
+            if (lineToInterprete.StartsWith("d"))
+            {
+                var content = toCheck;
+                if (!RegexCollection.Store.IsPureWord.IsMatch(toCheck))
+                {
+                    content = InterpretLine(toCheck, scopes, file as FileInterpreter);
+                }
+                result = Evaluator.DataTypeFromData(content, true).ToString();
+            }
+            else
+            {
+                result = Evaluator
+                    .GetVariable(toCheck, scopes)
+                    .DataType.ToString();
+            }
+
+            Output.WriteLine(result);
+            return result;
+        }
+
+        private string Exists(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var result = Evaluator.Exists(RegexCollection.Store.Exists.Match(lineToInterprete).Groups[1].Value, scopes).Exists
+                .ToString().ToLower();
+            Output.WriteLine(result);
+            return result;
+        }
+
+        private string GetArrayValue(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var value = Empty;
+            try
+            {
+                value = Evaluator.GetArrayValue($"${lineToInterprete.TrimStart('$')}", scopes, this, file as FileInterpreter);
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+                return value;
+            }
+            Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
+            return value;
+        }
+
+        private string InDecrease(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                var eOutput = ExplicitOutput;
+                ExplicitOutput = new NoOutput();
+                Evaluator.InDeCrease(lineToInterprete, scopes, this, file as FileInterpreter);
+                ExplicitOutput = eOutput;
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+            }
+            return Empty;
+        }
+
+        private static string ReturnWordValue(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            return RegexCollection.Store.IsPureWord.Match(lineToInterprete).Groups[1].Value;
+        }
+
+        private string Calculate(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            (bool Success, string Result) calculationResult;
+            try
+            {
+                calculationResult = Evaluator.EvaluateCalculation(lineToInterprete.Replace("integ(", "int(").Replace("%", "#"),
+                    scopes, this, file as FileInterpreter);
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+                return Empty;
+            }
+
+            if (calculationResult.Result != Empty)
+            {
+                Output.WriteLine(calculationResult.Result);
+            }
+
+            if (calculationResult.Result != "NaN")
+            {
+                return calculationResult.Result;
+            }
+            return null;
+        }
+
+        private string Clear(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            ExplicitOutput.Clear();
+            return Empty;
+        }
+
+        private string IncludeLibOrFile(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            try
+            {
+                return Evaluator.IncludeLib(lineToInterprete, scopes, this);
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+                return Empty;
+            }
+        }
+
+        private string GetVarValue(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            IVariable variable = null;
+            try
+            {
+                variable = Evaluator.GetVariable(lineToInterprete.TrimStart('$'), scopes);
+            }
+            catch (Exception e)
+            {
+                ExplicitOutput.WriteLine(e.Message);
+                return Empty;
+            }
+            if (variable is Variable)
+            {
+                var o = variable as Variable;
+                Output.WriteLine(o.Value);
+                return o.Value;
+            }
+            if (variable is Variables.Array)
+            {
+                var o = variable as Variables.Array;
+                var result = o.Values.Aggregate("{", (current, keyValuePair) => current + $"{keyValuePair.Value},")
+                                 .TrimEnd(',') + "}";
+                Output.WriteLine(result);
+                return result;
+            }
+            if (variable is FileInterpreter)
+            {
+                string guid;
+
+                //Put into cache
+                if (Cache.Instance.FileCache.ContainsValue(variable))
+                {
+                    guid = Cache.Instance.FileCache.First(a => a.Value == variable).Key;
+                }
+                else
+                {
+                    guid = Guid.NewGuid().ToString();
+                    Cache.Instance.FileCache.Add(guid, variable);
+                }
+                var reference = $"obj{guid}";
+                Output.WriteLine(reference);
+                return reference;
+            }
+            Output.WriteLine($"Invalid operation {lineToInterprete}");
+            return null;
+        }
+
+        private string ForceThrough(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            var output = Output;
+            var eOutput = ExplicitOutput;
+            Output = new NoOutput();
+            ExplicitOutput = new NoOutput();
+            var valueToInterpret =
+                InterpretLine(RegexCollection.Store.ForceThrough.Match(lineToInterprete).Groups[1].Value, scopes, file as FileInterpreter)
+                    .TrimStart('\'').TrimEnd('\'');
+            Output = output;
+            ExplicitOutput = eOutput;
+
+            return InterpretLine(valueToInterpret, scopes, file as FileInterpreter);
+        }
+
+        #endregion
 
         /// <summary>
         /// Registers a custom function

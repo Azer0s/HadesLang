@@ -13,7 +13,7 @@ namespace Testing
     public class Testingcs
     {
         private readonly Interpreter.Interpreter _interpreter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
-        private string prefix = "D:\\workspace\\HadesLang\\HadesLang\\";
+        private string prefix = "C:\\Users\\ariel\\workspace\\HadesLang\\HadesLang\\";
 
         [TearDown]
         public void TearDown()

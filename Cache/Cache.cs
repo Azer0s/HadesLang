@@ -93,6 +93,10 @@ public sealed class Cache
     /// Alias entries
     /// </summary>
     public Dictionary<string,string> Alias { get; set; } = new Dictionary<string, string>();
+    /// <summary>
+    /// Cache for prelexed calls
+    /// </summary>
+    public Dictionary<string,Func<string,List<string>,IVariable,string>> CallCache { get; set; } = new Dictionary<string, Func<string, List<string>, IVariable, string>>();
 
     /// <summary>
     /// Singleton constructor
