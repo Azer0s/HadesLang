@@ -14,6 +14,8 @@ namespace Variables
                     return AccessTypes.REACHABLE_ALL;
                 case "closed":
                     return AccessTypes.CLOSED;
+                case "":
+                    return AccessTypes.CLOSED;
                 default:
                     throw new Exception("Invalid access operator!");
             }

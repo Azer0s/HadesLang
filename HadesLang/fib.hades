@@ -1,10 +1,10 @@
-﻿c as num closed = fib:[1]
+﻿c as num = fib:[1]
 out:c
 //Testing
 func fib[num a]
-	b as num closed = 1
+	b as num = 1
 	while[true]
-		d as bit closed
+		d as bit
 		out:a
 		out:b
 
@@ -21,8 +21,8 @@ end
 func fizzbuzz[]
 	out:a
 	for[num i in range:[0,100]]
-		a as bit closed = ($i % 3) is 0
-		b as bit closed = ($i % 5) is 0
+		a as bit = ($i % 3) is 0
+		b as bit = ($i % 5) is 0
 
 		if[$a and $b]
 			out:'Fizzbuzz ' + $i
@@ -41,10 +41,10 @@ func fizzbuzz[]
 end
 
 func test[]
-	a as bit closed = true
+	a as bit = true
 	fizzbuzz:[]
 	t1:[1]
-	b as num closed = t1:[2,3]
+	b as num = t1:[2,3]
 	put b
 end
 

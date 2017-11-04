@@ -40,11 +40,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for creating new variables
     /// </summary>
-    public Regex CreateVariable { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit|object) *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
+    public Regex CreateVariable { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit|object) *(closed|reachable_all|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for creating new arrays
     /// </summary>
-    public Regex CreateArray { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit)\\[([\\d]*|\\*)\\] *(closed|reachable_all|reachable) *=? *(.*)", RegexOptions.Compiled);
+    public Regex CreateArray { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit)\\[([\\d]*|\\*)\\] *(closed|reachable_all|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for assigning data to variables
     /// </summary>
@@ -205,8 +205,14 @@ public class RegexCollection
     /// Regex for object reference codes
     /// </summary>
     public Regex ObjCode { get; set; } = new Regex("^obj[{(]?[0-9a-f]{8}[-]?(?:[0-9a-f]{4}[-]?){3}[0-9a-f]{12}[)}]?$", RegexOptions.Compiled);
-
+    /// <summary>
+    /// Checks for valid function
+    /// </summary>
     public Regex FunctionParam { get; set; } = new Regex("(\\w*):\\[([^\\]]*)\\]+", RegexOptions.Compiled);
+    /// <summary>
+    /// Checks for pipeline
+    /// </summary>
+    public Regex Pipeline { get; set; } = new Regex("([^|>]*) *(?:\\|>)?", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
