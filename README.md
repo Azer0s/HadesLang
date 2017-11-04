@@ -82,6 +82,14 @@ end
 | `t1:[9]`      | a is smaller 10      |
 | `t1:[100]` | No method will be called      |
 
+## Pipeline
+
+*Syntactic sugar for nested method calls*
+```vb
+with 'fibrec.hades' as a
+$a->fib:[9] |> out:[??]
+```
+
 ## Tasking
 ```vb
 task as t
