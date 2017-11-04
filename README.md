@@ -45,8 +45,8 @@ out:b
 ## Force value through interpreter 
 
 ```vb
-a as word closed = 'out:b'
-b as word closed = 'Hello world'
+a as word = 'out:b'
+b as word = 'Hello world'
 #a
 ```
 Output will be Hello world
@@ -93,7 +93,7 @@ $a->fib:[9] |> out:[??]
 ## Tasking
 ```vb
 task as t
-    a as num closed = 0
+    a as num = 0
     while [true]
         out:'Hello world'+$a
     end
