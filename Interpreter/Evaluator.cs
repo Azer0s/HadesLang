@@ -440,7 +440,7 @@ namespace Interpreter
                 catch (Exception)
                 {
                     interpreter.SetOutput(output.output, output.eOutput);
-                    throw new Exception($"Index {index} in array {groups[1].Value} is out of bounds!");
+                    throw new Exception($"Index {index} in array {groups[1].Value} is out of bounds or does not exist!");
                 }
             }
 

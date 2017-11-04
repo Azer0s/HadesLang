@@ -139,21 +139,28 @@ namespace Interpreter
 
                         var matches = tempLine.Split(new[] {"|>"}, StringSplitOptions.None).Select(a => a.Trim()).ToList();
 
-                        for (var i = 0; i < matches.Count; i++)
+                        if (matches[0].Contains("="))
                         {
-                            if (i + 1 == matches.Count)
-                            {
-                                tempLine = matches.Last();
-                            }
-                            else
-                            {
-                                matches[i + 1] = matches[i + 1].Replace("??", matches[i].Trim());
-                            }
+                            Cache.Instance.Pipelined.Add(lineToInterprete, lineToInterprete);
                         }
+                        else
+                        {
+                            for (var i = 0; i < matches.Count; i++)
+                            {
+                                if (i + 1 == matches.Count)
+                                {
+                                    tempLine = matches.Last();
+                                }
+                                else
+                                {
+                                    matches[i + 1] = matches[i + 1].Replace("??", matches[i].Trim());
+                                }
+                            }
 
-                        tempLine = stringDict.Aggregate(tempLine, (current, variable) => current.Replace(variable.Key, variable.Value));
-                        Cache.Instance.Pipelined.Add(lineToInterprete,tempLine);
-                        lineToInterprete = tempLine;
+                            tempLine = stringDict.Aggregate(tempLine, (current, variable) => current.Replace(variable.Key, variable.Value));
+                            Cache.Instance.Pipelined.Add(lineToInterprete, tempLine);
+                            lineToInterprete = tempLine;
+                        }
                     }
                 }
             }
