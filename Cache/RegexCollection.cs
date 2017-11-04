@@ -205,8 +205,14 @@ public class RegexCollection
     /// Regex for object reference codes
     /// </summary>
     public Regex ObjCode { get; set; } = new Regex("^obj[{(]?[0-9a-f]{8}[-]?(?:[0-9a-f]{4}[-]?){3}[0-9a-f]{12}[)}]?$", RegexOptions.Compiled);
-
+    /// <summary>
+    /// Checks for valid function
+    /// </summary>
     public Regex FunctionParam { get; set; } = new Regex("(\\w*):\\[([^\\]]*)\\]+", RegexOptions.Compiled);
+    /// <summary>
+    /// Checks for pipeline
+    /// </summary>
+    public Regex Pipeline { get; set; } = new Regex("([^|>]*) *(?:\\|>)?", RegexOptions.Compiled);
 
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.

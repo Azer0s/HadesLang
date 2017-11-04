@@ -97,6 +97,10 @@ public sealed class Cache
     /// Cache for prelexed calls
     /// </summary>
     public Dictionary<string,Func<string,List<string>,IVariable,string>> CallCache { get; set; } = new Dictionary<string, Func<string, List<string>, IVariable, string>>();
+    /// <summary>
+    /// Cache for preprocessed pipelines
+    /// </summary>
+    public Dictionary<string,string> Pipelined { get; set; } = new Dictionary<string, string>();
 
     /// <summary>
     /// Singleton constructor

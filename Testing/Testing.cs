@@ -30,6 +30,14 @@ namespace Testing
         }
 
         [Test]
+        public void PipelineTest()
+        {
+            _interpreter.InterpretLine($"with '{prefix}fibrec.hades' as a", new List<string> { "testing" }, null);
+            Assert.AreEqual("'34'", _interpreter.InterpretLine("$a->fib:[9] |> out:[??] |> out:[??]", new List<string> { "testing" }, null));
+            _interpreter.InterpretLine($"uload:a", new List<string> { "testing" }, null);
+        }
+
+        [Test]
         public void ConcatTest()
         {
             Assert.AreEqual("'Hello world'",_interpreter.InterpretLine("'Hello' + ' ' + 'world'", new List<string>{"testing"}, null));

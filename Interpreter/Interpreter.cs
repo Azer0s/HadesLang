@@ -114,6 +114,52 @@ namespace Interpreter
 
             #endregion
 
+            #region Pipeline
+
+            if (lineToInterprete.Contains("|>"))
+            {
+                if (Cache.Instance.Pipelined.ContainsKey(lineToInterprete))
+                {
+                    lineToInterprete = Cache.Instance.Pipelined[lineToInterprete];
+                }
+                else
+                {
+                    if (RegexCollection.Store.Pipeline.IsMatch(lineToInterprete))
+                    {
+                        var stringDict = new Dictionary<string, string>();
+                        var tempLine = lineToInterprete.ToString();
+
+                        foreach (Match variable in RegexCollection.Store.IsWord.Matches(tempLine))
+                        {
+                            var guid = Guid.NewGuid().ToString().ToLower();
+                            tempLine = tempLine.Replace(variable.Value, guid);
+                            stringDict.Add(guid, variable.Value);
+                        }
+
+
+                        var matches = tempLine.Split(new[] {"|>"}, StringSplitOptions.None).Select(a => a.Trim()).ToList();
+
+                        for (var i = 0; i < matches.Count; i++)
+                        {
+                            if (i + 1 == matches.Count)
+                            {
+                                tempLine = matches.Last();
+                            }
+                            else
+                            {
+                                matches[i + 1] = matches[i + 1].Replace("??", matches[i].Trim());
+                            }
+                        }
+
+                        tempLine = stringDict.Aggregate(tempLine, (current, variable) => current.Replace(variable.Key, variable.Value));
+                        Cache.Instance.Pipelined.Add(lineToInterprete,tempLine);
+                        lineToInterprete = tempLine;
+                    }
+                }
+            }
+
+            #endregion
+
             //FAccess addition
             if (file != null && !scopes.Contains(file.FAccess))
             {
