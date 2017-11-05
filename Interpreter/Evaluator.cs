@@ -654,9 +654,10 @@ namespace Interpreter
             return DataTypes.NONE;
         }
 
-        public string LoadAs(string path, string varName, List<string> scopes, Interpreter interpreter)
+        public string LoadAs(string path, string varName, List<string> scopes, Interpreter interpreter, Dictionary<string, string> construct)
         {
             var fileInterpreter = new FileInterpreter(path);
+            fileInterpreter.Construct(interpreter,construct);
             var result = Exists(varName, scopes);
             if (!result.Exists)
             {
@@ -676,14 +677,58 @@ namespace Interpreter
             return fileInterpreter.Execute(interpreter, new List<string>{path}).Value;
         }
 
-        public string LoadFile(string path, string varname, List<string> scopes, Interpreter interpreter)
+        public string LoadFile(string path, string varname, List<string> scopes, Interpreter interpreter, string constructorinfo)
         {
-            if (!IsNullOrEmpty(varname))
+            var construct = new Dictionary<string,string>();
+            if (constructorinfo != Empty)
             {
-                return LoadAs(path, varname, scopes, interpreter);
+                var stringDict = new Dictionary<string, string>();
+
+                foreach (Match variable in RegexCollection.Store.IsWord.Matches(constructorinfo))
+                {
+                    var guid = Guid.NewGuid().ToString().ToLower();
+                    constructorinfo = constructorinfo.Replace(variable.Value, guid);
+                    stringDict.Add(guid, variable.Value);
+                }
+
+                var assignments = constructorinfo.Split(';').Select(a => a.Trim());
+
+                foreach (var assignment in assignments)
+                {
+                    if (RegexCollection.Store.Assignment.IsMatch(assignment))
+                    {
+                        var groups = RegexCollection.Store.Assignment.Match(assignment).Groups.OfType<Group>().Skip(1)
+                            .Select(a => a.Value).ToArray();
+
+                        var output = interpreter.GetOutput();
+                        interpreter.SetOutput(new NoOutput(), output.eOutput);
+
+                        construct.Add(groups[0],
+                            RegexCollection.Store.GUID.IsMatch(groups[1])
+                                ? stringDict.Aggregate(groups[1],
+                                    (current, variable) => current.Replace(variable.Key, variable.Value))
+                                : interpreter.InterpretLine(
+                                    stringDict.Aggregate(groups[1],
+                                        (current, variable) => current.Replace(variable.Key, variable.Value)), scopes,
+                                    null));
+
+                        interpreter.SetOutput(output.output, output.eOutput);
+                    }
+                    else
+                    {
+                        throw new Exception($"Invalid assignment in construction: {assignment}!");
+                    }
+                }
             }
 
-            var result = new FileInterpreter(path).Execute(interpreter, new List<string> { path });
+            if (!IsNullOrEmpty(varname))
+            {
+                return LoadAs(path, varname, scopes, interpreter,construct);
+            }
+
+            var file = new FileInterpreter(path);
+            file.Construct(interpreter,construct);
+            var result = file.Execute(interpreter, new List<string> { path });
 
             if (Cache.Instance.EraseVars)
             {
@@ -866,7 +911,7 @@ namespace Interpreter
 
             if (!IsNullOrEmpty(file.Extension))
             {
-                return LoadFile(fn,group[3], scopes, interpreter);
+                return LoadFile(fn,group[3], scopes, interpreter,group[4]);
             }
 
             var exist = Exists(varname, scopes);

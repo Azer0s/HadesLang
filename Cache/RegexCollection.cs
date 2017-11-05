@@ -80,7 +80,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for including a library or a file
     /// </summary>
-    public Regex With { get; set; } = new Regex("^with *(?:\'([\\w\\.: \\\\]*)\'|([^\' ]*)) *(?:as *([\\w]*))?$", RegexOptions.Compiled);
+    public Regex With { get; set; } = new Regex("^with *(?:\'([\\w\\.: \\\\]*)\'|([^\' ]*)) *(?:as *([\\w]+))? *(?:sets *(.+))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for matching built-in functions
     /// </summary>
@@ -213,7 +213,14 @@ public class RegexCollection
     /// Checks for pipeline
     /// </summary>
     public Regex Pipeline { get; set; } = new Regex("([^|>]*) *(?:\\|>)?", RegexOptions.Compiled);
-
+    /// <summary>
+    /// Ctor requirement
+    /// </summary>
+    public Regex Requires { get; set; } = new Regex("^requires *(.+)",RegexOptions.Compiled);
+    /// <summary>
+    /// Parameters for sets command
+    /// </summary>
+    public Regex CtorParams { get; set; } = new Regex("(num|dec|word|bit|object)(?:\\[([\\d]*|\\*)\\])? *(\\w+) *;?",RegexOptions.Compiled);
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
     /// </summary>
