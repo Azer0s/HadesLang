@@ -63,6 +63,9 @@
     <None Include="iterate.hades">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="objctor.hades">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="unless.hades">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
