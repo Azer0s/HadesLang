@@ -17,19 +17,50 @@ namespace Interpreter
     {
         public List<string> Lines;
         public List<Methods> Functions = new List<Methods>();
+        public string FAccess;
         private Dictionary<int, int> _lineMap;
         private readonly Dictionary<int, int> _blockCache;
-        public string FAccess;
+        private readonly Dictionary<string, string> _requirements;
 
         public FileInterpreter()
         {
             //Default constructor
             _blockCache = new Dictionary<int, int>();
+            _requirements = new Dictionary<string, string>();
+        }
+
+        public void Construct(Interpreter interpreter, Dictionary<string, string> construct)
+        {
+            if (construct.Count != _requirements.Count)
+            {
+                throw new Exception("Ctor requirements not satisfied!");
+            }
+
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
+
+            try
+            {
+                foreach (var val in _requirements)
+                {
+                    var assign = IsNullOrEmpty(construct[val.Key]) ? Empty : $" = {construct[val.Key]}";
+                    interpreter.InterpretLine($"{val.Key} as {val.Value}{assign}", new List<string>(),this);
+                }
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+            finally
+            {
+                interpreter.SetOutput(output.output, output.eOutput);
+            }
         }
 
         public FileInterpreter(string path, List<string> customLines = null)
         {
             _blockCache = new Dictionary<int, int>();
+            _requirements = new Dictionary<string, string>();
             if (IsNullOrEmpty(path) && customLines != null)
             {
                 Lines = customLines;
@@ -46,6 +77,20 @@ namespace Interpreter
                 {
                     throw new Exception($"File {path} could not be read!");
                 }
+            }
+
+            //Requires
+            if (Lines.Any(a => RegexCollection.Store.Requires.IsMatch(a)))
+            {
+                var req = RegexCollection.Store.CtorParams.Matches(RegexCollection.Store.Requires
+                    .Match(Lines.FirstOrDefault(a => RegexCollection.Store.Requires.IsMatch(a)) ?? throw new Exception("Invalid requires command!")).Groups[1].Value);
+
+                foreach (Match o in req)
+                {
+                    _requirements.Add(o.Groups[3].Value,o.Groups[1].Value + (IsNullOrEmpty(o.Groups[2].Value) ? "" : $"[{o.Groups[2].Value}]"));
+                }
+
+                Lines.RemoveAll(a => RegexCollection.Store.Requires.IsMatch(a));
             }
 
             //Directives

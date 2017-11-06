@@ -1,0 +1,4 @@
+﻿requires num t; word z
+
+out:t
+out:z

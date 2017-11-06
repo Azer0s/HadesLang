@@ -23,6 +23,7 @@ namespace Interpreter
             if (path != null)
             {
                 //File interpreter
+                //TODO: support constructor params
                 interpreter.ExplicitOutput.WriteLine(new FileInterpreter(path).Execute(interpreter, new List<string> {"console"}).Value);
                 return;
             }

@@ -89,19 +89,6 @@ end
 with 'fibrec.hades' as a
 $a->fib:[9] |> out:[??]
 ```
-
-## Tasking
-```vb
-task as t
-    a as num = 0
-    while [true]
-        out:'Hello world'+$a
-    end
-end
-
-startTask:t
-```
-
 ## Conditions
 ```vb
 if[sqrt(9) smallerIs 3]
