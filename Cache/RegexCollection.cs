@@ -114,6 +114,10 @@ public class RegexCollection
     /// </summary>
     public Regex VarCall { get; set; } = new Regex("^\\$(\\w*) *-> *\\$?(\\w*(?:\\[(.*)\\])?)$", RegexOptions.Compiled);
     /// <summary>
+    /// Regex for setting var from object
+    /// </summary>
+    public Regex VarCallAssign { get; set; } = new Regex("^\\$(\\w*) *-> *\\$?(\\w*(?:\\[(.*)\\])?) *= *(.+)$", RegexOptions.Compiled);
+    /// <summary>
     /// Regex for halting the program
     /// </summary>
     public Regex Exit { get; set; } = new Regex("^exit:(-?\\d*)", RegexOptions.Compiled);

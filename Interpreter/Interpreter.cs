@@ -78,8 +78,6 @@ namespace Interpreter
                 return Empty;
             }
 
-            //TODO pipeline operator
-
             #region Alias
 
             //Register aliases
@@ -230,6 +228,13 @@ namespace Interpreter
             {
                 Cache.Instance.CallCache.Add(lineToInterprete,VarCall);
                 return VarCall(lineToInterprete, scopes,file);
+            }
+
+            //Var call assign
+            if (RegexCollection.Store.VarCallAssign.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete,VarCallAssign);
+                return VarCallAssign(lineToInterprete, scopes, file);
             }
 
             //Function
@@ -896,6 +901,13 @@ namespace Interpreter
             ExplicitOutput = eOutput;
 
             return InterpretLine(valueToInterpret, scopes, file as FileInterpreter);
+        }
+
+        private string VarCallAssign(string lineToInterprete, List<string> scopes, IVariable file)
+        {
+            //TODO $a->c = 22
+
+            return Empty;
         }
 
         #endregion
