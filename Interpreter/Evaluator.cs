@@ -1269,5 +1269,62 @@ namespace Interpreter
                 return input;
             }
         }
+
+        public string VarCallAssign(string obj, string varname, string value, List<string> scopes, Interpreter interpreter, FileInterpreter file)
+        {
+            if (!Exists(obj, scopes).Exists)
+            {
+                throw new Exception($"Object {obj} does not exist!");
+            }
+
+            varname = varname.TrimStart('$');
+            var varObj = GetVariable(obj, scopes);
+            var fileAccess = new List<string> {(varObj as FileInterpreter)?.FAccess};
+
+            if (varObj is FileInterpreter)
+            {
+                IVariable fileVariable;
+                var isArray = false;
+                var arrayPos = 0;
+                var arrayName = Empty;
+
+                if (RegexCollection.Store.ArrayVariable.IsMatch("$" + varname))
+                {
+                    var groups = RegexCollection.Store.ArrayVariable.Match("$" + varname);
+                    arrayPos = int.Parse(groups.Groups[2].Value);
+                    arrayName = groups.Groups[1].Value;
+                    arrayName = arrayName.Trim('$');
+                    fileVariable = GetVariable(arrayName, fileAccess);
+                    isArray = true;
+                }
+                else
+                {
+                    fileVariable = GetVariable(varname, fileAccess);
+                }
+
+                if (fileVariable.Access == AccessTypes.REACHABLE || fileVariable.Access == AccessTypes.REACHABLE_ALL)
+                {
+                    var output = interpreter.GetOutput();
+                    interpreter.SetOutput(new NoOutput(), output.eOutput);
+                    value = RegexCollection.Store.IsPureWord.IsMatch(value) ? value : interpreter.InterpretLine(value, scopes, file);
+                    interpreter.SetOutput(output.output, output.eOutput);
+
+                    if (IsNullOrEmpty(value))
+                    {
+                        return "Value is empty!";
+                    }
+
+                    if (isArray)
+                    {
+                        SetArrayAtPos(arrayName,fileAccess,value,arrayPos);
+                        return $"{arrayName}[{arrayPos}] is {value}";
+                    }
+                    SetVariable(varname, value, fileAccess);
+                    return $"{varname} is {value}";
+                }
+                throw new Exception($"Variable {varname} does not exist or the access was denied!");
+            }
+            throw new Exception($"Variable {obj} is not of type object!");
+        }
     }
 }

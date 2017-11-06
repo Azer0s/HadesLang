@@ -60,7 +60,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for assigning data to specific positions in an array
     /// </summary>
-    public Regex ArrayAssignment { get; set; } = new Regex("(\\w*)\\[(.*)\\] *= *(.*)", RegexOptions.Compiled);
+    public Regex ArrayAssignment { get; set; } = new Regex("^(\\w*)\\[(.*)\\] *= *(.*)", RegexOptions.Compiled);
     /// <summary>
     /// Checks if a string contains or is of type word
     /// </summary>
@@ -116,7 +116,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for setting var from object
     /// </summary>
-    public Regex VarCallAssign { get; set; } = new Regex("^\\$(\\w*) *-> *\\$?(\\w*(?:\\[(.*)\\])?) *= *(.+)$", RegexOptions.Compiled);
+    public Regex VarCallAssign { get; set; } = new Regex("^\\$(\\w*) *-> *\\$?(\\w*(?:\\[\\d*\\])?) *= *(.+)$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for halting the program
     /// </summary>
