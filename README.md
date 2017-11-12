@@ -80,7 +80,7 @@ end
 | ------------- |:-------------:|
 | `t1:[11]`      | a is 11 |
 | `t1:[9]`      | a is smaller 10      |
-| `t1:[100]` | No method will be called      |
+| `t1:[100]` | *No method will be called*      |
 
 ## Pipeline
 
