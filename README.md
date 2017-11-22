@@ -82,6 +82,16 @@ end
 | `t1:[9]`      | a is smaller 10      |
 | `t1:[100]` | *No method will be called*      |
 
+## Reflection
+```vb
+foo as word = 'Hello world'
+bar as bit = false
+foobar as num = 22
+
+arr as word[*] = getfields:[]
+out:#arr[0]
+```
+
 ## Pipeline
 
 *Syntactic sugar for nested method calls*
