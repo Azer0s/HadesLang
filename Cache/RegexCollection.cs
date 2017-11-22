@@ -130,6 +130,10 @@ public class RegexCollection
     /// </summary>
     public Regex Input { get; set; } = new Regex("^in:\\[ *\\]", RegexOptions.Compiled);
     /// <summary>
+    /// Regex for getFields
+    /// </summary>
+    public Regex Fields { get; set; } = new Regex("^getfields:\\[ *\\]", RegexOptions.Compiled);
+    /// <summary>
     /// Regex for output/conversion to word datatype
     /// </summary>
     public Regex Output { get; set; } = new Regex("^out:(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);

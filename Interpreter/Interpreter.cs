@@ -295,6 +295,13 @@ namespace Interpreter
                     return CallRaw(lineToInterprete, scopes, file);
                 }
 
+                //GetFields
+                if (RegexCollection.Store.Fields.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete,GetFields);
+                    return GetFields(lineToInterprete, scopes, file);
+                }
+
                 //Range
                 if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
                 {
@@ -918,6 +925,13 @@ namespace Interpreter
             }
 
             return Empty;
+        }
+
+        private string GetFields(string linetointerpret, List<string> scopes, IVariable file)
+        {
+            var result = Evaluator.GetFields(scopes);
+            Output.WriteLine(result);
+            return result;
         }
 
         #endregion

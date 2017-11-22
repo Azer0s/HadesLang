@@ -1326,5 +1326,10 @@ namespace Interpreter
             }
             throw new Exception($"Variable {obj} is not of type object!");
         }
+
+        public string GetFields(List<string> scopes)
+        {
+            return $"{{'{Join("','", from a in Cache.Instance.Variables where scopes.Contains(a.Key.Owner) orderby a.Key.Name select a.Key.Name)}'}}";
+        }
     }
 }
