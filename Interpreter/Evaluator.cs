@@ -1329,7 +1329,7 @@ namespace Interpreter
 
         public string GetFields(List<string> scopes)
         {
-            return $"{{'{Join("','", from a in Cache.Instance.Variables where scopes.Contains(a.Key.Owner) orderby a.Key.Name select a.Key.Name)}'}}";
+            return $"{{'{Join("','", from a in Cache.Instance.Variables where scopes.Contains(a.Key.Owner) select a.Key.Name)}'}}";
         }
     }
 }
