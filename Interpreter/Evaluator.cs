@@ -1216,6 +1216,11 @@ namespace Interpreter
 
         public class AliasManager
         {
+            public static void Add(string replacement, string toReplace)
+            {
+                Cache.Instance.Alias.Add(replacement, toReplace.TrimEnd(' '));
+            }
+
             public static void Register(string alias)
             {
                 if (RegexCollection.Store.Alias.IsMatch(alias))
@@ -1229,7 +1234,7 @@ namespace Interpreter
                         {
                             return;
                         }
-                        Cache.Instance.Alias.Add(groups[2], groups[1].TrimEnd(' '));
+                        Add(groups[2],groups[1]);
                     }
                     catch (Exception e)
                     {

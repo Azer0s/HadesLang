@@ -17,6 +17,7 @@ namespace Interpreter
                 a.ToList().ForEach(Console.WriteLine);
                 return "";
             }));
+            Evaluator.AliasManager.Add("clear","cls");
 
             interpreter.RegisterFunction(new Function("helloworld", a => "Hello world"));
 

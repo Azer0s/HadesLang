@@ -20,6 +20,11 @@ interpreter.RegisterFunction(new Function("print", a =>
 }));
 ```
 
+## Register an alias in C#
+```csharp
+Evaluator.AliasManager.Add("clear","cls");
+```
+
 ## Hello world
 ```vb
 out:'Hello world'
