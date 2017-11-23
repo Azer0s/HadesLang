@@ -341,7 +341,7 @@ namespace Interpreter
                     variable.Values = values;
                     return true;
                 }
-                throw new Exception($"Array is bigger than capacity!");
+                throw new Exception("Array is bigger than capacity!");
             }
             throw new Exception($"Variable {name} does not exist or the access was denied!");
         }
@@ -873,6 +873,7 @@ namespace Interpreter
 
             foreach (var keyValuePair in dt != DataTypes.NONE ? Cache.Instance.Variables.Where(a => a.Value.DataType == dt).ToList() : Cache.Instance.Variables.ToList())
             {
+                // ReSharper disable once MergeCastWithTypeCheck
                 if (keyValuePair.Value is Variable)
                 {
                     var kvpAsVar = (Variable)keyValuePair.Value;
