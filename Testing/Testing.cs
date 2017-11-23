@@ -13,7 +13,7 @@ namespace Testing
     public class Testingcs
     {
         private readonly Interpreter.Interpreter inter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
-        private string prefix = "C:\\Users\\ariel\\workspace\\HadesLang\\HadesLang\\";
+        private string prefix = "E:\\workspace\\HadesLang\\HadesLang\\";
 
         [TearDown]
         public void TearDown()
@@ -191,6 +191,15 @@ namespace Testing
             inter.ShouldError(true);
             inter.InterpretLine("a as *", new List<string> {"testing"}, null);
             inter.InterpretLine($"a = {value}", new List<string> {"testing"}, null);
+        }
+
+        [Test]
+        public void UntypedObject()
+        {
+            inter.InterpretLine("a as *", new List<string> {"testing"}, null);
+            inter.InterpretLine($"with \'{prefix}fibrec.hades\' as b", new List<string> {"testing"}, null);
+            inter.InterpretLine("a = b", new List<string> {"testing"}, null);
+            Assert.IsTrue(inter.InterpretLine("a", new List<string> { "testing" }, null).StartsWith("obj"));
         }
     }
 }
