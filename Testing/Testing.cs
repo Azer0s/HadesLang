@@ -165,11 +165,11 @@ namespace Testing
         [Test]
         public void ReflectionTest()
         {
-            inter.InterpretLine("a as num", new List<string> {"testing"}, null);
-            inter.InterpretLine("b as bit", new List<string> {"testing"}, null);
+            inter.InterpretLine("b as num", new List<string> {"testing"}, null);
+            inter.InterpretLine("d as bit", new List<string> {"testing"}, null);
             inter.InterpretLine("c as word = 'HELLO'", new List<string> { "testing" }, null);
-            inter.InterpretLine("d as word[*] = getfields:[]", new List<string> {"testing"}, null);
-            inter.InterpretLine("f as word = #d[2]", new List<string> {"testing"}, null);
+            inter.InterpretLine("a as word[*] = getfields:[]", new List<string> {"testing"}, null);
+            inter.InterpretLine("f as word = #a[2]", new List<string> {"testing"}, null);
             Assert.AreEqual("'HELLO'", inter.InterpretLine("out:f", new List<string> { "testing" }, null));
         }
 
