@@ -40,11 +40,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for creating new variables
     /// </summary>
-    public Regex CreateVariable { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit|object|\\*) *(closed|reachable_all|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
+    public Regex CreateVariable { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit|object|\\*) *(closed|global|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for creating new arrays
     /// </summary>
-    public Regex CreateArray { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit)\\[([\\d]*|\\*)\\] *(closed|reachable_all|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
+    public Regex CreateArray { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit)\\[([\\d]*|\\*)\\] *(closed|global|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for assigning data to variables
     /// </summary>
