@@ -10,8 +10,8 @@ namespace Variables
             {
                 case "reachable":
                     return AccessTypes.REACHABLE;
-                case "reachable_all":
-                    return AccessTypes.REACHABLE_ALL;
+                case "global":
+                    return AccessTypes.GLOBAL;
                 case "closed":
                     return AccessTypes.CLOSED;
                 case "":
