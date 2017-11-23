@@ -40,7 +40,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for creating new variables
     /// </summary>
-    public Regex CreateVariable { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit|object) *(closed|reachable_all|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
+    public Regex CreateVariable { get; set; } = new Regex("^(\\w*) *as *(num|dec|word|bit|object|\\*) *(closed|reachable_all|reachable|) *(?:= *([^=]*))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for creating new arrays
     /// </summary>

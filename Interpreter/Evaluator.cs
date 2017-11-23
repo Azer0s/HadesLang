@@ -507,6 +507,21 @@ namespace Interpreter
                     var datatypeFromVariable = variable.DataType;
                     var datatypeFromData = DataTypeFromData(result, hardCompare);
 
+                    if (datatypeFromVariable == DataTypes.ANY)
+                    {
+                        if (RegexCollection.Store.IsPureWord.IsMatch(groups[2].Value))
+                        {
+                            datatypeFromData = DataTypes.WORD;
+                            result = $"'{result.TrimStart('\'').TrimEnd('\'')}'";
+                        }
+
+                        if (datatypeFromData != DataTypes.NONE)
+                        {
+                            variable.DataType = datatypeFromData;
+                            datatypeFromData = datatypeFromVariable;
+                        }
+                    }
+
                     if (datatypeFromVariable == DataTypes.WORD)
                     {
                         result = $"'{result.TrimStart('\'').TrimEnd('\'')}'";

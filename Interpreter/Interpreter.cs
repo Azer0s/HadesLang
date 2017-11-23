@@ -18,16 +18,17 @@ namespace Interpreter
     {
         public IScriptOutput Output;
         public IScriptOutput ExplicitOutput;
-        private IScriptOutput _backup;
-        public readonly Evaluator Evaluator;
         public bool MuteOut = false;
+        public readonly Evaluator Evaluator;
+        private bool _error;
+        private IScriptOutput _backup;
 
-
-        public Interpreter(IScriptOutput output, IScriptOutput explicitOutput)
+        public Interpreter(IScriptOutput output, IScriptOutput explicitOutput, bool error = false)
         {
             Output = output;
             ExplicitOutput = explicitOutput;
             _backup = explicitOutput;
+            _error = error;
             Evaluator = new Evaluator();
 
             //Custom default library location
@@ -90,6 +91,7 @@ namespace Interpreter
                 catch (Exception e)
                 {
                     ExplicitOutput.WriteLine(e.Message);
+                    Error(e);
                 }
                 return Empty;
             }
@@ -260,9 +262,9 @@ namespace Interpreter
                         {
                             return file.CallFunction(lineToInterprete, this,scopes);
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
-                            // Ignored
+                            Error(e);
                         }
                     }
                 }
@@ -482,7 +484,7 @@ namespace Interpreter
                     }
                     catch (Exception e)
                     {
-                        //ignored
+                        Error(e);
                     }
                     return result;
                 }
@@ -522,7 +524,7 @@ namespace Interpreter
                     }
                     catch (Exception e)
                     {
-                        //ignored
+                        Error(e);
                     }
                     return result;
                 }
@@ -549,6 +551,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
             return Empty;
         }
@@ -562,6 +565,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
             return Empty;
         }
@@ -575,6 +579,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
             return Empty;
         }
@@ -588,6 +593,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
             return Empty;
         }
@@ -619,6 +625,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
 
             if (result != Empty)
@@ -641,6 +648,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
 
             if (result != Empty)
@@ -660,6 +668,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
                 return Empty;
             }
             if (!MuteOut)
@@ -685,6 +694,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
             return Empty;
         }
@@ -705,6 +715,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
                 return Empty;
             }
 
@@ -732,7 +743,7 @@ namespace Interpreter
 
         private string GetType(string lineToInterprete, List<string> scopes, IVariable file)
         {
-            string result;
+            var result = Empty;
             var typeGroup = RegexCollection.Store.Type.Match(lineToInterprete).Groups.OfType<Group>()
                 .Select(a => a.Value).ToList();
             var toCheck = IsNullOrEmpty(typeGroup[1]) ? typeGroup[2] : typeGroup[1];
@@ -748,9 +759,17 @@ namespace Interpreter
             }
             else
             {
-                result = Evaluator
-                    .GetVariable(toCheck, scopes)
-                    .DataType.ToString();
+                try
+                {
+                    result = Evaluator
+                        .GetVariable(toCheck, scopes)
+                        .DataType.ToString();
+                }
+                catch (Exception e)
+                {
+                    ExplicitOutput.WriteLine(e.Message);
+                    Error(e);
+                }
             }
 
             Output.WriteLine(result);
@@ -775,6 +794,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
                 return value;
             }
             Output.WriteLine(value.TrimStart('\'').TrimEnd('\''));
@@ -793,6 +813,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
             return Empty;
         }
@@ -813,6 +834,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
                 return Empty;
             }
 
@@ -843,6 +865,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
                 return Empty;
             }
         }
@@ -857,6 +880,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
                 return Empty;
             }
             if (variable is Variable)
@@ -922,6 +946,7 @@ namespace Interpreter
             catch (Exception e)
             {
                 ExplicitOutput.WriteLine(e.Message);
+                Error(e);
             }
 
             return Empty;
@@ -946,6 +971,19 @@ namespace Interpreter
             if (Cache.Instance.Functions.Contains(f)) return false;
             Cache.Instance.Functions.Add(f);
             return true;
+        }
+
+        private void Error(Exception exception)
+        {
+            if (_error)
+            {
+                throw exception;
+            }
+        }
+
+        public void ShouldError(bool error)
+        {
+            _error = error;
         }
     }
 }
