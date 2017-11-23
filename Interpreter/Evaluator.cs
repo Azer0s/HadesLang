@@ -259,11 +259,11 @@ namespace Interpreter
         private void SetArrayAtPos(string name, List<string> scopes, string value, int position)
         {
             Variables.Array variable;
-            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL))
             {
                 var reachableAllVar =
                     Cache.Instance.Variables.First(a => a.Key.Name == name &&
-                                                        a.Value.Access == AccessTypes.REACHABLE_ALL);
+                                                        a.Value.Access == AccessTypes.GLOBAL);
                 variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
             }
             else
@@ -312,9 +312,9 @@ namespace Interpreter
         private bool SetArray(string name, List<string> scopes, Dictionary<int, string> values)
         {
             Variables.Array variable = null;
-            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL))
             {
-                var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL);
+                var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL);
                 variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
             }
             var owner = Empty;
@@ -350,7 +350,7 @@ namespace Interpreter
         {
             if (VariableIsReachableAll(name))
             {
-                return (true, "Variable already defined as reachable_all!");
+                return (true, "Variable already defined as global!");
             }
 
             var owner = Empty;
@@ -376,7 +376,7 @@ namespace Interpreter
 
         private bool VariableIsReachableAll(string varname)
         {
-            return Cache.Instance.Variables.Any(a => a.Key.Name == varname && a.Value.Access == AccessTypes.REACHABLE_ALL);
+            return Cache.Instance.Variables.Any(a => a.Key.Name == varname && a.Value.Access == AccessTypes.GLOBAL);
         }
 
         public string ReplaceWithVars(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
@@ -607,9 +607,9 @@ namespace Interpreter
         private bool SetVariable(string name, string value, List<string> scopes)
         {
             IVariable variable = null;
-            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL))
+            if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL))
             {
-                var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.REACHABLE_ALL);
+                var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL);
 
                 if (reachableAllVar.Value is FileInterpreter interpreter)
                 {
@@ -992,7 +992,7 @@ namespace Interpreter
                 },
                 new Library(Cache.Instance.GetOrder())
                 {
-                    Access = AccessTypes.REACHABLE_ALL,
+                    Access = AccessTypes.GLOBAL,
                     DataType = DataTypes.NONE,
                     LibObject = Activator.CreateInstanceFrom(path, $"{fn}.Library")
                 });
@@ -1364,7 +1364,7 @@ namespace Interpreter
                     fileVariable = GetVariable(varname, fileAccess);
                 }
 
-                if (fileVariable.Access == AccessTypes.REACHABLE || fileVariable.Access == AccessTypes.REACHABLE_ALL)
+                if (fileVariable.Access == AccessTypes.REACHABLE || fileVariable.Access == AccessTypes.GLOBAL)
                 {
                     var output = interpreter.GetOutput();
                     interpreter.SetOutput(new NoOutput(), output.eOutput);
