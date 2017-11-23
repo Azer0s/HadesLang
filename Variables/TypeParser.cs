@@ -35,6 +35,8 @@ namespace Variables
                     return DataTypes.BIT;
                 case "object":
                     return DataTypes.OBJECT;
+                case "*":
+                    return DataTypes.ANY;
                 default:
                     throw new Exception("Invalid data type!");
             }

@@ -7,5 +7,9 @@ namespace Variables
     {
         public Dictionary<int,string> Values;
         public int Capacity = int.MaxValue;
+
+        public Array(int order) : base(order)
+        {
+        }
     }
 }

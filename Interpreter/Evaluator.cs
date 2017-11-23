@@ -32,12 +32,12 @@ namespace Interpreter
 
             var dt = TypeParser.ParseDataType(groups[2]);
             var variable = dt == DataTypes.OBJECT
-                ? (IVariable) new FileInterpreter
+                ? (IVariable) new FileInterpreter(Cache.Instance.GetOrder())
                 {
                     Access = TypeParser.ParseAccessType(groups[3]),
                     DataType = TypeParser.ParseDataType(groups[2])
                 }
-                : new Variable
+                : new Variable(Cache.Instance.GetOrder())
                 {
                     Access = TypeParser.ParseAccessType(groups[3]),
                     DataType = TypeParser.ParseDataType(groups[2])
@@ -67,13 +67,13 @@ namespace Interpreter
 
             Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = scopes[0] },
                 groups[3] == "*"
-                    ? new Variables.Array
+                    ? new Variables.Array(Cache.Instance.GetOrder())
                     {
                         Access = TypeParser.ParseAccessType(groups[4]),
                         DataType = TypeParser.ParseDataType(groups[2]),
                         Values = new Dictionary<int, string>()
                     }
-                    : new Variables.Array
+                    : new Variables.Array(Cache.Instance.GetOrder())
                     {
                         Access = TypeParser.ParseAccessType(groups[4]),
                         DataType = TypeParser.ParseDataType(groups[2]),
@@ -149,7 +149,7 @@ namespace Interpreter
                 {
                     success = SetArray(groups[1],scopes, list.ToDictionary(pair => pair.Key, pair => pair.Value.TrimStart(' ')));
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     interpreter.SetOutput(output.output, output.eOutput);
                     interpreter.MuteOut = false;
@@ -341,7 +341,7 @@ namespace Interpreter
                     variable.Values = values;
                     return true;
                 }
-                throw new Exception($"Array is bigger than capacity!");
+                throw new Exception("Array is bigger than capacity!");
             }
             throw new Exception($"Variable {name} does not exist or the access was denied!");
         }
@@ -507,6 +507,21 @@ namespace Interpreter
                     var datatypeFromVariable = variable.DataType;
                     var datatypeFromData = DataTypeFromData(result, hardCompare);
 
+                    if (datatypeFromVariable == DataTypes.ANY)
+                    {
+                        if (RegexCollection.Store.IsPureWord.IsMatch(groups[2].Value))
+                        {
+                            datatypeFromData = DataTypes.WORD;
+                            result = $"'{result.TrimStart('\'').TrimEnd('\'')}'";
+                        }
+
+                        if (datatypeFromData != DataTypes.NONE)
+                        {
+                            variable.DataType = datatypeFromData;
+                            datatypeFromData = datatypeFromVariable;
+                        }
+                    }
+
                     if (datatypeFromVariable == DataTypes.WORD)
                     {
                         result = $"'{result.TrimStart('\'').TrimEnd('\'')}'";
@@ -656,7 +671,7 @@ namespace Interpreter
 
         public string LoadAs(string path, string varName, List<string> scopes, Interpreter interpreter, Dictionary<string, string> construct)
         {
-            var fileInterpreter = new FileInterpreter(path);
+            var fileInterpreter = new FileInterpreter(path,Cache.Instance.GetOrder());
             fileInterpreter.Construct(interpreter,construct);
             var result = Exists(varName, scopes);
             if (!result.Exists)
@@ -726,7 +741,7 @@ namespace Interpreter
                 return LoadAs(path, varname, scopes, interpreter,construct);
             }
 
-            var file = new FileInterpreter(path);
+            var file = new FileInterpreter(path,Cache.Instance.GetOrder());
             file.Construct(interpreter,construct);
             var result = file.Execute(interpreter, new List<string> { path });
 
@@ -755,7 +770,7 @@ namespace Interpreter
                     {
                         Unload(keyValuePair.Key.Name, scopes);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         //ignored
                     }
@@ -858,6 +873,7 @@ namespace Interpreter
 
             foreach (var keyValuePair in dt != DataTypes.NONE ? Cache.Instance.Variables.Where(a => a.Value.DataType == dt).ToList() : Cache.Instance.Variables.ToList())
             {
+                // ReSharper disable once MergeCastWithTypeCheck
                 if (keyValuePair.Value is Variable)
                 {
                     var kvpAsVar = (Variable)keyValuePair.Value;
@@ -933,7 +949,7 @@ namespace Interpreter
                     Name = varname,
                     Owner = scopes[0]
                 },
-                new Library
+                new Library(Cache.Instance.GetOrder())
                 {
                     Access = AccessTypes.REACHABLE_ALL,
                     DataType = DataTypes.NONE,
@@ -1097,7 +1113,7 @@ namespace Interpreter
                         return (false, "Mixed types in boolean comparison are invalid!");
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return (false, "Mixed types in boolean comparison are invalid!");
                 }
@@ -1334,7 +1350,7 @@ namespace Interpreter
 
         public string GetFields(List<string> scopes)
         {
-            return $"{{'{Join("','", from a in Cache.Instance.Variables where scopes.Contains(a.Key.Owner) select a.Key.Name)}'}}";
+            return $"{{'{Join("','", from a in Cache.Instance.Variables orderby a.Value.Order ascending where scopes.Contains(a.Key.Owner) select a.Key.Name)}'}}";
         }
     }
 }

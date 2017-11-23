@@ -22,7 +22,7 @@ namespace Interpreter
         private readonly Dictionary<int, int> _blockCache;
         private readonly Dictionary<string, string> _requirements;
 
-        public FileInterpreter()
+        public FileInterpreter(int order) : base(order)
         {
             //Default constructor
             _blockCache = new Dictionary<int, int>();
@@ -47,7 +47,7 @@ namespace Interpreter
                     interpreter.InterpretLine($"{val.Key} as {val.Value}{assign}", new List<string>(),this);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // ignored
             }
@@ -57,7 +57,7 @@ namespace Interpreter
             }
         }
 
-        public FileInterpreter(string path, List<string> customLines = null)
+        public FileInterpreter(string path, int order, List<string> customLines = null) : base(order)
         {
             _blockCache = new Dictionary<int, int>();
             _requirements = new Dictionary<string, string>();
@@ -73,7 +73,7 @@ namespace Interpreter
                     Lines = File.ReadAllLines(path).ToList();
                     _lineMap = new Dictionary<int, int>(Lines.Count);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw new Exception($"File {path} could not be read!");
                 }
@@ -111,7 +111,7 @@ namespace Interpreter
                             {
                                 importedLines = File.ReadLines(importPath).ToList();
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 throw new Exception($"File {importPath} could not be read!");
                             }
@@ -234,7 +234,7 @@ namespace Interpreter
                             elseBlock = GetBlock(elseLoc);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         // ignored
                     }
@@ -264,7 +264,7 @@ namespace Interpreter
                             ? bool.Parse(interpreter.InterpretLine(groups[1], scopes, this))
                             : !bool.Parse(interpreter.InterpretLine(groups[1], scopes, this));
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         interpreter.ExplicitOutput.WriteLine("Value was not recognized as a valid bit!");
                         return (Empty, true);
@@ -320,7 +320,7 @@ namespace Interpreter
                                     return result;
                                 }
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 // ignored
                             }
@@ -469,7 +469,7 @@ namespace Interpreter
 
                     interpreter.Evaluator.CreateVariable($"{expectedArgs[i].Key} as {expectedArgs[i].Value.ToString().ToLower()} closed = {args[i]}", new List<string> { id }, interpreter, this);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     interpreter.SetOutput(output.output, output.eOutput);
                     throw;

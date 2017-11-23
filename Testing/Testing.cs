@@ -21,6 +21,7 @@ namespace Testing
             inter.InterpretLine("dumpVars:all", new List<string> {"testing"}, null, true);
             inter.InterpretLine("uload:all", new List<string>{"testing"}, null);
             inter.InterpretLine("dumpVars:all", new List<string> { "testing" }, null, true);
+            inter.ShouldError(false);
         }
 
         [Test]
@@ -145,6 +146,7 @@ namespace Testing
         [TestCase("BIT", "true")]
         [TestCase("WORD", "'Hello world'")]
         [TestCase("DEC", "0.9")]
+        [TestCase("NUM","22")]
         public void TypeTest(string expected, string calc)
         {
             Assert.AreEqual(expected, inter.InterpretLine($"dtype:{calc}", new List<string>{"testing"}, null));
@@ -163,11 +165,11 @@ namespace Testing
         [Test]
         public void ReflectionTest()
         {
-            inter.InterpretLine("a as num", new List<string> {"testing"}, null);
-            inter.InterpretLine("b as bit", new List<string> {"testing"}, null);
+            inter.InterpretLine("b as num", new List<string> {"testing"}, null);
+            inter.InterpretLine("d as bit", new List<string> {"testing"}, null);
             inter.InterpretLine("c as word = 'HELLO'", new List<string> { "testing" }, null);
-            inter.InterpretLine("d as word[*] = getfields:[]", new List<string> {"testing"}, null);
-            inter.InterpretLine("f as word = #d[2]", new List<string> {"testing"}, null);
+            inter.InterpretLine("a as word[*] = getfields:[]", new List<string> {"testing"}, null);
+            inter.InterpretLine("f as word = #a[2]", new List<string> {"testing"}, null);
             Assert.AreEqual("'HELLO'", inter.InterpretLine("out:f", new List<string> { "testing" }, null));
         }
 
@@ -177,6 +179,18 @@ namespace Testing
         public void StringCompTest(string a, string b)
         {
             Assert.AreEqual("true",inter.InterpretLine($"{a} is {b}", new List<string>{"testing"}, null));
+        }
+
+        [Test]
+        [TestCase("22")]
+        [TestCase("22.4")]
+        [TestCase("'Hello'")]
+        [TestCase("true")]
+        public void UntypedTest(string value)
+        {
+            inter.ShouldError(true);
+            inter.InterpretLine("a as *", new List<string> {"testing"}, null);
+            inter.InterpretLine($"a = {value}", new List<string> {"testing"}, null);
         }
     }
 }

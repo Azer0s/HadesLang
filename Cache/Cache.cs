@@ -101,6 +101,19 @@ public sealed class Cache
     /// Cache for preprocessed pipelines
     /// </summary>
     public Dictionary<string,string> Pipelined { get; set; } = new Dictionary<string, string>();
+    /// <summary>
+    /// Var order
+    /// </summary>
+    private int _order { get; set; }
+    /// <summary>
+    /// Method to return var order
+    /// </summary>
+    /// <returns>Order</returns>
+    public int GetOrder()
+    {
+        Instance._order++;
+        return Instance._order;
+    }
 
     /// <summary>
     /// Singleton constructor

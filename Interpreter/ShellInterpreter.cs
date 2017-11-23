@@ -25,7 +25,7 @@ namespace Interpreter
             {
                 //File interpreter
                 //TODO: support constructor params
-                interpreter.ExplicitOutput.WriteLine(new FileInterpreter(path).Execute(interpreter, new List<string> {"console"}).Value);
+                interpreter.ExplicitOutput.WriteLine(new FileInterpreter(path,Cache.Instance.GetOrder()).Execute(interpreter, new List<string> {"console"}).Value);
                 return;
             }
 
@@ -49,7 +49,7 @@ namespace Interpreter
                         }
                     }
 
-                    var fi = new FileInterpreter(null,lines);
+                    var fi = new FileInterpreter(null,Cache.Instance.GetOrder(),lines);
                     fi.Execute(interpreter, new List<string>{"console"});
                 }
                 else
