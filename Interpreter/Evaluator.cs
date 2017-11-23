@@ -480,6 +480,36 @@ namespace Interpreter
             throw new Exception($"Variable {variable} does not exist or the access was denied!");
         }
 
+        public void ConvertToFile(string variable, List<string> scopes)
+        {
+            if (VariableIsReachableAll(variable))
+            {
+                var ivar = Cache.Instance.Variables[Cache.Instance.Variables.First(a => a.Key.Name == variable).Key];
+                Cache.Instance.Variables[Cache.Instance.Variables.First(a => a.Key.Name == variable).Key] = new FileInterpreter(Cache.Instance.GetOrder()) {Access = ivar.Access, DataType = DataTypes.OBJECT};
+                return;
+            }
+            if (Exists(variable, scopes).Exists)
+            {
+                foreach (var scope in scopes)
+                {
+                    try
+                    {
+                        if (Cache.Instance.Variables.Any(a => a.Key.Owner == scope && a.Key.Name == variable))
+                        {
+                            var ivar = Cache.Instance.Variables[new Meta {Name = variable, Owner = scope}];
+                            Cache.Instance.Variables[new Meta { Name = variable, Owner = scope }] = new FileInterpreter(Cache.Instance.GetOrder()) { Access = ivar.Access, DataType = DataTypes.OBJECT };
+                            return;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        //ignored
+                    }
+                }
+            }
+            throw new Exception($"Variable {variable} does not exist or the access was denied!");
+        }
+
         public string AssignToVariable(string lineToInterprete, List<string> scopes, bool hardCompare, Interpreter interpreter, FileInterpreter file)
         {
             var groups = RegexCollection.Store.Assignment.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
@@ -515,6 +545,12 @@ namespace Interpreter
                             result = $"'{result.TrimStart('\'').TrimEnd('\'')}'";
                         }
 
+                        if (datatypeFromData == DataTypes.OBJECT)
+                        {
+                            ConvertToFile(groups[1].Value,scopes);
+                            variable.DataType = DataTypes.OBJECT;
+                        }
+
                         if (datatypeFromData != DataTypes.NONE)
                         {
                             variable.DataType = datatypeFromData;
@@ -535,6 +571,11 @@ namespace Interpreter
                     else if (datatypeFromData == datatypeFromVariable)
                     {
                         success = SetVariable(groups[1].Value, result, scopes);
+
+                        if (RegexCollection.Store.ObjCode.IsMatch(result))
+                        {
+                            result = "object";
+                        }
                     }
                     else
                     {
@@ -671,7 +712,7 @@ namespace Interpreter
 
         public string LoadAs(string path, string varName, List<string> scopes, Interpreter interpreter, Dictionary<string, string> construct)
         {
-            var fileInterpreter = new FileInterpreter(path,Cache.Instance.GetOrder());
+            var fileInterpreter = new FileInterpreter(path,Cache.Instance.GetOrder()){Access = AccessTypes.CLOSED,DataType = DataTypes.OBJECT};
             fileInterpreter.Construct(interpreter,construct);
             var result = Exists(varName, scopes);
             if (!result.Exists)
