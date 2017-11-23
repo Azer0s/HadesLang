@@ -3,7 +3,7 @@
     public enum AccessTypes
     {
         REACHABLE = 1,
-        REACHABLE_ALL = 2,
+        GLOBAL = 2,
         CLOSED = 3
     }
 }
