@@ -59,7 +59,7 @@ Output will be Hello world
 ## Overarching variables
 ### foo.hades
 ```vb
-a as num reachable_all = 18
+a as num global = 18
 with 'bar.hades' as b
 $b->printA:[]
 ```
