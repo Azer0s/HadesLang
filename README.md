@@ -43,7 +43,7 @@ end
 ```
 ### main.hades
 ```vb
-with 'fibonacci.hades' as a
+with 'fibonacci' as a
 b as num reachable = $a->fib:[7]
 out:b
 ```
@@ -60,7 +60,7 @@ Output will be Hello world
 ### foo.hades
 ```vb
 a as num global = 18
-with 'bar.hades' as b
+with 'bar' as b
 $b->printA:[]
 ```
 ### bar.hades
@@ -81,11 +81,11 @@ func t1[num a] requires $a is 11
 end
 ```
 
-| Call        | Output          |
-| ------------- |:-------------:|
-| `t1:[11]`      | a is 11 |
-| `t1:[9]`      | a is smaller 10      |
-| `t1:[100]` | *No method will be called*      |
+| Call       |           Output           |
+| ---------- | :------------------------: |
+| `t1:[11]`  |          a is 11           |
+| `t1:[9]`   |      a is smaller 10       |
+| `t1:[100]` | *No method will be called* |
 
 ## Reflection
 ```vb
@@ -101,7 +101,7 @@ out:#arr[0]
 
 *Syntactic sugar for nested method calls*
 ```vb
-with 'fibrec.hades' as a
+with 'fibrec' as a
 $a->fib:[9] |> out:[??]
 ```
 ## Conditions

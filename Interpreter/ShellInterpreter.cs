@@ -41,7 +41,7 @@ namespace Interpreter
                     var lineInput = Empty;
                     while (lineInput != "\t")
                     {
-                        Console.WriteLine(":");
+                        Console.Write(":");
                         lineInput = Console.ReadLine();
                         if (lineInput != "\t")
                         {

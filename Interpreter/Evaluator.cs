@@ -966,9 +966,17 @@ namespace Interpreter
 
             var file = new FileInfo(fn);
 
-            if (!IsNullOrEmpty(file.Extension))
+            if (IsNullOrEmpty(file.Extension))
             {
-                return LoadFile(fn,group[3], scopes, interpreter,group[4]);
+                file = new FileInfo(fn + ".hades");
+            }
+
+            /*
+             * TODO: WIP
+             */
+            if (file.Exists)
+            {
+                return LoadFile(file.FullName,group[3], scopes, interpreter,group[4]);
             }
 
             var exist = Exists(varname, scopes);
