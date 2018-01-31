@@ -23,6 +23,25 @@ namespace StringExtension
             }
         }
 
+        public static bool Closes(this string str,char open, char close)
+        {
+            var buff = 0;
+            foreach (var c in str)
+            {
+                if (c == open)
+                {
+                    buff++;
+                }
+
+                if (c == close)
+                {
+                    buff--;
+                }
+            }
+
+            return buff == 0;
+        }
+
         public static string GetIntValue(this string source)
         {
             var md5 = System.Security.Cryptography.MD5.Create();

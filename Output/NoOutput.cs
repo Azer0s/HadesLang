@@ -1,4 +1,6 @@
-﻿namespace Output
+﻿using System;
+
+namespace Output
 {
     public class NoOutput : IScriptOutput
     {
@@ -14,12 +16,12 @@
 
         public void Clear()
         {
-            //ignore
+            Console.Clear();
         }
 
         public string ReadLine()
         {
-            return "";
+            return Console.ReadLine();
         }
     }
 }
