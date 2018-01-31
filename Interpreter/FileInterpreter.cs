@@ -207,7 +207,6 @@ namespace Interpreter
                 //If or unless
                 if (RegexCollection.Store.IfOrUnless.IsMatch(Lines[i]))
                 {
-                    //TODO: Add scoping
                     var block = GetBlock(i);
                     (int start, int end) elseBlock = (0, 0);
                     var elseLoc = 0;
@@ -405,7 +404,6 @@ namespace Interpreter
                     i = block.end;
                     continue;
                 }
-                //TODO: Implement tasking
 
                 //Put
                 if (RegexCollection.Store.Put.IsMatch(Lines[i]))

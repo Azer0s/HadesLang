@@ -971,9 +971,6 @@ namespace Interpreter
                 file = new FileInfo(fn + ".hades");
             }
 
-            /*
-             * TODO: WIP
-             */
             if (file.Exists)
             {
                 return LoadFile(file.FullName,group[3], scopes, interpreter,group[4]);
