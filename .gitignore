@@ -244,3 +244,15 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 HadesLang/deflib
+
+\.idea/\.idea\.HadesLang/\.idea/contentModel\.xml
+
+\.idea/\.idea\.HadesLang/\.idea/indexLayout\.xml
+
+\.idea/\.idea\.HadesLang/\.idea/modules\.xml
+
+\.idea/\.idea\.HadesLang/\.idea/vcs\.xml
+
+\.idea/\.idea\.HadesLang/\.idea/workspace\.xml
+
+\.idea/\.idea\.HadesLang/riderModule\.iml
