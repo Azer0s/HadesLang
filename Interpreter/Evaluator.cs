@@ -433,14 +433,17 @@ namespace Interpreter
                     interpreter.SetOutput(new NoOutput(), output.output);
                     index = int.Parse(interpreter.InterpretLine(groups[2].Value, scopes, file));
                     var value = (variable as Variables.Array).Values[index];
-                    interpreter.SetOutput(output.output, output.eOutput);
 
                     return value;
                 }
                 catch (Exception)
                 {
+                    throw new Exception(
+                        $"Index {index} in array {groups[1].Value} is out of bounds or does not exist!");
+                }
+                finally
+                {
                     interpreter.SetOutput(output.output, output.eOutput);
-                    throw new Exception($"Index {index} in array {groups[1].Value} is out of bounds or does not exist!");
                 }
             }
 
@@ -712,7 +715,7 @@ namespace Interpreter
 
         public string LoadAs(string path, string varName, List<string> scopes, Interpreter interpreter, Dictionary<string, string> construct)
         {
-            var fileInterpreter = new FileInterpreter(path,Cache.Instance.GetOrder()){Access = AccessTypes.CLOSED,DataType = DataTypes.OBJECT};
+            var fileInterpreter = new FileInterpreter(path,Cache.Instance.GetOrder(), interpreter){Access = AccessTypes.CLOSED,DataType = DataTypes.OBJECT};
             fileInterpreter.Construct(interpreter,construct);
             var result = Exists(varName, scopes);
             if (!result.Exists)
@@ -782,7 +785,7 @@ namespace Interpreter
                 return LoadAs(path, varname, scopes, interpreter,construct);
             }
 
-            var file = new FileInterpreter(path,Cache.Instance.GetOrder());
+            var file = new FileInterpreter(path,Cache.Instance.GetOrder(),interpreter);
             file.Construct(interpreter,construct);
             var result = file.Execute(interpreter, new List<string> { path });
 
@@ -1194,14 +1197,17 @@ namespace Interpreter
             string result;
             try
             {
-                result = interpreter.InterpretLine(RegexCollection.Store.Raw.Match(lineToInterprete).Groups[1].Value, scopes, file);
+                result = interpreter.InterpretLine(RegexCollection.Store.Raw.Match(lineToInterprete).Groups[1].Value,
+                    scopes, file);
             }
             catch (Exception e)
             {
-                interpreter.SetOutput(output.output, output.eOutput);
                 throw e;
             }
-            interpreter.SetOutput(output.output, output.eOutput);
+            finally
+            {
+                interpreter.SetOutput(output.output, output.eOutput);
+            }
 
             return result.Trim('\'');
         }
@@ -1217,14 +1223,17 @@ namespace Interpreter
             string result;
             try
             {
-                result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value, scopes, file);
+                result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value,
+                    scopes, file);
             }
             catch (Exception e)
             {
-                interpreter.SetOutput(output.output, output.eOutput);
                 throw e;
             }
-            interpreter.SetOutput(output.output,output.eOutput);
+            finally
+            {
+                interpreter.SetOutput(output.output, output.eOutput);
+            }
 
             return $"'{result.Replace("\\/","/")}'";
         }

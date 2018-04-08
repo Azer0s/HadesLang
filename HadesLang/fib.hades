@@ -1,4 +1,6 @@
-﻿c as num = fib:[1]
+﻿%optimize%
+
+c as num = fib:[1]
 x as word[*] reachable = {'ji','wdw','wq'}
 out:c
 //Testing

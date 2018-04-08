@@ -57,10 +57,11 @@ namespace Interpreter
             }
         }
 
-        public FileInterpreter(string path, int order, List<string> customLines = null) : base(order)
+        public FileInterpreter(string path, int order, Interpreter interpreter, List<string> customLines = null) : base(order)
         {
             _blockCache = new Dictionary<int, int>();
             _requirements = new Dictionary<string, string>();
+            var optimize = false;
             if (IsNullOrEmpty(path) && customLines != null)
             {
                 Lines = customLines;
@@ -140,6 +141,12 @@ namespace Interpreter
                         Evaluator.AliasManager.Register(directive);
                     }
                 }
+
+                if (Lines.Any(a => RegexCollection.Store.Optimize.IsMatch(a)))
+                {
+                    Lines.Remove("%optimize%");
+                    optimize = true;
+                }
             }
 
             FAccess = path;
@@ -173,7 +180,41 @@ namespace Interpreter
                 }
             }
 
+            if (optimize)
+            {
+                Optimize(interpreter);
+            }
+
             LoadFunctions();
+        }
+
+        public void Optimize(Interpreter interpreter)
+        {
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
+
+            foreach (var line in Lines)
+            {
+                if (RegexCollection.Store.IfOrUnless.IsMatch(line) 
+                    || RegexCollection.Store.While.IsMatch(line)
+                    || RegexCollection.Store.FunctionDecleration.IsMatch(line) 
+                    || RegexCollection.Store.For.IsMatch(line)
+                    || RegexCollection.Store.Put.IsMatch(line))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    interpreter.OptimizeLine(line);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
+
+            interpreter.SetOutput(output.output, output.eOutput);
         }
 
         public (string Value, bool Return) Execute(Interpreter interpreter, List<string> scopes, int start = 0, int end = -1)
