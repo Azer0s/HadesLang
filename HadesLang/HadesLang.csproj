@@ -48,27 +48,28 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="ctor.hades">
+    <None Include="ctor.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="deflib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="fib.hades">
+    <None Include="fib.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="fibrec.hades">
+    <None Include="fibrec.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="iterate.hades">
+    <None Include="iterate.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="objctor.hades">
+    <None Include="main.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="unless.hades">
+    <None Include="objctor.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="unless.hd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Interpreter\Interpreter.csproj">

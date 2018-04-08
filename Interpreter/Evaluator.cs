@@ -971,7 +971,7 @@ namespace Interpreter
 
             if (IsNullOrEmpty(file.Extension))
             {
-                file = new FileInfo(fn + ".hades");
+                file = new FileInfo(fn + ".hd");
             }
 
             if (file.Exists)
