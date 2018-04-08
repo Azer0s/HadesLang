@@ -14,14 +14,27 @@ using Function = Variables.Function;
 
 namespace Interpreter
 {
-    public class Interpreter
+    public class Interpreter : IDisposable
     {
         public IScriptOutput Output;
         public IScriptOutput ExplicitOutput;
         public bool MuteOut = false;
-        public readonly Evaluator Evaluator;
+        public Evaluator Evaluator;
         private bool _error;
         private IScriptOutput _backup;
+
+        public void Dispose()
+        {
+            Output = null;
+            ExplicitOutput = null;
+            Evaluator = null;
+            _backup = null;
+        }
+
+        ~Interpreter()
+        {
+            Dispose();
+        }
 
         public Interpreter(IScriptOutput output, IScriptOutput explicitOutput, bool error = false)
         {
@@ -48,17 +61,24 @@ namespace Interpreter
                 .Where(a => !a.Key.StartsWith("@") && a.Key != "LSHIFT" && a.Key != "RSHIFT")
                 .ToDictionary(a => a.Key, a => a.Value);
 
-            //Add constants to CallCache
-            Cache.Instance.CallCache.Add("e",(s, l, f) =>
+            try
             {
-                Output.WriteLine(Math.E.ToString(CultureInfo.InvariantCulture));
-                return Math.E.ToString(CultureInfo.InvariantCulture);
-            });
-            Cache.Instance.CallCache.Add("pi", (s, l, f) =>
+                //Add constants to CallCache
+                Cache.Instance.CallCache.Add("e", (s, l, f) =>
+                {
+                    Output.WriteLine(Math.E.ToString(CultureInfo.InvariantCulture));
+                    return Math.E.ToString(CultureInfo.InvariantCulture);
+                });
+                Cache.Instance.CallCache.Add("pi", (s, l, f) =>
+                {
+                    Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
+                    return Math.PI.ToString(CultureInfo.InvariantCulture);
+                });
+            }
+            catch (Exception)
             {
-                Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
-                return Math.PI.ToString(CultureInfo.InvariantCulture);
-            });
+                // ignored
+            }   
         }
 
         public void SetOutput(IScriptOutput output, IScriptOutput explicitOutput)
@@ -960,6 +980,305 @@ namespace Interpreter
             var result = Evaluator.GetFields(scopes);
             Output.WriteLine(result);
             return result;
+        }
+
+        #endregion
+
+        #region Optimizer
+
+        /// <summary>
+        /// Takes a line, evaluates it and puts in into the call cache
+        /// </summary>
+        /// <param name="lineToInterprete">Line to optimize</param>
+        public void OptimizeLine(string lineToInterprete)
+        {
+            if (IsNullOrEmpty(lineToInterprete) || lineToInterprete == "end")
+            {
+                return;
+            }
+
+            #region Alias
+
+            //Register aliases
+            if (lineToInterprete.StartsWith("%") && lineToInterprete.EndsWith("%"))
+            {
+                try
+                {
+                    Evaluator.AliasManager.Register(lineToInterprete);
+                }
+                catch (Exception e)
+                {
+                    ExplicitOutput.WriteLine(e.Message);
+                    Error(e);
+                }
+                return;
+            }
+
+            //Replacement for alias
+            lineToInterprete = Evaluator.AliasManager.AliasReplace(lineToInterprete);
+
+            #endregion
+
+            #region Pipeline
+
+            if (lineToInterprete.Contains("|>"))
+            {
+                if (Cache.Instance.Pipelined.ContainsKey(lineToInterprete))
+                {
+                    lineToInterprete = Cache.Instance.Pipelined[lineToInterprete];
+                }
+                else
+                {
+                    if (RegexCollection.Store.Pipeline.IsMatch(lineToInterprete))
+                    {
+                        var stringDict = new Dictionary<string, string>();
+                        var tempLine = lineToInterprete.ToString();
+
+                        foreach (Match variable in RegexCollection.Store.IsWord.Matches(tempLine))
+                        {
+                            var guid = Guid.NewGuid().ToString().ToLower();
+                            tempLine = tempLine.Replace(variable.Value, guid);
+                            stringDict.Add(guid, variable.Value);
+                        }
+
+
+                        var matches = tempLine.Split(new[] { "|>" }, StringSplitOptions.None).Select(a => a.Trim()).ToList();
+
+                        if (matches[0].Closes('[', ']'))
+                        {
+                            if (matches[0].Contains("="))
+                            {
+                                Cache.Instance.Pipelined.Add(lineToInterprete, lineToInterprete);
+                            }
+                            else
+                            {
+                                for (var i = 0; i < matches.Count; i++)
+                                {
+                                    if (i + 1 == matches.Count)
+                                    {
+                                        tempLine = matches.Last();
+                                    }
+                                    else
+                                    {
+                                        matches[i + 1] = matches[i + 1].Replace("??", matches[i].Trim());
+                                    }
+                                }
+
+                                tempLine = stringDict.Aggregate(tempLine, (current, variable) => current.Replace(variable.Key, variable.Value));
+                                Cache.Instance.Pipelined.Add(lineToInterprete, tempLine);
+                                lineToInterprete = tempLine;
+                            }
+                        }
+                    }
+                }
+            }
+
+            #endregion
+
+            //Call cached call
+            if (Cache.Instance.CallCache.ContainsKey(lineToInterprete))
+            {
+                return;
+            }
+
+            //Variable decleration
+            if (RegexCollection.Store.CreateVariable.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, VarDecleration);
+                return;
+            }
+
+            //Array decleration
+            if (RegexCollection.Store.CreateArray.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, ArrayDecleration);
+                return;
+            }
+
+            //Array assignment
+            if (RegexCollection.Store.ArrayAssignment.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, ArrayAssignment);
+                return;
+            }
+
+            //Variable assignment
+            if (RegexCollection.Store.Assignment.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, VarAssignment);
+                return;
+            }
+
+            //Operator assignment
+            if (RegexCollection.Store.OpAssignment.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, OperatorAssignment);
+                return;
+            }
+
+            //Method calls
+            if (RegexCollection.Store.MethodCall.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, MethodCalls);
+                return;
+            }
+
+            //Var call assign
+            if (RegexCollection.Store.VarCallAssign.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, VarCallAssign);
+                return;
+            }
+
+            //Var call
+            if (RegexCollection.Store.VarCall.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, VarCall);
+                return;
+            }
+
+            //Function
+            if (RegexCollection.Store.Function.IsMatch(lineToInterprete) &&
+                !lineToInterprete.Remainder(RegexCollection.Store.Outside)
+                .ContainsFromList(Cache.Instance.CharList.Concat(Cache.Instance.Replacement.Keys)) &&
+                (lineToInterprete.IsValidFunction() || lineToInterprete.NestedFunction(RegexCollection.Store.FunctionParam)))
+            {
+
+                var groups = RegexCollection.Store.Function.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
+
+                //Custom functions
+                if (Cache.Instance.Functions.Any(a => a.Name == groups[1].Value))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, CallCustomFunction);
+                    return;
+                }
+
+                //Out
+                if (RegexCollection.Store.Output.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, CallOut);
+                    return;
+                }
+
+                //Unload
+                if (RegexCollection.Store.Unload.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, Unload);
+                    return;
+                }
+
+                //Raw
+                if (RegexCollection.Store.Raw.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, CallRaw);
+                    return;
+                }
+
+                //GetFields
+                if (RegexCollection.Store.Fields.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, GetFields);
+                    return;
+                }
+
+                //Range
+                if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, GetRange);
+                    return;
+                }
+
+                #region Console-Specific
+
+                //Input
+                if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, GetInput);
+                    return;
+                }
+
+                //Random number
+                if (RegexCollection.Store.RandomNum.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, GetRandomNumber);
+                    return;
+                }
+
+                //Type/dtype
+                if (RegexCollection.Store.Type.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, GetType);
+                    return;
+                }
+
+                //Exists
+                if (RegexCollection.Store.Exists.IsMatch(lineToInterprete))
+                {
+                    Cache.Instance.CallCache.Add(lineToInterprete, Exists);
+                    return;
+                }
+
+                #endregion
+
+                return;
+            }
+
+            //Return array value
+            if (RegexCollection.Store.ArrayVariable.IsMatch($"${lineToInterprete.TrimStart('$')}") && !RegexCollection.Store.IsWord.IsMatch(lineToInterprete.Remainder(RegexCollection.Store.Variable)))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, GetArrayValue);
+                return;
+            }
+
+            //In/Decrease
+            if (RegexCollection.Store.InDeCrease.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, InDecrease);
+                return;
+            }
+
+            //Return string
+            if (RegexCollection.Store.IsPureWord.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, ReturnWordValue);
+                return;
+            }
+
+            //Clear console
+            if (lineToInterprete.ToLower().Replace(" ", "") == "clear")
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, Clear);
+                return;
+            }
+
+            //Include library or file
+            if (RegexCollection.Store.With.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, IncludeLibOrFile);
+                return;
+            }
+
+            //Bool type
+            if (RegexCollection.Store.IsBit.IsMatch(lineToInterprete.ToLower()))
+            {
+                var fn = new Func<string, List<string>, IVariable, string>(((l, s, f) => l.ToLower()));
+                Cache.Instance.CallCache.Add(lineToInterprete, fn);
+                return;
+            }
+
+            //Return var value
+            if (RegexCollection.Store.Variable.IsMatch(lineToInterprete) || RegexCollection.Store.SingleName.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, GetVarValue);
+                return;
+            }
+
+            //Force through
+            if (RegexCollection.Store.ForceThrough.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete, ForceThrough);
+                return;
+            }
         }
 
         #endregion

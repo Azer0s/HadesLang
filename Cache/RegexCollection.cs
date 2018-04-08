@@ -230,6 +230,11 @@ public class RegexCollection
     /// </summary>
     public Regex CtorParams { get; set; } = new Regex("(num|dec|word|bit|object)(?:\\[([\\d]*|\\*)\\])? *(\\w+) *;?",RegexOptions.Compiled);
     /// <summary>
+    /// Flag for pre-compiling
+    /// </summary>
+    public Regex Optimize { get; set; } = new Regex("^%optimize%",RegexOptions.Compiled);
+
+    /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
     /// </summary>
     private RegexCollection()
