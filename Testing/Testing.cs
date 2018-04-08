@@ -33,7 +33,7 @@ namespace Testing
         [Test]
         public void PipelineTest()
         {
-            inter.InterpretLine($"with '{prefix}fibrec.hades' as a", new List<string> { "testing" }, null);
+            inter.InterpretLine($"with '{prefix}fibrec.hd' as a", new List<string> { "testing" }, null);
             Assert.AreEqual("'34'", inter.InterpretLine("$a->fib:[9] |> out:[??] |> out:[??]", new List<string> { "testing" }, null));
         }
 
@@ -57,7 +57,7 @@ namespace Testing
         [Test]
         public void FibTest()
         {
-            inter.InterpretLine($"with '{prefix}fib.hades' as a", new List<string> {"testing"}, null);
+            inter.InterpretLine($"with '{prefix}fib.hd' as a", new List<string> {"testing"}, null);
             Assert.AreEqual("5",inter.InterpretLine("$a->test:[]", new List<string> { "testing" }, null));
         }
 
@@ -67,15 +67,15 @@ namespace Testing
         [TestCase("Hello world", "325")]
         public void GuardTest(string expected, string value)
         {
-            inter.InterpretLine($"with '{prefix}fib.hades' as a", new List<string> { "testing" }, null);
+            inter.InterpretLine($"with '{prefix}fib.hd' as a", new List<string> { "testing" }, null);
             Assert.AreEqual(expected, inter.InterpretLine($"$a->t1:[{value}]", new List<string> { "testing" }, null));
         }
 
         [Test]
         public void CallTest()
         {
-            inter.InterpretLine($"with \'{prefix}iterate.hades\' as a",new List<string>{"testing"},null);
-            inter.InterpretLine($"with \'{prefix}fibrec.hades\' as b",new List<string>{"testing"},null);
+            inter.InterpretLine($"with \'{prefix}iterate.hd\' as a",new List<string>{"testing"},null);
+            inter.InterpretLine($"with \'{prefix}fibrec.hd\' as b",new List<string>{"testing"},null);
             Assert.AreEqual("55",inter.InterpretLine("$a->test:[$b,10]", new List<string>{"testing"}, null));
         }
 
@@ -121,7 +121,7 @@ namespace Testing
         [Test]
         public void FileTest()
         {
-            Assert.AreEqual("23",inter.InterpretLine($"with \'{prefix}fibrec.hades\'", new List<string>{"testing"},null));
+            Assert.AreEqual("23",inter.InterpretLine($"with \'{prefix}fibrec.hd\'", new List<string>{"testing"},null));
         }
 
         [Test]
@@ -197,7 +197,7 @@ namespace Testing
         public void UntypedObject()
         {
             inter.InterpretLine("a as *", new List<string> {"testing"}, null);
-            inter.InterpretLine($"with \'{prefix}fibrec.hades\' as b", new List<string> {"testing"}, null);
+            inter.InterpretLine($"with \'{prefix}fibrec.hd\' as b", new List<string> {"testing"}, null);
             inter.InterpretLine("a = b", new List<string> {"testing"}, null);
             Assert.IsTrue(inter.InterpretLine("a", new List<string> { "testing" }, null).StartsWith("obj"));
         }

@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="ctor.hades">
+    <None Include="ctor.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="deflib">
