@@ -31,7 +31,7 @@ out:'Hello world'
 ```
 
 ## Fibonacci Numbers
-### fibonacci.hades
+### fibonacci.hd
 ```vb
 func fib[num n]
     if[($n is 0) or ($n is 1)]
@@ -41,7 +41,7 @@ func fib[num n]
     put fib:[$n-1] + fib:[$n-2]
 end
 ```
-### main.hades
+### main.hd
 ```vb
 with 'fibonacci' as a
 b as num reachable = $a->fib:[7]
@@ -57,13 +57,13 @@ b as word = 'Hello world'
 Output will be Hello world
 
 ## Overarching variables
-### foo.hades
+### foo.hd
 ```vb
 a as num global = 18
 with 'bar' as b
 $b->printA:[]
 ```
-### bar.hades
+### bar.hd
 ```vb
 func printA[]
     out:a
