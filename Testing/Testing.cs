@@ -13,7 +13,7 @@ namespace Testing
     public class Testingcs
     {
         private readonly Interpreter.Interpreter inter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
-        private string prefix = "..\\..\\..\\..\\HadesLang\\";
+        private string prefix = string.Format("..{0}..{0}..{0}..{0}HadesLang{0}", Path.DirectorySeparatorChar);
 
         [TearDown]
         public void TearDown()
