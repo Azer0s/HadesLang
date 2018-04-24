@@ -50,3 +50,30 @@ end
 
 
 * Moved some `SetOutput` calls to `finally`  (removed duplicate code)
+
+**<u>24/04/2018</u>**
+
+* Added support for web
+
+* Added webserver
+
+* Added page written in Hades
+
+  * index.hd
+
+  * about.hd
+
+  * contact.hd
+
+  * config
+
+    * Written like
+
+      ```
+      config: localhost
+      port: 5678
+      ```
+
+    * More settings will follow
+
+* Todo: std library for web
