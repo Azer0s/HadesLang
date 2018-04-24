@@ -1,0 +1,4 @@
+localhost:80 {
+    proxy / localhost:5678
+}
+
