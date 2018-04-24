@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using Output;
 using StringExtension;
@@ -45,7 +44,10 @@ namespace Interpreter
             Evaluator = new Evaluator();
 
             //Custom default library location
-            Cache.Instance.LibraryLocation = File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib") ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib") : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            Cache.Instance.LibraryLocation =
+                File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib")
+                    ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib")
+                    : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             if (!Directory.Exists(Cache.Instance.LibraryLocation))
             {

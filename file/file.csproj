@@ -4,4 +4,8 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\StringExtension\StringExtension.csproj" />
+  </ItemGroup>
+
 </Project>
