@@ -6,11 +6,16 @@
 
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.10.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Cache\Cache.csproj" />
+    <ProjectReference Include="..\Debug\Debug.csproj" />
     <ProjectReference Include="..\Interpreter\Interpreter.csproj" />
     <ProjectReference Include="..\Output\Output.csproj" />
+    <ProjectReference Include="..\StringExtension\StringExtension.csproj" />
+    <ProjectReference Include="..\Variables\Variables.csproj" />
   </ItemGroup>
 
 </Project>
