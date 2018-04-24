@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "file", "Lib\file\file.cspro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rest", "Lib\rest\rest.csproj", "{8D8F5C32-D8EE-4530-973F-1EB2A47D69FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HadesWeb", "HadesWeb\HadesWeb.csproj", "{697941E5-14C3-44E6-A2C1-3908CAF950C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{8D8F5C32-D8EE-4530-973F-1EB2A47D69FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D8F5C32-D8EE-4530-973F-1EB2A47D69FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D8F5C32-D8EE-4530-973F-1EB2A47D69FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{697941E5-14C3-44E6-A2C1-3908CAF950C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{697941E5-14C3-44E6-A2C1-3908CAF950C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{697941E5-14C3-44E6-A2C1-3908CAF950C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{697941E5-14C3-44E6-A2C1-3908CAF950C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

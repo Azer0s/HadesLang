@@ -1,0 +1,5 @@
+﻿out:'<html>'
+	out:'<h1>Contact page</h1>'
+out:'</html>'
+
+put 200
