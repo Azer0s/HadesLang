@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using Output;
 using Variables;
@@ -11,29 +12,11 @@ namespace Interpreter
 {
     public class ShellInterpreter
     {
-        private static readonly Color BLUE = Color.FromArgb(240, 6, 153);
-        private static readonly Color YELLOW = Color.FromArgb(247, 208, 2);
-        private static readonly Color PURPLE = Color.FromArgb(69, 78, 158);
-        private static readonly Color RED = Color.FromArgb(191, 26, 47);
-        private static readonly Color GREEN = Color.FromArgb(1, 142, 66);
-
         public ShellInterpreter(string path = null)
         {
-            Console.Clear();
-            Console.WriteAscii("HadesLang",BLUE);
-            var interpreter = new Interpreter(new ConsoleOutput(), new ConsoleOutput());
-            Console.WriteLine();
-            Console.WriteLine("\t======================================",YELLOW);
-            Console.Write("\t||", YELLOW);
-            Console.Write("           Hades - v0.4           ", PURPLE);
-            Console.WriteLine("||",YELLOW);
-            Console.WriteLine("\t======================================", YELLOW);
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("\t\t      Press key...", GREEN);
-            Console.ReadKey();
-            Console.Clear();
+            PrintStart(new decimal(0.4));
 
+            var interpreter = new Interpreter(new ConsoleOutput(), new ConsoleOutput());
             interpreter.RegisterFunction(new Function("print", a =>
             {
                 a.ToList().ForEach(Console.WriteLine);
@@ -78,5 +61,42 @@ namespace Interpreter
                 }
             }
         }
+
+        #region Title
+
+        private static readonly Color Purple = Color.Fuchsia;
+        private static readonly Color LightYellow = Color.Yellow;
+        private static readonly Color Orange = Color.DarkOrange;
+        private static readonly Color LightBlue = Color.LightSkyBlue;
+        private static readonly Color White = Color.White;
+
+        private static void PrintStart(decimal version)
+        {
+            Console.Clear();
+            Console.WriteAscii(" HadesLang", Purple);
+            Console.WriteLine();
+            Console.Write("\t\t                /:+\n", Orange);
+            Console.Write("\t\t                ::-\n", LightYellow);
+            Console.Write("\t\t               :::-\n", Orange);
+            Console.Write("\t\t              ::::/:\n", LightYellow);
+            Console.Write("\t\t            :::", LightYellow); Console.Write("---", White); Console.Write("::+\n", Orange);
+            Console.Write("\t\t            /:", Orange); Console.Write("--`.-", White); Console.Write("::\n", LightYellow);
+            Console.Write("\t\t            ::", LightYellow); Console.Write("-..`", White); Console.Write(".::\n", Orange);
+            Console.Write("\t\t           /--", LightBlue); Console.Write("..```", White); Console.Write(".-+\n", LightYellow);
+            Console.Write("\t\t           +:", LightBlue); Console.Write(".`````", White); Console.Write(".-+\n", LightBlue);
+            Console.Write("\t\t             +:--..:/\n", LightBlue);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("     =======================================================", LightYellow);
+            Console.Write("     ||", LightYellow);
+            Console.Write($"                   Hades - v{version.ToString(CultureInfo.InvariantCulture)}                    ", LightBlue);
+            Console.WriteLine("||", LightYellow);
+            Console.WriteLine("     =======================================================", LightYellow);
+            Console.WriteLine();
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+        #endregion
     }
 }
