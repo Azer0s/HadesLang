@@ -1,103 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{697941E5-14C3-44E6-A2C1-3908CAF950C5}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>HadesWeb</RootNamespace>
-    <AssemblyName>HadesWeb</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Colorful.Console, Version=1.2.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Colorful.Console.1.2.6\lib\net461\Colorful.Console.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="Colorful.Console" Version="1.2.6" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ProjectReference Include="..\Interpreter\Interpreter.csproj" />
+    <ProjectReference Include="..\Output\Output.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="wwwroot\views\about.hd">
+    <None Update="config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="App.config" />
-    <None Include="wwwroot\views\contact.hd">
+    <None Update="wwwroot\favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="wwwroot\views\index.hd">
+    <None Update="wwwroot\views\about.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="wwwroot\views\web.hd">
+    <None Update="wwwroot\views\contact.hd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\views\index.hd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\views\web.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Cache\Cache.csproj">
-      <Project>{871eef92-5231-45f1-b42f-63e3e06196cb}</Project>
-      <Name>Cache</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Debugger\Debug.csproj">
-      <Project>{3e8f583d-7044-4984-bf32-a0ffd09db7e5}</Project>
-      <Name>Debug</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Interpreter\Interpreter.csproj">
-      <Project>{79602591-8999-4c48-9685-b48564f1ea95}</Project>
-      <Name>Interpreter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Output\Output.csproj">
-      <Project>{02613388-e4a5-43b2-8450-914738fcab57}</Project>
-      <Name>Output</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StringExtension\StringExtension.csproj">
-      <Project>{54df6e25-1617-49e2-9c26-86b2e86b372a}</Project>
-      <Name>StringExtension</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Variables\Variables.csproj">
-      <Project>{91cdf345-0953-45fb-abb8-b6e8dfe2afc2}</Project>
-      <Name>Variables</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Content Include="wwwroot\favicon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

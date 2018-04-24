@@ -4,8 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using System.Text;
 using System.Text.RegularExpressions;
 using org.mariuszgromada.math.mxparser;
@@ -13,6 +12,9 @@ using Output;
 using StringExtension;
 using Variables;
 using static System.String;
+using Microsoft.Extensions.DependencyModel;
+using Function = Variables.Function;
+using Library = Variables.Library;
 
 namespace Interpreter
 {
@@ -993,6 +995,10 @@ namespace Interpreter
 
             try
             {
+                var asl = new AssemblyLoader();
+                var asm = asl.LoadFromAssemblyPath(new FileInfo(path).FullName);
+
+                var type = asm.GetType($"{fn}.Library");
                 Cache.Instance.Variables.Add(new Meta
                 {
                     Name = varname,
@@ -1002,7 +1008,7 @@ namespace Interpreter
                 {
                     Access = AccessTypes.GLOBAL,
                     DataType = DataTypes.NONE,
-                    LibObject = Activator.CreateInstanceFrom(path, $"{fn}.Library")
+                    LibObject = Activator.CreateInstance(type)
                 });
             }
             catch (Exception)
@@ -1263,7 +1269,7 @@ namespace Interpreter
                 {
                     var methodGroups = RegexCollection.Store.Function.Match(groups[2]).Groups.OfType<Group>().Select(a => a.Value).ToArray();
 
-                    MethodInfo mi = (variable as Library).LibObject.Unwrap().GetType().GetMethod(methodGroups[1]);
+                    MethodInfo mi = (variable as Library).LibObject.GetType().GetMethod(methodGroups[1]);
 
                     var args = methodGroups[2].StringSplit(',', new[] { '\'', '[', ']', '(', ')' }).ToArray();
 
@@ -1272,7 +1278,7 @@ namespace Interpreter
                         args[i] = interpreter.InterpretLine(args[i], scopes, null);
                     }
 
-                    return mi.Invoke((variable as Library).LibObject.Unwrap(), args);
+                    return mi.Invoke((variable as Library).LibObject, args);
                 }
 
                 if (variable is FileInterpreter)
@@ -1406,6 +1412,17 @@ namespace Interpreter
         public string GetFields(List<string> scopes)
         {
             return $"{{'{Join("','", from a in Cache.Instance.Variables orderby a.Value.Order ascending where scopes.Contains(a.Key.Owner) select a.Key.Name)}'}}";
+        }
+    }
+
+    public class AssemblyLoader : AssemblyLoadContext
+    {
+        protected override Assembly Load(AssemblyName assemblyName)
+        {
+            var deps = DependencyContext.Default;
+            var res = deps.CompileLibraries.Where(d => d.Name.Contains(assemblyName.Name)).ToList();
+            var assembly = Assembly.Load(new AssemblyName(res.First().Name));
+            return assembly;
         }
     }
 }
