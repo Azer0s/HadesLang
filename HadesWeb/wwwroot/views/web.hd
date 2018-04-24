@@ -1,0 +1,31 @@
+﻿out:'<html>'
+out:'<p>'
+out:'Hello world'
+out:'</p>'
+fib:[]
+out:'</html>'
+
+put 200
+
+func fib[]
+	a as num = 1
+	b as num = 1
+	while[true]
+		d as bit
+		out:'<p>'
+		out:a
+		out:'<br/>'
+		out:'</p>'
+		out:'<p>'
+		out:b
+		out:'</p>'
+
+		a = $a + $b
+		b = $a + $b
+
+		if[$a bigger 10000]
+			af as bit closed
+			put a
+		end
+	end
+end

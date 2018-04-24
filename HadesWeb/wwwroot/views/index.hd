@@ -1,0 +1,66 @@
+﻿out:'<html lang="en">'
+  out:'<head>'
+    out:'<meta charset="utf-8">'
+    out:'<meta http-equiv="X-UA-Compatible" content="IE=edge">'
+    out:'<meta name="viewport" content="width=device-width, initial-scale=1">'
+    out:'<meta name="description" content="">'
+    out:'<meta name="author" content="">'
+    out:'<title>HadesWeb</title>'
+	out:'<link rel="stylesheet" href="https:\/\/maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">'
+	out:'<link rel="stylesheet" href="https:\/\/maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">'
+	out:'<script src="https:\/\/maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>'
+  out:'</head>'
+
+  out:'<body>'
+  out:'<br/>'
+    out:'<div class="container">'
+      out:'<div class="header clearfix">'
+        out:'<nav>'
+          out:'<ul class="nav nav-pills pull-right">'
+            out:'<li role="presentation" class="active"><a href="/">Home</a></li>'
+            out:'<li role="presentation"><a href="/about.hd">About</a></li>'
+            out:'<li role="presentation"><a href="/contact.hd">Contact</a></li>'
+          out:'</ul>'
+        out:'</nav>'
+        out:'<h3 class="text-muted">HadesWeb Landing Page</h3>'
+      out:'</div>'
+
+      out:'<div class="jumbotron">'
+        out:'<h1>HadesWeb Framework</h1>'
+        out:'<p class="lead">HadesWeb is a powerful framework to build web apps in Hades.</p>'
+        out:'<p><a class="btn btn-lg btn-success" href="https:\/\/github.com/Azer0s/hadeslang" role="button">Learn more</a></p>'
+      out:'</div>'
+
+      out:'<div class="row marketing">'
+        out:'<div class="col-lg-6">'
+          out:'<h4>Subheading</h4>'
+          out:'<p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>''
+
+          out:'<h4>Subheading</h4>'
+          out:'<p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>'
+
+          out:'<h4>Subheading</h4>'
+          out:'<p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>'
+       out:'</div>'
+
+        out:'<div class="col-lg-6">'
+          out:'<h4>Subheading</h4>'
+          out:'<p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>'
+
+          out:'<h4>Subheading</h4>'
+          out:'<p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>'
+
+          out:'<h4>Subheading</h4>'
+          out:'<p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>'
+        out:'</div>'
+      out:'</div>'
+
+      out:'<footer class="footer">'
+        out:'<p>&copy; 2016 Company, Inc.</p>'
+      out:'</footer>'
+
+    out:'</div>'
+  out:'</body>'
+out:'</html>'
+
+put 200

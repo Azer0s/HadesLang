@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Output
 {
-    class WebOutput : IScriptOutput
+    public class WebOutput : IScriptOutput
     {
         public StringBuilder Output;
 
@@ -17,12 +17,12 @@ namespace Output
 
         public void Write(string input)
         {
-            Output.Append(input);
+            Output.Append(input.Replace("\\n", "\n").Replace("\\t", "\t").Replace("\\/","/"));
         }
 
         public void WriteLine(string input)
         {
-            Output.AppendLine(input);
+            Output.Append(input.Replace("\\n", "\n").Replace("\\t", "\t").Replace("\\/", "/"));
         }
 
         public void Clear()

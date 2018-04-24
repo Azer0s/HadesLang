@@ -159,6 +159,7 @@ namespace Interpreter
                     if (!ignored.StartsWith("//"))
                     {
                         ignored = Evaluator.AliasManager.AliasReplace(ignored);
+                        //TODO: Escape for strings
                         if (ignored.Contains("//"))
                         {
                             ignored = RegexCollection.Store.SingleLineComment.Replace(ignored, "");

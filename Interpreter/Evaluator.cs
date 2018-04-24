@@ -976,7 +976,7 @@ namespace Interpreter
 
             if (file.Exists)
             {
-                return LoadFile(file.Name,group[3], scopes, interpreter,group[4]);
+                return LoadFile(file.FullName,group[3], scopes, interpreter,group[4]);
             }
 
             var exist = Exists(varname, scopes);

@@ -80,7 +80,7 @@ public class RegexCollection
     /// <summary>
     /// Regex for including a library or a file
     /// </summary>
-    public Regex With { get; set; } = new Regex("^with *(?:\'([\\w\\.: \\\\]*)\'|([^\' ]*)) *(?:as *([\\w]+))? *(?:sets *(.+))?$", RegexOptions.Compiled);
+    public Regex With { get; set; } = new Regex("^with *(?:\'([\\w\\.: \\\\\\/]*)\'|([^\' ]*)) *(?:as *([\\w]+))? *(?:sets *(.+))?$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for matching built-in functions
     /// </summary>
