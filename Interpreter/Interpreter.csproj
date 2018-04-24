@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Colorful.Console" Version="1.2.6" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.4" />
   </ItemGroup>
