@@ -3,29 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HadesLang", "HadesLang\HadesLang.csproj", "{FAC99466-9C02-4C8D-A511-144C25FD0B1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HadesLang", "HadesLang\HadesLang.csproj", "{FAC99466-9C02-4C8D-A511-144C25FD0B1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache", "Cache\Cache.csproj", "{B821CF10-89C4-42DD-B2B4-018705D56687}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cache", "Cache\Cache.csproj", "{B821CF10-89C4-42DD-B2B4-018705D56687}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug", "Debug\Debug.csproj", "{E29AA74E-3C10-465D-A281-844CD5B5A2DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debug", "Debug\Debug.csproj", "{E29AA74E-3C10-465D-A281-844CD5B5A2DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interpreter", "Interpreter\Interpreter.csproj", "{7B4F7BA6-2322-4753-A64A-532BF6FED7A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interpreter", "Interpreter\Interpreter.csproj", "{7B4F7BA6-2322-4753-A64A-532BF6FED7A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Output", "Output\Output.csproj", "{0F428BBC-3B81-4063-B232-520BC875103D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Output", "Output\Output.csproj", "{0F428BBC-3B81-4063-B232-520BC875103D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringExtension", "StringExtension\StringExtension.csproj", "{62B8AE4A-3B09-4B13-822B-ECB68075C47B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StringExtension", "StringExtension\StringExtension.csproj", "{62B8AE4A-3B09-4B13-822B-ECB68075C47B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{07BE2B07-6E07-4CDD-84DA-C5B536251609}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testing", "Testing\Testing.csproj", "{07BE2B07-6E07-4CDD-84DA-C5B536251609}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Variables", "Variables\Variables.csproj", "{AE37BC5A-6D14-4929-93E5-9D3502DF1732}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Variables", "Variables\Variables.csproj", "{AE37BC5A-6D14-4929-93E5-9D3502DF1732}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StdLib", "StdLib", "{0F88F677-9E0A-4365-BFDA-7CF07DB26D63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "file", "Lib\file\file.csproj", "{FA2FDB5C-7B18-4045-88F2-277E2CD5E522}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "file", "Lib\file\file.csproj", "{FA2FDB5C-7B18-4045-88F2-277E2CD5E522}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rest", "Lib\rest\rest.csproj", "{D74FC23F-8328-43BC-9063-B653A2BAFB55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rest", "Lib\rest\rest.csproj", "{D74FC23F-8328-43BC-9063-B653A2BAFB55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HadesWeb", "HadesWeb\HadesWeb.csproj", "{24E16A64-3457-4EF8-A3B5-CFE49B6D9300}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HadesWeb", "HadesWeb\HadesWeb.csproj", "{24E16A64-3457-4EF8-A3B5-CFE49B6D9300}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "redis", "redis\redis.csproj", "{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{24E16A64-3457-4EF8-A3B5-CFE49B6D9300}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24E16A64-3457-4EF8-A3B5-CFE49B6D9300}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24E16A64-3457-4EF8-A3B5-CFE49B6D9300}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -84,6 +90,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{FA2FDB5C-7B18-4045-88F2-277E2CD5E522} = {0F88F677-9E0A-4365-BFDA-7CF07DB26D63}
 		{D74FC23F-8328-43BC-9063-B653A2BAFB55} = {0F88F677-9E0A-4365-BFDA-7CF07DB26D63}
+		{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE} = {0F88F677-9E0A-4365-BFDA-7CF07DB26D63}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A0442018-820A-4E2F-A551-A8F791979721}
