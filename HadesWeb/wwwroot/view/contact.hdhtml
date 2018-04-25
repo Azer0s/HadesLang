@@ -1,0 +1,5 @@
+﻿%import wwwroot/view/head.html%
+
+<h1>Contact page</h1>
+
+%import wwwroot/view/bottom.html%

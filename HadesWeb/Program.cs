@@ -261,7 +261,7 @@ namespace HadesWeb
                         }
                         else
                         {   
-                            returnBytes = InterpretFile(action + ".hd", response);
+                            returnBytes = InterpretFile(action, response);
                         }
                     }       
                 }
@@ -270,11 +270,11 @@ namespace HadesWeb
                 {
                     if (request.RawUrl == "/" || request.RawUrl == "/#")
                     {
-                        returnBytes = InterpretFile("index.hd", response);
+                        returnBytes = InterpretFile("index", response);
                     }
                     else
                     {
-                        returnBytes = request.RawUrl.EndsWith(".hd") ? InterpretFile(request.RawUrl.TrimStart('/'), response) : GetFile(request);
+                        returnBytes = request.RawUrl.EndsWith(".hd") ? InterpretFile(request.RawUrl.TrimStart('/').Replace(".hd",""), response) : GetFile(request);
                     }
                 }
 
@@ -304,19 +304,21 @@ namespace HadesWeb
 
         public static byte[] InterpretFile(string file, HttpListenerResponse response)
         {
-            var fileWithPath = $"wwwroot/views/{file}";
+            var fileWithPath = $"wwwroot/controller/{file}.hd";
             if (File.Exists(fileWithPath))
             {
                 try
                 {
-                    var woutput = new WebOutput();
-                    _interpreter.SetOutput(woutput, woutput);
-                    var code = _interpreter.InterpretLine($"with '{fileWithPath}'", new List<string> {"web"}, null);
-                    response.StatusCode = int.Parse(code);
+                    var code = ViewEngine.RenderFile(file, _interpreter);
+                    response.StatusCode = code.Item2;
+
+                    //Cleanup
+                    Cache.Instance.Variables = new Dictionary<Meta, IVariable>();
+
                     Success($"Handled request successfully");
-                    return Encoding.UTF8.GetBytes(woutput.Output.ToString());
+                    return code.Item1;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     Error($"Error while handling request - /{file}");
                     response.StatusCode = 500;

@@ -1,0 +1,12 @@
+﻿%import wwwroot/view/head.html%
+
+<body>
+
+<h1>${heading}</h1>
+
+<for:word x in y>
+	<p>${title}</p>
+	<h2>${x}</h2>
+</for>
+
+%import wwwroot/view/bottom.html%
