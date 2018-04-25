@@ -986,7 +986,7 @@ namespace Interpreter
             {
                 throw new Exception(exist.Message);
             }
-            var path = $"{Cache.Instance.LibraryLocation}\\{fn}.dll";
+            var path = string.Format($"{Cache.Instance.LibraryLocation}{{0}}{fn}.dll",Path.DirectorySeparatorChar);
 
             if (!File.Exists(path))
             {

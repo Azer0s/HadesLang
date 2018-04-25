@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rest", "Lib\rest\rest.cspro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HadesWeb", "HadesWeb\HadesWeb.csproj", "{24E16A64-3457-4EF8-A3B5-CFE49B6D9300}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "redis", "redis\redis.csproj", "{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "redis", "Lib\redis\redis.csproj", "{7D2CB52D-C8DC-4C73-B4D2-CA91BBD2E2BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

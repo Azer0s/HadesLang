@@ -45,15 +45,23 @@ namespace Interpreter
 
             //Custom default library location
             Cache.Instance.LibraryLocation =
-                File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib")
-                    ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\deflib")
+                File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + string.Format("{0}deflib",Path.DirectorySeparatorChar))
+                    ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + string.Format("{0}deflib",Path.DirectorySeparatorChar))
                     : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             if (!Directory.Exists(Cache.Instance.LibraryLocation))
             {
-                Output.WriteLine("Default-library location does not exist! Aborting!");
-                Output.ReadLine();
-                Environment.Exit(-1);
+                if (!Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + Cache.Instance.LibraryLocation))
+                {
+                    Cache.Instance.LibraryLocation = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar +
+                                                     Cache.Instance.LibraryLocation;
+                }
+                else
+                {
+                    Output.WriteLine("Default-library location does not exist! Aborting!");
+                    Output.ReadLine();
+                    Environment.Exit(-1);
+                }
             }
 
             Cache.Instance.Variables = new Dictionary<Meta, IVariable>();
@@ -492,6 +500,13 @@ namespace Interpreter
                 return ReturnWordValue(lineToInterprete,scopes,file);
             }
 
+            //Include library or file
+            if (RegexCollection.Store.With.IsMatch(lineToInterprete))
+            {
+                Cache.Instance.CallCache.Add(lineToInterprete,IncludeLibOrFile);
+                return IncludeLibOrFile(lineToInterprete, scopes,file);
+            }
+            
             //Calculation & string concat
             if ((lineToInterprete.ContainsFromList(Cache.Instance.CharList) ||
                 lineToInterprete.ContainsFromList(Cache.Instance.Replacement.Keys)) &&
@@ -520,13 +535,6 @@ namespace Interpreter
             {
                 Cache.Instance.CallCache.Add(lineToInterprete,Clear);
                 return Clear(lineToInterprete,scopes,file);
-            }
-
-            //Include library or file
-            if (RegexCollection.Store.With.IsMatch(lineToInterprete))
-            {
-                Cache.Instance.CallCache.Add(lineToInterprete,IncludeLibOrFile);
-                return IncludeLibOrFile(lineToInterprete, scopes,file);
             }
 
             //Bool type

@@ -14,6 +14,8 @@ namespace redis
     {
         public string get(string key,string connection)
         {
+            key = key.Trim('\'');
+            connection = connection.Trim('\'');
             try
             {
                 var client = new RedisManagerPool(connection).GetClient();
@@ -28,6 +30,14 @@ namespace redis
 
         public string set(string key, string value, string connection)
         {
+            key = key.Trim('\'');
+            value = value.Trim('\'');
+            connection = connection.Trim('\'');
+            
+            Console.WriteLine(key);
+            Console.WriteLine(value);
+            Console.WriteLine(connection);
+            
             try
             {
                 var client = new RedisManagerPool(connection).GetClient();
