@@ -77,3 +77,39 @@ end
     * More settings will follow
 
 * Todo: std library for web
+
+**<u>25/04/2018</u>**
+
+* Added routing options for HadesWeb
+
+  * Option in config for routing file
+
+    ```
+    routing: main.hd
+    ```
+
+  * If no routing file is given, HadesWeb will switch to autorouting
+
+  * Special hades functions:
+
+    * `route:[word route,word action]` - Adds route to HadesWebEngine
+
+      * e.g.: 
+
+        ```vb
+        route:['/','index']
+        route:['/about','about']
+        route:['/contact','contact']
+        ```
+
+        ​
+
+    * `forward:[word filetype]` - Adds forward for filetype to HadesWebEngine
+
+      * e.g.:
+
+        ```vb
+        forward:['.ico']
+        ```
+
+* Cleaned up `Programm.cs` in HadesWeb

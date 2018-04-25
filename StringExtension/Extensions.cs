@@ -23,6 +23,19 @@ namespace StringExtension
             }
         }
 
+        public static bool EndsWithFromList(this string s, List<string> list)
+        {
+            foreach (var s1 in list)
+            {
+                if (s.EndsWith(s1))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static bool Closes(this string str,char open, char close)
         {
             var buff = 0;

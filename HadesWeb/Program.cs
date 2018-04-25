@@ -11,6 +11,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Colorful;
 using Output;
+using StringExtension;
+using Variables;
 using Interpreter = Interpreter.Interpreter;
 using Console = Colorful.Console;
 
@@ -19,6 +21,16 @@ namespace HadesWeb
     class Program
     {
         private static global::Interpreter.Interpreter _interpreter;
+        private static bool _routingEnabled = false;
+        private static string _address;
+        private static string _port;
+        private static bool _browser = false;
+        private static string _routingFile;
+        private static readonly Dictionary<string,string> Routes = new Dictionary<string, string>();
+        private static readonly List<string> Forward = new List<string>();
+        
+        #region Log
+
         private static readonly Color Blue = Color.FromArgb(240, 6, 153);
         private static readonly Color Yellow = Color.FromArgb(247, 208, 2);
         private static readonly Color Purple = Color.FromArgb(69, 78, 158);
@@ -48,29 +60,117 @@ namespace HadesWeb
             Console.WriteLine($" {message}",Green);
         }
 
+
+        #endregion
+        
         public static void Main()
         {
+            Console.Clear();
             Console.Title = "HadesWeb Server";
             Console.WriteAscii("HadesWeb Server", Blue);
             Info("Initializing Hades Interpreter...");
             _interpreter = new global::Interpreter.Interpreter(new NoOutput(), new NoOutput());
 
-            var lines = File.ReadAllLines("config").ToList();
-            var address = lines.Where(a => a.StartsWith("address"))
-                .Select(a => a.Replace("address:", "").Replace(" ", "")).First();
-            var port = lines.Where(a => a.StartsWith("port"))
-                .Select(a => a.Replace("port:", "").Replace(" ", "")).First();
-            var browser = bool.Parse(lines.Where(a => a.StartsWith("startBrowser"))
-                .Select(a => a.Replace("startBrowser:", "").Replace(" ", "")).First());
+            #region Config
 
+            var lines = File.ReadAllLines("config").ToList();
+            _address = lines.Where(a => a.StartsWith("address"))
+                .Select(a => a.Replace("address:", "").Replace(" ", "")).First();
+            _port = lines.Where(a => a.StartsWith("port"))
+                .Select(a => a.Replace("port:", "").Replace(" ", "")).First();
+            try
+            {
+                _browser = bool.Parse(lines.Where(a => a.StartsWith("startBrowser"))
+                    .Select(a => a.Replace("startBrowser:", "").Replace(" ", "")).First());
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+            _routingFile = lines.Where(a => a.StartsWith("routing"))
+                .Select(a => a.Replace("routing:", "").Replace(" ", "")).FirstOrDefault();
+
+            #endregion       
+
+            #region Routing
+
+            _routingEnabled = false;
+                        
+            //Function endpoint for HadesInterpreter
+            _interpreter.RegisterFunction(new Function("route", a =>
+            {
+                var parameters = a as object[] ?? a.ToArray();
+
+                if (parameters.Length != 2)
+                {
+                    return "false";
+                }
+                
+                var route = parameters[0].ToString();
+                var action = parameters[1].ToString();
+
+                try
+                {
+                    Routes.Add(route, action);
+                    Info($"Added route {route} with action {action}!");
+                }
+                catch (Exception)
+                {
+                    return "false";
+                }
+                
+                return "true";
+            }));
+
+            _interpreter.RegisterFunction(new Function("forward", a =>
+            {
+                var parameters = a as object[] ?? a.ToArray();
+
+                if (parameters.Length != 1)
+                {
+                    return "false";
+                }
+
+                var fileType = parameters[0].ToString();
+
+                try
+                {
+                    Forward.Add(fileType);
+                    Info($"Added forward route to filetype {fileType}!");
+                }
+                catch (Exception)
+                {
+                    return "false";
+                }
+
+                return "true";
+            }));
+            
+            //Check if route config exists
+            if (!string.IsNullOrEmpty(_routingFile) && File.Exists(_routingFile))
+            {
+                _interpreter.InterpretLine($"with '{_routingFile}'", new List<string> {"web"}, null);
+            }
+
+            if (Routes.Count != 0)
+            {
+                _routingEnabled = true;
+            }
+            else
+            {
+                Info("No routing file given - switching to autorouting!");
+            }
+
+            #endregion
+            
             var listener = new HttpListener();
-            listener.Prefixes.Add($"http://{address}:{port}/");
-            Info($"Listening @ {address} on port {port}");
+            listener.Prefixes.Add($"http://{_address}:{_port}/");
+            Info($"Listening @ {_address} on port {_port}");
             listener.Start();
 
-            if (browser)
+            if (_browser)
             {
-                OpenUrl($"http://{address}:{port}/");
+                OpenUrl($"http://{_address}:{_port}/");
             }
 
             while (true)
@@ -81,27 +181,46 @@ namespace HadesWeb
                 var returnBytes = new byte[] { };
 
                 Info($"Request - {request.RawUrl}");
-                if (request.RawUrl == "/" || request.RawUrl == "/#")
+
+                if (_routingEnabled)
                 {
-                    returnBytes = InterpretFile("index.hd", response);
-                }
-                else
-                {
-                    if (request.RawUrl.EndsWith(".hd"))
+                    var action = string.Empty;
+
+                    if (request.RawUrl.EndsWithFromList(Forward))
                     {
-                        returnBytes = InterpretFile(request.RawUrl.TrimStart('/'), response);
+                        returnBytes = GetFile(request);
                     }
                     else
                     {
-                        try
+                        if (Routes.ContainsKey(request.RawUrl))
                         {
-                            returnBytes = File.ReadAllBytes($"wwwroot{request.RawUrl}");
-                            Success("Handled request successfully");
+                            action = Routes[request.RawUrl];
                         }
-                        catch (Exception e)
+                        else if (Routes.ContainsKey(request.RawUrl.Replace(".hd","")))
                         {
-                            Error($"Error while handling request - file wwwroot{request.RawUrl} does not exist!");
+                            action = Routes[request.RawUrl.Replace(".hd", "")];
                         }
+
+                        if (string.IsNullOrEmpty(action))
+                        {
+                            response.StatusCode = 500;
+                        }
+                        else
+                        {   
+                            returnBytes = InterpretFile(action + ".hd", response);
+                        }
+                    }       
+                }
+                //Autoroute
+                else
+                {
+                    if (request.RawUrl == "/" || request.RawUrl == "/#")
+                    {
+                        returnBytes = InterpretFile("index.hd", response);
+                    }
+                    else
+                    {
+                        returnBytes = request.RawUrl.EndsWith(".hd") ? InterpretFile(request.RawUrl.TrimStart('/'), response) : GetFile(request);
                     }
                 }
 
@@ -111,6 +230,22 @@ namespace HadesWeb
                 output.Close();
             }
             // ReSharper disable once FunctionNeverReturns
+        }
+
+        public static byte[] GetFile(HttpListenerRequest request)
+        {
+            var returnBytes = new byte[]{};
+            try
+            {
+                returnBytes = File.ReadAllBytes($"wwwroot{request.RawUrl}");
+                Success("Handled request successfully");
+            }
+            catch (Exception e)
+            {
+                Error($"Error while handling request - file wwwroot{request.RawUrl} does not exist!");
+            }
+
+            return returnBytes;
         }
 
         public static byte[] InterpretFile(string file, HttpListenerResponse response)
@@ -130,6 +265,8 @@ namespace HadesWeb
                 catch (Exception)
                 {
                     Error($"Error while handling request - /{file}");
+                    response.StatusCode = 500;
+                    return new byte[1];
                 }
             }
             Error($"Error while handling request - file {file} does not exist!");
