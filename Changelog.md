@@ -100,6 +100,9 @@ end
         route:['/','index']
         route:['/about','about']
         route:['/contact','contact']
+
+        //This is a folder
+        route:['/folder/hello','folder/hello']
         ```
 
         ​
@@ -113,3 +116,28 @@ end
         ```
 
 * Cleaned up `Programm.cs` in HadesWeb
+
+* Added viewengine
+
+  * supports variables
+
+    ```html
+    <p>${text}</p>
+    ```
+
+  * supports loops
+
+    ```html
+    <for:word x in y>
+    	<p>${title}</p>
+    	<h2>${x}</h2>
+    </for>
+    ```
+
+* Added support for folders in routing
+
+  ```vb
+  route:['/contact/*','*']
+  ```
+
+  ​

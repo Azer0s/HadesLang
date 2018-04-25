@@ -1,5 +1,7 @@
 route:['/','index']
 route:['/about','about']
 route:['/contact','contact']
+route:['/folder/hello','folder/hello']
 route:['/testing','/view/testing.html']
+route:['/data/*','/files/*']
 forward:['.ico']

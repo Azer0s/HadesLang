@@ -26,14 +26,14 @@ namespace HadesWeb
             return returnBytes;
         }
 
-        public static byte[] InterpretFile(string file, HttpListenerResponse response, Interpreter.Interpreter interpreter)
+        public static byte[] InterpretFile(string file, HttpListenerResponse response, Interpreter.Interpreter interpreter, string controllerBasePath = "wwwroot/controller/{0}.hd", string viewBasePath = "wwwroot/view/{0}.hdhtml")
         {
-            var fileWithPath = $"wwwroot/controller/{file}.hd";
+            var fileWithPath = string.Format(controllerBasePath,file);
             if (File.Exists(fileWithPath))
             {
                 try
                 {
-                    var code = ViewEngine.RenderFile(file, interpreter);
+                    var code = ViewEngine.RenderFile(file, interpreter,controllerBasePath,viewBasePath);
                     response.StatusCode = code.Item2;
 
                     //Cleanup

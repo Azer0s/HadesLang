@@ -14,10 +14,10 @@ namespace HadesWeb
 {
     public class ViewEngine
     {
-        public static (byte[],int) RenderFile(string viewFile, Interpreter.Interpreter interpreter)
+        public static (byte[],int) RenderFile(string viewFile, Interpreter.Interpreter interpreter, string controllerBasePath = "wwwroot/controller/{0}.hd", string viewBasePath = "wwwroot/view/{0}.hdhtml")
         {
-            var controllerPath = $"wwwroot/controller/{viewFile}.hd";
-            var viewPath = $"wwwroot/view/{viewFile}.hdhtml";
+            var controllerPath = string.Format(controllerBasePath, viewFile);
+            var viewPath = string.Format(viewBasePath, viewFile);
 
             //Only controller
             if (!File.Exists(viewPath) && File.Exists(controllerPath))
