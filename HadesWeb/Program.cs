@@ -17,6 +17,9 @@ using StringExtension;
 using Variables;
 using Interpreter = Interpreter.Interpreter;
 using Console = Colorful.Console;
+using static HadesWeb.BrowserHelper;
+using static HadesWeb.FileHelper;
+using static HadesWeb.Log;
 
 namespace HadesWeb
 {
@@ -30,53 +33,6 @@ namespace HadesWeb
         private static string _routingFile;
         private static readonly Dictionary<string,string> Routes = new Dictionary<string, string>();
         private static readonly List<string> Forward = new List<string>();
-        private static RedisManagerPool _manager;
-        private static bool _log = false;
-        
-        #region Log
-
-        private static readonly Color Blue = Color.FromArgb(240, 6, 153);
-        private static readonly Color Yellow = Color.FromArgb(247, 208, 2);
-        private static readonly Color Purple = Color.FromArgb(69, 78, 158);
-        private static readonly Color Red = Color.FromArgb(191, 26, 47);
-        private static readonly Color Green = Color.FromArgb(1, 142, 66);
-
-        private static string Time()
-        {
-            var now = $"[{DateTime.UtcNow:o}]";
-            Console.Write(now, Yellow);
-            return now;
-        }
-
-        private static void Error(string message)
-        {
-            var now = Time();
-
-            if (_log)
-            {
-                using (var client = _manager.GetClient())
-                {
-                    client.Set(now, message);
-                }
-            }
-
-            Console.WriteLine($" {message}", Red);
-        }
-
-        private static void Info(string message)
-        {
-            Time();
-            Console.WriteLine($" {message}", Purple);
-        }
-
-        private static void Success(string message)
-        {
-            Time();
-            Console.WriteLine($" {message}",Green);
-        }
-
-
-        #endregion
         
         public static void Main()
         {
@@ -121,8 +77,8 @@ namespace HadesWeb
                 try
                 {
                     Info("Trying to connect to redis...");
-                    _manager = new RedisManagerPool(redis);
-                    _manager.GetClient();
+                    Manager = new RedisManagerPool(redis);
+                    Manager.GetClient();
                     Success("Connection to redis successful!");
                 }
                 catch (Exception)
@@ -242,7 +198,7 @@ namespace HadesWeb
 
                     if (request.RawUrl.EndsWithFromList(Forward))
                     {
-                        returnBytes = GetFile(request);
+                        returnBytes = GetFile(request.RawUrl);
                     }
                     else
                     {
@@ -254,14 +210,20 @@ namespace HadesWeb
                         {
                             action = Routes[request.RawUrl.Replace(".hd", "")];
                         }
+                        else
+                        {
+                            Error($"No route specified for action {request.RawUrl}!");
+                        }
 
                         if (string.IsNullOrEmpty(action))
                         {
                             response.StatusCode = 500;
                         }
                         else
-                        {   
-                            returnBytes = InterpretFile(action + ".hd", response);
+                        {
+                            returnBytes = RegexCollection.Store.HasExtension.IsMatch(action)
+                                ? GetFile(action)
+                                : InterpretFile(action, response,_interpreter);
                         }
                     }       
                 }
@@ -270,11 +232,14 @@ namespace HadesWeb
                 {
                     if (request.RawUrl == "/" || request.RawUrl == "/#")
                     {
-                        returnBytes = InterpretFile("index.hd", response);
+                        returnBytes = InterpretFile("index", response,_interpreter);
                     }
                     else
                     {
-                        returnBytes = request.RawUrl.EndsWith(".hd") ? InterpretFile(request.RawUrl.TrimStart('/'), response) : GetFile(request);
+                        returnBytes =
+                            request.RawUrl.EndsWith(".hd") || File.Exists($"wwwroot/controller{request.RawUrl}.hd")
+                                ? InterpretFile(request.RawUrl.TrimStart('/').Replace(".hd", ""), response,_interpreter)
+                                : GetFile(request.RawUrl);
                     }
                 }
 
@@ -284,77 +249,6 @@ namespace HadesWeb
                 output.Close();
             }
             // ReSharper disable once FunctionNeverReturns
-        }
-
-        public static byte[] GetFile(HttpListenerRequest request)
-        {
-            var returnBytes = new byte[]{};
-            try
-            {
-                returnBytes = File.ReadAllBytes($"wwwroot{request.RawUrl}");
-                Success("Handled request successfully");
-            }
-            catch (Exception e)
-            {
-                Error($"Error while handling request - file wwwroot{request.RawUrl} does not exist!");
-            }
-
-            return returnBytes;
-        }
-
-        public static byte[] InterpretFile(string file, HttpListenerResponse response)
-        {
-            var fileWithPath = $"wwwroot/views/{file}";
-            if (File.Exists(fileWithPath))
-            {
-                try
-                {
-                    var woutput = new WebOutput();
-                    _interpreter.SetOutput(woutput, woutput);
-                    var code = _interpreter.InterpretLine($"with '{fileWithPath}'", new List<string> {"web"}, null);
-                    response.StatusCode = int.Parse(code);
-                    Success($"Handled request successfully");
-                    return Encoding.UTF8.GetBytes(woutput.Output.ToString());
-                }
-                catch (Exception)
-                {
-                    Error($"Error while handling request - /{file}");
-                    response.StatusCode = 500;
-                    return new byte[1];
-                }
-            }
-            Error($"Error while handling request - file {file} does not exist!");
-            response.StatusCode = 500;
-            return new byte[1];
-        }
-
-        private static void OpenUrl(string url)
-        {
-            try
-            {
-                Process.Start(url);
-            }
-            catch
-            {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    url = url.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    Process.Start("xdg-open", url);
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Process.Start("open", url);
-                }
-                else
-                {
-                    throw;
-                }
-            }
         }
     }
 }

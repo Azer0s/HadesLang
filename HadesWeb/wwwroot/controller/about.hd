@@ -1,0 +1,5 @@
+title as word = 'About page'
+heading as word = 'My simple heading'
+y as word[*] = {'Hello world','Hi from hades','Print in browser'}
+
+put 200
