@@ -100,6 +100,9 @@ end
         route:['/','index']
         route:['/about','about']
         route:['/contact','contact']
+
+        //This is a folder
+        route:['/folder/hello','folder/hello']
         ```
 
         ​
