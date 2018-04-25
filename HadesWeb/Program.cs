@@ -121,11 +121,28 @@ namespace HadesWeb
 
                 try
                 {
+                    if (route.EndsWith("/*"))
+                    {
+                        if (action.EndsWith("/*"))
+                        {
+                            route = route.Replace("/*", "/(.+)");
+                            Info($"Added wildcard rout {route.Replace("/(.+)", "/*")} with action {action}!");
+                        }
+                        else
+                        {
+                            Error($"Can't add non wildcarded action ({action}) for wildcarded route ({route})!");
+                            return "false";
+                        }
+                    }
+                    else
+                    {
+                        Info($"Added route {route} with action {action}!");
+                    }
                     Routes.Add(route, action);
-                    Info($"Added route {route} with action {action}!");
                 }
                 catch (Exception)
                 {
+                    Error($"Error while adding route {route}!");
                     return "false";
                 }
                 
@@ -195,6 +212,7 @@ namespace HadesWeb
                 if (_routingEnabled)
                 {
                     var action = string.Empty;
+                    var basepath = "wwwroot/controller/{0}.hd";
 
                     if (request.RawUrl.EndsWithFromList(Forward))
                     {
@@ -210,6 +228,14 @@ namespace HadesWeb
                         {
                             action = Routes[request.RawUrl.Replace(".hd", "")];
                         }
+                        else if (Routes.Where(a => a.Key.EndsWith("/(.+)") && a.Key != "/").Select(a => a.Key).Any(a => Regex.IsMatch(request.RawUrl,a)))
+                        {
+                            var pair = Routes.Where(a => Regex.IsMatch(request.RawUrl, a.Key) && a.Key != "/").Select(a => a)
+                                .First();
+                            action = Regex.Replace(request.RawUrl, pair.Key,
+                                a => pair.Value.Replace("/*", $"/{a.Groups[1].Value}"));
+                            basepath = "wwwroot{0}.hd";
+                        }
                         else
                         {
                             Error($"No route specified for action {request.RawUrl}!");
@@ -223,7 +249,7 @@ namespace HadesWeb
                         {
                             returnBytes = RegexCollection.Store.HasExtension.IsMatch(action)
                                 ? GetFile(action)
-                                : InterpretFile(action, response,_interpreter);
+                                : InterpretFile(action, response,_interpreter,basepath);
                         }
                     }       
                 }
