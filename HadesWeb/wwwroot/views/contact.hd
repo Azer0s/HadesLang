@@ -1,5 +1,7 @@
-﻿out:'<html>'
-	out:'<h1>Contact page</h1>'
-out:'</html>'
+﻿%import wwwroot/views/head.hd%
+
+out:'<h1>Contact page</h1>'
+
+%import wwwroot/views/bottom.hd%
 
 put 200

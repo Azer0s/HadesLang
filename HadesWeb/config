@@ -1,2 +1,3 @@
 ﻿address: localhost
 port: 5678
+startBrowser: true
