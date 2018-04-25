@@ -248,7 +248,11 @@ public class RegexCollection
     /// <summary>
     /// Ends for-loops in hdhtml
     /// </summary>
-    public Regex ViewEndFor { get; set; } = new Regex("^</for>$");
+    public Regex ViewEndFor { get; set; } = new Regex("^</for>$", RegexOptions.Compiled);
+    /// <summary>
+    /// Checks if a string has an extension
+    /// </summary>
+    public Regex HasExtension { get; set; } = new Regex(".+\\..+", RegexOptions.Compiled);
 
     #endregion
     
