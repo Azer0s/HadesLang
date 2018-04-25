@@ -9,8 +9,10 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Colorful;
 using Output;
+using ServiceStack.Redis;
 using StringExtension;
 using Variables;
 using Interpreter = Interpreter.Interpreter;
@@ -28,6 +30,8 @@ namespace HadesWeb
         private static string _routingFile;
         private static readonly Dictionary<string,string> Routes = new Dictionary<string, string>();
         private static readonly List<string> Forward = new List<string>();
+        private static RedisManagerPool _manager;
+        private static bool _log = false;
         
         #region Log
 
@@ -37,14 +41,25 @@ namespace HadesWeb
         private static readonly Color Red = Color.FromArgb(191, 26, 47);
         private static readonly Color Green = Color.FromArgb(1, 142, 66);
 
-        private static void Time()
+        private static string Time()
         {
-            Console.Write($"[{DateTime.UtcNow:o}]", Yellow);
+            var now = $"[{DateTime.UtcNow:o}]";
+            Console.Write(now, Yellow);
+            return now;
         }
 
         private static void Error(string message)
         {
-            Time();
+            var now = Time();
+
+            if (_log)
+            {
+                using (var client = _manager.GetClient())
+                {
+                    client.Set(now, message);
+                }
+            }
+
             Console.WriteLine($" {message}", Red);
         }
 
@@ -67,7 +82,16 @@ namespace HadesWeb
         {
             Console.Clear();
             Console.Title = "HadesWeb Server";
-            Console.WriteAscii("HadesWeb Server", Blue);
+
+            var name = string.Empty;
+            foreach (var c in "HadesWeb Server")
+            {
+                name += c;
+                Console.Clear();
+                Console.WriteAscii(name,Blue);
+                Thread.Sleep(70);
+            }
+
             Info("Initializing Hades Interpreter...");
             _interpreter = new global::Interpreter.Interpreter(new NoOutput(), new NoOutput());
 
@@ -78,6 +102,36 @@ namespace HadesWeb
                 .Select(a => a.Replace("address:", "").Replace(" ", "")).First();
             _port = lines.Where(a => a.StartsWith("port"))
                 .Select(a => a.Replace("port:", "").Replace(" ", "")).First();
+
+            try
+            {
+                _log = bool.Parse(lines.Where(a => a.StartsWith("log"))
+                    .Select(a => a.Replace("log:", "").Replace(" ", "")).First());
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            if (_log)
+            {
+                var redis = lines.Where(a => a.StartsWith("port"))
+                    .Select(a => a.Replace("port:", "").Replace(" ", "")).First();
+
+                try
+                {
+                    Info("Trying to connect to redis...");
+                    _manager = new RedisManagerPool(redis);
+                    _manager.GetClient();
+                    Success("Connection to redis successful!");
+                }
+                catch (Exception)
+                {
+                    _log = false;
+                    Error("Couldn't connect to redis!");
+                }
+            }
+
             try
             {
                 _browser = bool.Parse(lines.Where(a => a.StartsWith("startBrowser"))

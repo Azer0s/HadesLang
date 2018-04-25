@@ -2,3 +2,5 @@
 port: 5679
 startBrowser: true
 routing: main.hd
+log: false
+redis: localhost:6379

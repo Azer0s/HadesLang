@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.6" />
+    <PackageReference Include="ServiceStack.Redis.Core" Version="5.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Interpreter\Interpreter.csproj" />
