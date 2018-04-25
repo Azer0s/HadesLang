@@ -1,3 +1,4 @@
 ﻿address: localhost
-port: 5678
+port: 5679
 startBrowser: true
+routing: main.hd

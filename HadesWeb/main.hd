@@ -1,0 +1,4 @@
+route:['/','index']
+route:['/about','about']
+route:['/contact','contact']
+forward:['.ico']
