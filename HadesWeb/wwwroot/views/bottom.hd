@@ -1,0 +1,7 @@
+﻿      out:'<footer class="footer">'
+        out:'<p>&copy; 2018 HadesWeb - Starter Template</p>'
+      out:'</footer>'
+
+    out:'</div>'
+  out:'</body>'
+out:'</html>'

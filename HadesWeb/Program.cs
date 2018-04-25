@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Colorful;
@@ -17,39 +19,39 @@ namespace HadesWeb
     class Program
     {
         private static global::Interpreter.Interpreter _interpreter;
-        private static readonly Color BLUE = Color.FromArgb(240, 6, 153);
-        private static readonly Color YELLOW = Color.FromArgb(247, 208, 2);
-        private static readonly Color PURPLE = Color.FromArgb(69, 78, 158);
-        private static readonly Color RED = Color.FromArgb(191, 26, 47);
-        private static readonly Color GREEN = Color.FromArgb(1, 142, 66);
+        private static readonly Color Blue = Color.FromArgb(240, 6, 153);
+        private static readonly Color Yellow = Color.FromArgb(247, 208, 2);
+        private static readonly Color Purple = Color.FromArgb(69, 78, 158);
+        private static readonly Color Red = Color.FromArgb(191, 26, 47);
+        private static readonly Color Green = Color.FromArgb(1, 142, 66);
 
         private static void Time()
         {
-            Console.Write($"[{DateTime.UtcNow:o}]", YELLOW);
+            Console.Write($"[{DateTime.UtcNow:o}]", Yellow);
         }
 
         private static void Error(string message)
         {
             Time();
-            Console.WriteLine($" {message}", RED);
+            Console.WriteLine($" {message}", Red);
         }
 
         private static void Info(string message)
         {
             Time();
-            Console.WriteLine($" {message}", PURPLE);
+            Console.WriteLine($" {message}", Purple);
         }
 
         private static void Success(string message)
         {
             Time();
-            Console.WriteLine($" {message}",GREEN);
+            Console.WriteLine($" {message}",Green);
         }
 
         public static void Main()
         {
             Console.Title = "HadesWeb Server";
-            Console.WriteAscii("HadesWeb Server", BLUE);
+            Console.WriteAscii("HadesWeb Server", Blue);
             Info("Initializing Hades Interpreter...");
             _interpreter = new global::Interpreter.Interpreter(new NoOutput(), new NoOutput());
 
@@ -58,11 +60,18 @@ namespace HadesWeb
                 .Select(a => a.Replace("address:", "").Replace(" ", "")).First();
             var port = lines.Where(a => a.StartsWith("port"))
                 .Select(a => a.Replace("port:", "").Replace(" ", "")).First();
+            var browser = bool.Parse(lines.Where(a => a.StartsWith("startBrowser"))
+                .Select(a => a.Replace("startBrowser:", "").Replace(" ", "")).First());
 
             var listener = new HttpListener();
             listener.Prefixes.Add($"http://{address}:{port}/");
             Info($"Listening @ {address} on port {port}");
             listener.Start();
+
+            if (browser)
+            {
+                OpenUrl($"http://{address}:{port}/");
+            }
 
             while (true)
             {
@@ -126,6 +135,35 @@ namespace HadesWeb
             Error($"Error while handling request - file {file} does not exist!");
             response.StatusCode = 500;
             return new byte[1];
+        }
+
+        private static void OpenUrl(string url)
+        {
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
     }
 }
