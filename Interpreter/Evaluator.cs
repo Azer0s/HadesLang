@@ -1271,7 +1271,7 @@ namespace Interpreter
 
                     MethodInfo mi = (variable as Library).LibObject.GetType().GetMethod(methodGroups[1]);
 
-                    var args = methodGroups[2].StringSplit(',', new[] { '\'', '[', ']', '(', ')' }).ToArray();
+                    var args = methodGroups[2].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}'}).ToArray();
 
                     for (var i = 0; i < args.Length; i++)
                     {
@@ -1281,9 +1281,9 @@ namespace Interpreter
                     return mi.Invoke((variable as Library).LibObject, args);
                 }
 
-                if (variable is FileInterpreter)
+                if (variable is FileInterpreter fileInterpreter)
                 {
-                    return (variable as FileInterpreter).CallFunction(groups[2], interpreter,scopes);
+                    return fileInterpreter.CallFunction(groups[2], interpreter,scopes);
                 }
                 throw new Exception($"Variable {groups[1]} is not of type object!");
             }
