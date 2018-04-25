@@ -234,6 +234,16 @@ public class RegexCollection
     /// </summary>
     public Regex Optimize { get; set; } = new Regex("^%optimize%",RegexOptions.Compiled);
 
+
+    #region HadesWeb
+
+    /// <summary>
+    /// Finds variables in hdhtml
+    /// </summary>
+    public Regex ViewVariable { get; set; } = new Regex("\\${([\\S]+)}",RegexOptions.Compiled);
+
+    #endregion
+    
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
     /// </summary>
