@@ -147,3 +147,6 @@ end
 * Added params method to get request parameter
 * Added getMethod method to get HTTP method
 * Restructured HadesWeb project
+* Added multithread options to HadesWeb Server
+  * Pass multiple config files
+  * HadesWeb Server will load config and run server in own thread
