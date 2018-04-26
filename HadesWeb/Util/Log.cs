@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using ServiceStack.Redis;
 using Console = Colorful.Console;
 
-namespace HadesWeb
+namespace HadesWeb.Util
 {
     class Log
     {

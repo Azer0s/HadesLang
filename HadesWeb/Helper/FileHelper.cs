@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
+using HadesWeb.Server;
+using HadesWeb.Util;
 using Variables;
-using static HadesWeb.Log;
 
-namespace HadesWeb
+namespace HadesWeb.Helper
 {
     class FileHelper
     {
@@ -16,11 +16,11 @@ namespace HadesWeb
             try
             {
                 returnBytes = File.ReadAllBytes($"wwwroot{file}");
-                Success("Handled request successfully");
+                Log.Success("Handled request successfully");
             }
             catch (Exception e)
             {
-                Error($"Error while handling request - file wwwroot{file} does not exist!");
+                Log.Error($"Error while handling request - file wwwroot{file} does not exist!");
             }
 
             return returnBytes;
@@ -39,17 +39,17 @@ namespace HadesWeb
                     //Cleanup
                     Cache.Instance.Variables = new Dictionary<Meta, IVariable>();
 
-                    Success($"Handled request successfully");
+                    Log.Success($"Handled request successfully");
                     return code.Item1;
                 }
                 catch (Exception e)
                 {
-                    Error($"Error while handling request - /{file}");
+                    Log.Error($"Error while handling request - /{file}");
                     response.StatusCode = 500;
                     return new byte[1];
                 }
             }
-            Error($"Error while handling request - file {file} does not exist!");
+            Log.Error($"Error while handling request - file {file} does not exist!");
             response.StatusCode = 500;
             return new byte[1];
         }

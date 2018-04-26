@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using Colorful;
 using Interpreter;
 using Output;
 using StringExtension;
-using Variables;
 
-namespace HadesWeb
+namespace HadesWeb.Server
 {
     public class ViewEngine
     {

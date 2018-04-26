@@ -12,7 +12,7 @@
     <ProjectReference Include="..\Output\Output.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="config">
+    <None Update="config.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wwwroot\controller\folder\hello.hd">

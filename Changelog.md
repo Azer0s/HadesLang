@@ -141,3 +141,9 @@ end
   ```
 
   ​
+
+**<u>26/04/2018</u>**
+
+* Added params method to get request parameter
+* Added getMethod method to get HTTP method
+* Restructured HadesWeb project

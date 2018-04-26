@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
 
-namespace HadesWeb
+namespace HadesWeb.Helper
 {
     class BrowserHelper
     {

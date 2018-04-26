@@ -95,7 +95,7 @@ namespace Interpreter
             Console.WriteLine("||", LightYellow);
             Console.WriteLine("     =======================================================", LightYellow);
             Console.WriteLine();
-            Thread.Sleep(2000);
+            Thread.Sleep(1500);
             Console.Clear();
 
             Console.WriteAscii(" HadesLang", Purple);
@@ -118,7 +118,7 @@ namespace Interpreter
             Console.WriteLine("||", LightYellow);
             Console.WriteLine("     =======================================================", LightYellow);
             Console.WriteLine();
-            Thread.Sleep(200);
+            Thread.Sleep(90);
             Console.Clear();
 
             Console.WriteAscii(" HadesLang", Purple);
@@ -141,7 +141,7 @@ namespace Interpreter
             Console.WriteLine("||", LightYellow);
             Console.WriteLine("     =======================================================", LightYellow);
             Console.WriteLine();
-            Thread.Sleep(200);
+            Thread.Sleep(90);
             Console.Clear();
 
             Console.WriteAscii(" HadesLang", Purple);
@@ -164,7 +164,7 @@ namespace Interpreter
             Console.WriteLine("||", LightYellow);
             Console.WriteLine("     =======================================================", LightYellow);
             Console.WriteLine();
-            Thread.Sleep(200);
+            Thread.Sleep(90);
             Console.Clear();
 
             Console.WriteAscii(" HadesLang", Purple);
@@ -187,7 +187,7 @@ namespace Interpreter
             Console.WriteLine("||", LightYellow);
             Console.WriteLine("     =======================================================", LightYellow);
             Console.WriteLine();
-            Thread.Sleep(200);
+            Thread.Sleep(90);
             Console.Clear();
 
             Console.WriteAscii(" HadesLang", Purple);
@@ -210,7 +210,7 @@ namespace Interpreter
             Console.WriteLine("||", LightYellow);
             Console.WriteLine("     =======================================================", LightYellow);
             Console.WriteLine();
-            Thread.Sleep(200);
+            Thread.Sleep(90);
             Console.Clear();
 
             Console.WriteAscii(" HadesLang", Purple);
@@ -233,7 +233,7 @@ namespace Interpreter
             Console.WriteLine("||", LightYellow);
             Console.WriteLine("     =======================================================", LightYellow);
             Console.WriteLine();
-            Thread.Sleep(200);
+            Thread.Sleep(90);
             Console.Clear();
 
             Console.WriteAscii(" HadesLang", Purple);

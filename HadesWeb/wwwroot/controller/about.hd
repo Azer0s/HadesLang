@@ -1,5 +1,9 @@
 title as word = 'About page'
-heading as word = 'My simple heading'
+heading as word = param:['title']
+if[$heading is '']
+	heading = 'My simple heading'
+end
+
 y as word[*] = {'Hello world','Hi from hades','Print in browser'}
 
 put 200
