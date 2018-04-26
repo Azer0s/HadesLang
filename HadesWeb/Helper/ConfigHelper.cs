@@ -20,8 +20,8 @@ namespace HadesWeb.Helper
         private static string _port;
         private static bool _browser;
         private static string _routingFile;
-        private static readonly Dictionary<string, string> _routes = new Dictionary<string, string>();
-        private static readonly List<string> _forward = new List<string>();
+        private static Dictionary<string, string> _routes = new Dictionary<string, string>();
+        private static List<string> _forward = new List<string>();
 
         #endregion
 
@@ -40,7 +40,7 @@ namespace HadesWeb.Helper
 
         private ConfigHelper(){}
 
-        public static ConfigHelper BuildConfig()
+        public static ConfigHelper BuildConfig(string config)
         {
             _interpreter = new global::Interpreter.Interpreter(new NoOutput(), new NoOutput());
 
@@ -84,7 +84,7 @@ namespace HadesWeb.Helper
                 return "true";
             }));
 
-            _interpreter.InterpretLine("with config", new List<string> { }, null);
+            _interpreter.InterpretLine($"with '{config}'", new List<string> { }, null);
 
             if (_log)
             {
@@ -199,7 +199,7 @@ namespace HadesWeb.Helper
             }
 
             #endregion
-
+            
             return new ConfigHelper
             {
                 Address = _address,
@@ -211,6 +211,18 @@ namespace HadesWeb.Helper
                 RoutingEnabled = _routingEnabled,
                 RoutingFile = _routingFile
             };
+        }
+
+        public static void Reset()
+        {
+            _interpreter = null;
+            _routingEnabled = false;
+            _address = null;
+            _port = null;
+            _browser = false;
+            _routingFile = null;
+            _routes = new Dictionary<string, string>();
+            _forward = new List<string>();
         }
     }
 }
