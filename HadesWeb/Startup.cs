@@ -15,29 +15,9 @@ namespace HadesWeb
 
         public void Start()
         {
-            var configs = new List<ConfigHelper>();
-
-            if (_args.Length == 0)
-            {
-                configs.Add(ConfigHelper.BuildConfig("config.hd"));
-            }
-            else
-            {
-                foreach (var s in _args)
-                {
-                    configs.Add(ConfigHelper.BuildConfig(s));
-                    ConfigHelper.Reset();
-                }
-            }
-
-            foreach (var cfg in configs)
-            {
-                var server = new Server.Server(cfg.Address, cfg.Port, cfg.RoutingEnabled, cfg.Browser, cfg.Interpreter, cfg.Routes, cfg.Forward);
-                Task.Run(() =>
-                {
-                    server.Start();
-                });
-            }
+            var cfg = _args.Length == 0 ? ConfigHelper.BuildConfig("config.hd") : ConfigHelper.BuildConfig(_args[0]);
+            var server = new Server.Server(cfg.Address, cfg.Port, cfg.RoutingEnabled, cfg.Browser, cfg.Interpreter, cfg.Routes, cfg.Forward);
+            server.Start();
         }
     }
 }

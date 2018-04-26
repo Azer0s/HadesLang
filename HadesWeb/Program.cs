@@ -12,11 +12,6 @@ namespace HadesWeb
             Title();
             var startup = new Startup(args);
             startup.Start();
-
-            while (true)
-            {
-                Console.ReadKey();
-            }
             // ReSharper disable once FunctionNeverReturns
         }
 

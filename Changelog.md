@@ -150,3 +150,4 @@ end
 * Added multithread options to HadesWeb Server
   * Pass multiple config files
   * HadesWeb Server will load config and run server in own thread
+* Removed multithread support again
