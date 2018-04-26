@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using HadesWeb.Helper;
 using Output;
 using ServiceStack.Redis;
@@ -15,7 +16,7 @@ namespace HadesWeb
 {
     class Program
     {
-        public static void Main()
+        public static void Main(string[] args)
         {
             Console.Clear();
             Console.Title = "HadesWeb Server";
@@ -31,9 +32,33 @@ namespace HadesWeb
 
             Info("Initializing Hades Interpreter...");
 
-            var cfg = ConfigHelper.BuildConfig();
-            var server = new Server.Server(cfg.Address,cfg.Port,cfg.RoutingEnabled,cfg.Browser,cfg.Interpreter,cfg.Routes,cfg.Forward);
-            server.Start();
+            if (args.Length == 0)
+            {
+                var cfg = ConfigHelper.BuildConfig("config.hd");
+                var server = new Server.Server(cfg.Address,cfg.Port,cfg.RoutingEnabled,cfg.Browser,cfg.Interpreter,cfg.Routes,cfg.Forward);
+                server.Start();
+            }
+            else
+            {
+                var configs = new List<ConfigHelper>();
+                
+                foreach (var s in args)
+                {
+                    configs.Add(ConfigHelper.BuildConfig(s));
+                    ConfigHelper.Reset();
+                }
+
+                foreach (var cfg in configs)
+                {
+                    var server = new Server.Server(cfg.Address,cfg.Port,cfg.RoutingEnabled,cfg.Browser,cfg.Interpreter,cfg.Routes,cfg.Forward);
+                    Task.Run(() =>
+                    {
+                        server.Start();
+                    });
+                }
+            }
+
+            Console.ReadKey();
             // ReSharper disable once FunctionNeverReturns
         }
     }
