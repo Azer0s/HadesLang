@@ -18,7 +18,7 @@ namespace HadesWeb.Helper
                 returnBytes = File.ReadAllBytes($"wwwroot{file}");
                 Log.Success("Handled request successfully");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Log.Error($"Error while handling request - file wwwroot{file} does not exist!");
             }
@@ -42,7 +42,7 @@ namespace HadesWeb.Helper
                     Log.Success($"Handled request successfully");
                     return code.Item1;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Log.Error($"Error while handling request - /{file}");
                     response.StatusCode = 500;

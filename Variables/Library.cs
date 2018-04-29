@@ -1,4 +1,6 @@
-﻿namespace Variables
+﻿#pragma warning disable 168
+
+namespace Variables
 {
     public class Library : IVariable
     {

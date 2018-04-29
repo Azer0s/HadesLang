@@ -60,7 +60,7 @@ namespace HadesWeb.Server
                     var returnString = request.QueryString[parameters[0].ToString().Trim('\'').Trim()];
                     return string.IsNullOrEmpty(returnString) ? "''" : $"'{returnString}'";
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return "''";
                 }
