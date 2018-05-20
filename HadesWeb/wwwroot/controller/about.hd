@@ -5,5 +5,9 @@ if[$heading is '']
 end
 
 y as word[*] = {'Hello world','Hi from hades','Print in browser'}
+cond as bit = true
+world as word = 'World'
+ayy as word = 'ayy'
+
 
 put 200
