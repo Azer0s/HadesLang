@@ -151,3 +151,23 @@ end
   * Pass multiple config files
   * HadesWeb Server will load config and run server in own thread
 * Removed multithread support again
+
+**<u>20/05/2018</u>**
+
+* Added conditions in hdtml
+
+  ```html
+  <if:$cond>
+      <p>
+          ${hello} world
+      </p>
+  </if>
+  
+  <unless:inv $cond>
+      <p>
+          ayy ${name}!
+      </p>
+  </unless>
+  ```
+
+  
