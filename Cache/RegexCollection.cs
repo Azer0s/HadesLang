@@ -253,9 +253,17 @@ public class RegexCollection
     /// Checks if a string has an extension
     /// </summary>
     public Regex HasExtension { get; set; } = new Regex(".+\\..+", RegexOptions.Compiled);
+    /// <summary>
+    /// Executes if in hdhtml
+    /// </summary>
+    public Regex ViewIf { get; set; } = new Regex("^<(if|unless): *(.*)>$", RegexOptions.Compiled);
+    /// <summary>
+    /// Ends if condition in hdhtml
+    /// </summary>
+    public Regex ViewEndIf { get; set; } = new Regex("^</(if|unless)>$",RegexOptions.Compiled);
 
     #endregion
-    
+
     /// <summary>
     /// Prevents a default instance of the <see cref="RegexCollection"/> class from being created.
     /// </summary>

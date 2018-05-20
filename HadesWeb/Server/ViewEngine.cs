@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Interpreter;
 using Output;
 using StringExtension;
@@ -77,17 +78,7 @@ namespace HadesWeb.Server
                     //For-loops
                     if (RegexCollection.Store.ViewFor.IsMatch(view[i]))
                     {
-                        var end = -1;
-                        for (var j = i; j < view.Count; j++)
-                        {
-                            if (RegexCollection.Store.ViewEndFor.IsMatch(view[j]))
-                            {
-                                end = j;
-                                goto continueForLoop;
-                            }
-                        }
-
-                        continueForLoop:;
+                        var end = GetEnd(RegexCollection.Store.ViewEndFor, view, i);
 
                         if (end != -1)
                         {
@@ -126,7 +117,46 @@ namespace HadesWeb.Server
                             continue;
                         }
 
-                        return (Encoding.UTF8.GetBytes($"Invalid for loop at line {i}!"), 500);
+                        return (Encoding.UTF8.GetBytes($"Invalid for loop (Line: {i})!"), 500);
+                    }
+
+                    //If condition
+                    if (RegexCollection.Store.ViewIf.IsMatch(view[i]))
+                    {
+                        var end = GetEnd(RegexCollection.Store.ViewEndIf, view, i);
+                        var guid = Guid.NewGuid().ToString();
+                        var scopes = new List<string> { guid, fi.FAccess };
+
+                        if (end != -1)
+                        {
+                            var ifexecution = view.Skip(i + 1).Take(end - i - 1);
+                            var groups = RegexCollection.Store.ViewIf.Match(view[i]).Groups.Select(a => a.Value)
+                                .ToList();
+                            var isIf = groups[1] == "if";
+                            var condition = groups[2];
+                            var newLines = new List<string>();
+
+                            if (bool.TryParse(interpreter.InterpretLine(condition,scopes, null), out var result))
+                            {
+                                if ((isIf && result) || (!isIf && !result))
+                                {
+                                    newLines.AddRange(ifexecution.Select(s => ReplaceVariables(s, interpreter, fi, scopes)));
+                                }
+                            }
+                            else
+                            {
+                                return (Encoding.UTF8.GetBytes($"Condition yields invalid result (Line: {i})!"), 500);
+                            }
+
+                            view.RemoveRange(i, end - i + 1);
+                            view.InsertRange(i, newLines);
+                            i = i + newLines.Count;
+
+                            interpreter.Evaluator.Unload("all", new List<string> { guid });
+                            continue;
+                        }
+
+                        return (Encoding.UTF8.GetBytes($"Invalid condition (Line: {i})!"), 500);
                     }
 
                     view[i] = ReplaceVariables(view[i], interpreter, fi, new List<string>{"web"});
@@ -136,6 +166,22 @@ namespace HadesWeb.Server
             }
 
             return (new byte[]{}, 500);
+        }
+
+        private static int GetEnd(Regex endReg, List<string> view, int start)
+        {
+            var end = -1;
+            for (var j = start; j < view.Count; j++)
+            {
+                if (endReg.IsMatch(view[j]))
+                {
+                    end = j;
+                    goto continueForLoop;
+                }
+            }
+
+            continueForLoop:;
+            return end;
         }
 
         private static string ReplaceVariables(string line, Interpreter.Interpreter interpreter, FileInterpreter fi, List<string> scopes)
