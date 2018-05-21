@@ -1,4 +1,4 @@
-﻿%import wwwroot/view/head.html%
+﻿%import-load https://raw.githubusercontent.com/Azer0s/HadesLang/master/HadesWeb/wwwroot/view/head.html%
 
 <body>
 

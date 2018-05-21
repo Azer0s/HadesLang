@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -126,6 +127,44 @@ namespace Interpreter
                         else
                         {
                             throw new Exception($"Invalid import directive {directive}");
+                        }
+                    }
+                }
+
+                //Import load
+                while (Lines.Any(a => RegexCollection.Store.ImportLoad.IsMatch(a)))
+                {
+                    var directives = Lines.Where(a => RegexCollection.Store.ImportLoad.IsMatch(a)).Select(a => a)
+                        .ToList();
+
+                    foreach (var directive in directives)
+                    {
+                        if (RegexCollection.Store.ImportLoad.IsMatch(directive))
+                        {
+                            var importPath = RegexCollection.Store.ImportLoad.Match(directive).Groups[1].Value;
+                            List<string> importedLines;
+                            try
+                            {
+                                importedLines = new HttpClient()
+                                    .GetAsync(importPath).Result
+                                    .Content.ReadAsStringAsync()
+                                    .Result.Split('\n').ToList();
+                            }
+                            catch (Exception)
+                            {
+                                throw new Exception($"URL {importPath} could not be opened!");
+                            }
+
+                            if (importedLines.Count > 0)
+                            {
+                                Lines.InsertRange(Lines.IndexOf(directive), importedLines);
+                            }
+
+                            Lines.Remove(directive);
+                        }
+                        else
+                        {
+                            throw new Exception($"Invalid import-load directive {directive}");
                         }
                     }
                 }

@@ -1,0 +1,3 @@
+﻿%import-load https://raw.githubusercontent.com/Azer0s/HadesLang/master/HadesLang/fibrec.hd%
+
+put fib:[10]
