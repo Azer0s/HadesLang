@@ -170,4 +170,15 @@ end
   </unless>
   ```
 
-  
+
+**<u>21/05/2018</u>**
+
+* Added importload
+
+  * Imports a HadesScript from a URL
+
+    ```asm
+    %import-load https://raw.githubusercontent.com/Azer0s/HadesLang/master/HadesLang/fibrec.hd%
+    ```
+
+  * Can also be used in HadesWeb

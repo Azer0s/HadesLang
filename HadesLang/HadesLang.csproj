@@ -22,6 +22,9 @@
     <None Update="fibrec.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="importload.hd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="iterate.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

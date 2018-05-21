@@ -14,11 +14,13 @@ namespace Testing
     {
         private readonly Interpreter.Interpreter inter = new Interpreter.Interpreter(new ConsoleOutput(), new ConsoleOutput());
         private readonly string _prefix = string.Format("..{0}..{0}..{0}..{0}HadesLang{0}", Path.DirectorySeparatorChar);
+        // ReSharper disable once InconsistentNaming
+        private readonly List<string> SCOPE = new List<string> {"testing"};
 
         [TearDown]
         public void TearDown()
         {
-            inter.InterpretLine("dumpVars:all", new List<string> {"testing"}, null, true);
+            inter.InterpretLine("dumpVars:all", SCOPE, null, true);
             inter.InterpretLine("uload:all", new List<string>{"testing"}, null);
             inter.InterpretLine("dumpVars:all", new List<string> { "testing" }, null, true);
             inter.ShouldError(false);
@@ -28,6 +30,12 @@ namespace Testing
         public void AddTest()
         {
             Assert.AreEqual("15", inter.InterpretLine("10+5", new List<string>{"testing"}, null));
+        }
+
+        [Test]
+        public void ImportLoadTest()
+        {
+            Assert.AreEqual("23",inter.InterpretLine($"with '{new FileInfo(_prefix + "importload.hd").FullName}'", new List<string> { "testing" },null));
         }
 
         [Test]
@@ -57,7 +65,7 @@ namespace Testing
         [Test]
         public void FibTest()
         {
-            inter.InterpretLine($"with '{new FileInfo(_prefix + "fib.hd").FullName}' as a", new List<string> {"testing"}, null);
+            inter.InterpretLine($"with '{new FileInfo(_prefix + "fib.hd").FullName}' as a", SCOPE, null);
             Assert.AreEqual("5",inter.InterpretLine("$a->test:[]", new List<string> { "testing" }, null));
         }
 
@@ -165,11 +173,11 @@ namespace Testing
         [Test]
         public void ReflectionTest()
         {
-            inter.InterpretLine("b as num", new List<string> {"testing"}, null);
-            inter.InterpretLine("d as bit", new List<string> {"testing"}, null);
+            inter.InterpretLine("b as num", SCOPE, null);
+            inter.InterpretLine("d as bit", SCOPE, null);
             inter.InterpretLine("c as word = 'HELLO'", new List<string> { "testing" }, null);
-            inter.InterpretLine("a as word[*] = getfields:[]", new List<string> {"testing"}, null);
-            inter.InterpretLine("f as word = #a[2]", new List<string> {"testing"}, null);
+            inter.InterpretLine("a as word[*] = getfields:[]", SCOPE, null);
+            inter.InterpretLine("f as word = #a[2]", SCOPE, null);
             Assert.AreEqual("'HELLO'", inter.InterpretLine("out:f", new List<string> { "testing" }, null));
         }
 
@@ -189,16 +197,16 @@ namespace Testing
         public void UntypedTest(string value)
         {
             inter.ShouldError(true);
-            inter.InterpretLine("a as *", new List<string> {"testing"}, null);
-            inter.InterpretLine($"a = {value}", new List<string> {"testing"}, null);
+            inter.InterpretLine("a as *", SCOPE, null);
+            inter.InterpretLine($"a = {value}", SCOPE, null);
         }
 
         [Test]
         public void UntypedObject()
         {
-            inter.InterpretLine("a as *", new List<string> {"testing"}, null);
-            inter.InterpretLine($"with \'{new FileInfo(_prefix + "fibrec.hd").FullName}\' as b", new List<string> {"testing"}, null);
-            inter.InterpretLine("a = b", new List<string> {"testing"}, null);
+            inter.InterpretLine("a as *", SCOPE, null);
+            inter.InterpretLine($"with \'{new FileInfo(_prefix + "fibrec.hd").FullName}\' as b", SCOPE, null);
+            inter.InterpretLine("a = b", SCOPE, null);
             Assert.IsTrue(inter.InterpretLine("a", new List<string> { "testing" }, null).StartsWith("obj"));
         }
     }

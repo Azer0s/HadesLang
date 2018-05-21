@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using Interpreter;
@@ -64,6 +65,44 @@ namespace HadesWeb.Server
                         else
                         {
                             return (Encoding.UTF8.GetBytes($"Invalid import directive {directive}"), 500);
+                        }
+                    }
+                }
+
+                //Import load
+                while (view.Any(a => RegexCollection.Store.ImportLoad.IsMatch(a)))
+                {
+                    var directives = view.Where(a => RegexCollection.Store.ImportLoad.IsMatch(a)).Select(a => a)
+                        .ToList();
+
+                    foreach (var directive in directives)
+                    {
+                        if (RegexCollection.Store.ImportLoad.IsMatch(directive))
+                        {
+                            var importPath = RegexCollection.Store.ImportLoad.Match(directive).Groups[1].Value;
+                            List<string> importedLines;
+                            try
+                            {
+                                importedLines = new HttpClient()
+                                    .GetAsync(importPath).Result
+                                    .Content.ReadAsStringAsync()
+                                    .Result.Split('\n').ToList();
+                            }
+                            catch (Exception)
+                            {
+                                return (Encoding.UTF8.GetBytes($"URL {importPath} could not be opened!"), 500);
+                            }
+
+                            if (importedLines.Count > 0)
+                            {
+                                view.InsertRange(view.IndexOf(directive), importedLines);
+                            }
+
+                            view.Remove(directive);
+                        }
+                        else
+                        {
+                            return (Encoding.UTF8.GetBytes($"Invalid import-load directive {directive}"), 500);
                         }
                     }
                 }

@@ -198,6 +198,11 @@ public class RegexCollection
     /// </summary>
     public Regex Import { get; set; } = new Regex("^%import +(.*)%$", RegexOptions.Compiled);
     /// <summary>
+    /// Import from URL
+    /// </summary>
+    public Regex ImportLoad { get; set; } = new Regex("^%import-load +(.*)%$", RegexOptions.Compiled);
+
+    /// <summary>
     /// Regex for simple // comment
     /// </summary>
     public Regex SingleLineComment { get; set; } = new Regex("\\/\\/.*", RegexOptions.Compiled);
