@@ -16,7 +16,7 @@ namespace HadesWeb
         public void Start()
         {
             var cfg = _args.Length == 0 ? ConfigHelper.BuildConfig("config.hd") : ConfigHelper.BuildConfig(_args[0]);
-            var server = new Server.Server(cfg.Address, cfg.Port, cfg.RoutingEnabled, cfg.Browser, cfg.Interpreter, cfg.Routes, cfg.Forward);
+            var server = new Server.Server(cfg.Address, cfg.Port, cfg.RoutingEnabled, cfg.Browser, cfg.Interpreter, cfg.Routes, cfg.Forward,cfg.Static);
             server.Start();
         }
     }

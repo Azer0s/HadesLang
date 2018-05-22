@@ -1,6 +1,6 @@
 ﻿config:['address','localhost']
 config:['port', '5679']
-config:['startBrowser', 'true']
+config:['startBrowser', true]
 config:['routing', 'main.hd']
-config:['log', 'false']
+config:['log', false]
 config:['redis', 'localhost:6379']

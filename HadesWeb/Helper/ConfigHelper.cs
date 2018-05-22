@@ -22,6 +22,7 @@ namespace HadesWeb.Helper
         private static string _routingFile;
         private static Dictionary<string, string> _routes = new Dictionary<string, string>();
         private static List<string> _forward = new List<string>();
+        private static List<string> _static = new List<string>();
 
         #endregion
 
@@ -35,6 +36,7 @@ namespace HadesWeb.Helper
         public string RoutingFile { get; set; }
         public Dictionary<string, string> Routes { get; set; }
         public List<string> Forward { get; set; }
+        public List<string> Static { get; set; }
 
         #endregion
 
@@ -183,6 +185,25 @@ namespace HadesWeb.Helper
                 return "true";
             }));
 
+            _interpreter.RegisterFunction(new Function("static", a =>
+            {
+                var parameters = a.ToList();
+
+                if (parameters.Count != 1)
+                {
+                    return "false";
+                }
+
+                if (!_static.Contains(parameters[0].ToString()))
+                {
+                    _static.Add(parameters[0].ToString());
+                    return "true";
+
+                }
+
+                return "false";
+            }));
+
             //Check if route config exists
             if (!string.IsNullOrEmpty(_routingFile) && File.Exists(_routingFile))
             {
@@ -209,7 +230,8 @@ namespace HadesWeb.Helper
                 Port = _port,
                 Routes = _routes,
                 RoutingEnabled = _routingEnabled,
-                RoutingFile = _routingFile
+                RoutingFile = _routingFile,
+                Static = _static
             };
         }
 
@@ -223,6 +245,7 @@ namespace HadesWeb.Helper
             _routingFile = null;
             _routes = new Dictionary<string, string>();
             _forward = new List<string>();
+            _static = new List<string>();
         }
     }
 }
