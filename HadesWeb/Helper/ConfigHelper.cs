@@ -197,10 +197,12 @@ namespace HadesWeb.Helper
                 if (!_static.Contains(parameters[0].ToString()))
                 {
                     _static.Add(parameters[0].ToString());
+                    Info($"Added cached route for action {parameters[0]}!");
                     return "true";
 
                 }
 
+                Error($"Can't add cached route for action {parameters[0]}!");
                 return "false";
             }));
 
