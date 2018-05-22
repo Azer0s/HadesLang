@@ -13,8 +13,11 @@ using StringExtension;
 using Variables;
 using static System.String;
 using Microsoft.Extensions.DependencyModel;
-using Function = Variables.Function;
+using Array = Variables.Array;
 using Library = Variables.Library;
+// ReSharper disable RedundantEnumerableCastCall
+// ReSharper disable CoVariantArrayConversion
+// ReSharper disable AssignNullToNotNullAttribute
 
 namespace Interpreter
 {
@@ -47,14 +50,7 @@ namespace Interpreter
 
             Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = scopes[0] }, variable);
 
-            try
-            {
-                return !IsNullOrEmpty(groups[4]) ? AssignToVariable($"{groups[1]} = {groups[4]}", scopes, true, interpreter, file) : $"{groups[1]} is undefined";
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return !IsNullOrEmpty(groups[4]) ? AssignToVariable($"{groups[1]} = {groups[4]}", scopes, true, interpreter, file) : $"{groups[1]} is undefined";
         }
 
         public string CreateArray(string lineToInterprete, List<string> scopes, Interpreter interpreter, FileInterpreter file)
@@ -69,13 +65,13 @@ namespace Interpreter
 
             Cache.Instance.Variables.Add(new Meta { Name = groups[1], Owner = scopes[0] },
                 groups[3] == "*"
-                    ? new Variables.Array(Cache.Instance.GetOrder())
+                    ? new Array(Cache.Instance.GetOrder())
                     {
                         Access = TypeParser.ParseAccessType(groups[4]),
                         DataType = TypeParser.ParseDataType(groups[2]),
                         Values = new Dictionary<int, string>()
                     }
-                    : new Variables.Array(Cache.Instance.GetOrder())
+                    : new Array(Cache.Instance.GetOrder())
                     {
                         Access = TypeParser.ParseAccessType(groups[4]),
                         DataType = TypeParser.ParseDataType(groups[2]),
@@ -83,14 +79,7 @@ namespace Interpreter
                         Capacity = int.Parse(groups[3])
                     });
 
-            try
-            {
-                return !IsNullOrEmpty(groups[5]) ? AssignToArray($"{groups[1]} = {groups[5]}", scopes, interpreter, file) : $"{groups[1]} is undefined";
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            return !IsNullOrEmpty(groups[5]) ? AssignToArray($"{groups[1]} = {groups[5]}", scopes, interpreter, file) : $"{groups[1]} is undefined";
         }
 
         private string AssignToArray(string s, List<string> scopes, Interpreter interpreter, FileInterpreter file)
@@ -188,12 +177,12 @@ namespace Interpreter
                 {
                     position = int.Parse(interpreter.InterpretLine(groups[2], scopes, file));
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     interpreter.SetOutput(output.output, output.eOutput);
                     interpreter.MuteOut = false;
 
-                    throw e;
+                    throw;
                 }
 
                 if (datatypeFromVariable == DataTypes.WORD)
@@ -202,12 +191,12 @@ namespace Interpreter
                     {
                         SetArrayAtPos(groups[1], scopes, $"'{groups[3].TrimStart('\'').TrimEnd('\'')}'", position);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         interpreter.SetOutput(output.output, output.eOutput);
                         interpreter.MuteOut = false;
 
-                        throw e;
+                        throw;
                     }
                 }
                 else if (datatypeFromData == DataTypes.NUM && datatypeFromVariable == DataTypes.DEC)
@@ -216,12 +205,12 @@ namespace Interpreter
                     {
                         SetArrayAtPos(groups[1], scopes, $"{groups[3].Replace(" ", "")}.0", position);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         interpreter.SetOutput(output.output, output.eOutput);
                         interpreter.MuteOut = false;
 
-                        throw e;
+                        throw;
                     }
                 }
                 else if (datatypeFromData == datatypeFromVariable)
@@ -230,12 +219,12 @@ namespace Interpreter
                     {
                         SetArrayAtPos(groups[1], scopes, groups[3], position);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         interpreter.SetOutput(output.output, output.eOutput);
                         interpreter.MuteOut = false;
 
-                        throw e;
+                        throw;
                     }
                 }
                 else
@@ -260,13 +249,13 @@ namespace Interpreter
 
         private void SetArrayAtPos(string name, List<string> scopes, string value, int position)
         {
-            Variables.Array variable;
+            Array variable;
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL))
             {
                 var reachableAllVar =
                     Cache.Instance.Variables.First(a => a.Key.Name == name &&
                                                         a.Value.Access == AccessTypes.GLOBAL);
-                variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
+                variable = Cache.Instance.Variables[reachableAllVar.Key] as Array;
             }
             else
             {
@@ -285,7 +274,7 @@ namespace Interpreter
                 
                 if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == owner))
                 {
-                    variable = Cache.Instance.Variables[new Meta { Name = name, Owner = owner }] as Variables.Array;
+                    variable = Cache.Instance.Variables[new Meta { Name = name, Owner = owner }] as Array;
                 }
                 else
                 {
@@ -313,11 +302,11 @@ namespace Interpreter
 
         private bool SetArray(string name, List<string> scopes, Dictionary<int, string> values)
         {
-            Variables.Array variable = null;
+            Array variable = null;
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL))
             {
                 var reachableAllVar = Cache.Instance.Variables.First(a => a.Key.Name == name && a.Value.Access == AccessTypes.GLOBAL);
-                variable = Cache.Instance.Variables[reachableAllVar.Key] as Variables.Array;
+                variable = Cache.Instance.Variables[reachableAllVar.Key] as Array;
             }
             var owner = Empty;
 
@@ -333,7 +322,7 @@ namespace Interpreter
             }
             if (Cache.Instance.Variables.Any(a => a.Key.Name == name && a.Key.Owner == owner))
             {
-                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = owner }] as Variables.Array;
+                variable = Cache.Instance.Variables[new Meta { Name = name, Owner = owner }] as Array;
             }
 
             if (variable != null)
@@ -398,11 +387,11 @@ namespace Interpreter
             {
                 var variable = GetVariable(match.Groups[1].Value.TrimStart('$'), scopes);
 
-                if (variable is Variable)
+                if (variable is Variable variable1)
                 {
-                    lineToInterprete = lineToInterprete.Replace(match.Groups[1].Value, (variable as Variable).Value);
+                    lineToInterprete = lineToInterprete.Replace(match.Groups[1].Value, variable1.Value);
                 }
-                else if (variable is Variables.Array)
+                else if (variable is Array)
                 {
                     if (RegexCollection.Store.ArrayVariable.IsMatch(match.Value))
                     {
@@ -418,7 +407,7 @@ namespace Interpreter
                     throw new Exception($"Variable {match.Value} is an object!");
                 }
             }
-            return stringDict.Aggregate(lineToInterprete, (current, variable) => current.Replace(variable.Key, variable.Value)); ;
+            return stringDict.Aggregate(lineToInterprete, (current, variable) => current.Replace(variable.Key, variable.Value));
         }
 
         public string GetArrayValue(string name, List<string> scopes, Interpreter interpreter, FileInterpreter file)
@@ -426,7 +415,7 @@ namespace Interpreter
             var groups = RegexCollection.Store.ArrayVariable.Match(name).Groups;
             var variable = GetVariable(groups[1].Value.TrimStart('$'), scopes);
 
-            if (variable is Variables.Array)
+            if (variable is Array array)
             {
                 var output = interpreter.GetOutput();
                 var index = -1;
@@ -434,7 +423,7 @@ namespace Interpreter
                 {
                     interpreter.SetOutput(new NoOutput(), output.output);
                     index = int.Parse(interpreter.InterpretLine(groups[2].Value, scopes, file));
-                    var value = (variable as Variables.Array).Values[index];
+                    var value = array.Values[index];
 
                     return value;
                 }
@@ -592,7 +581,7 @@ namespace Interpreter
                     success = SetVariable(groups[1].Value, result, scopes);
                     result = "object";
                 }
-                else if (variable is Variables.Array)
+                else if (variable is Array)
                 {
                     return AssignToArray(lineToInterprete,scopes, interpreter, file);
                 }
@@ -643,13 +632,13 @@ namespace Interpreter
             {
                 var varFromCache = Cache.Instance.Variables[new Meta {Name = name, Owner = owner}];
 
-                if (varFromCache is Variable)
+                if (varFromCache is Variable variable1)
                 {
-                    variable = varFromCache as Variable;
+                    variable = variable1;
                 }
-                else if(varFromCache is FileInterpreter)
+                else if(varFromCache is FileInterpreter interpreter)
                 {
-                    variable = varFromCache as FileInterpreter;
+                    variable = interpreter;
                 }
             }
 
@@ -660,10 +649,10 @@ namespace Interpreter
                 {
                     ((Variable)variable).Value = value;
                     // ReSharper disable once UseNullPropagation
-                }else if (variable is FileInterpreter)
+                }else if (variable is FileInterpreter interpreter)
                 {
                     var key = value.Replace("obj", "");
-                    ((FileInterpreter) variable).Set(Cache.Instance.FileCache[key] as FileInterpreter);
+                    interpreter.Set(Cache.Instance.FileCache[key] as FileInterpreter);
                     Cache.Instance.FileCache.Remove(key);
                 }
                 return true;
@@ -793,14 +782,7 @@ namespace Interpreter
 
             if (Cache.Instance.EraseVars)
             {
-                try
-                {
-                    Unload("all", new List<string>{path});
-                }
-                catch (Exception e)
-                {
-                    throw e;
-                }
+                Unload("all", new List<string>{path});
             }
 
             return result.Value;
@@ -840,11 +822,11 @@ namespace Interpreter
                 }
             }
 
-            if (obj is FileInterpreter && Cache.Instance.EraseVars)
+            if (obj is FileInterpreter interpreter && Cache.Instance.EraseVars)
             {
                 if (!RegexCollection.Store.GUID.IsMatch(owner))
                 {
-                    Unload("all", new List<string>{(obj as FileInterpreter).FAccess});
+                    Unload("all", new List<string>{interpreter.FAccess});
                 }
                 else
                 {
@@ -876,17 +858,17 @@ namespace Interpreter
             varname = $"${varname.TrimStart('$')}";
             var varObj = GetVariable(obj,scopes);
 
-            if (varObj is FileInterpreter)
+            if (varObj is FileInterpreter fileInterpreter)
             {
                 IVariable fileVariable = null;
                 var arrayValue = Empty;
                 if (RegexCollection.Store.ArrayVariable.IsMatch(varname))
                 {
-                    arrayValue = GetArrayValue(varname, new List<string>{(varObj as FileInterpreter).FAccess }, interpreter, varObj as FileInterpreter);
+                    arrayValue = GetArrayValue(varname, new List<string>{fileInterpreter.FAccess }, interpreter, fileInterpreter);
                 }
                 else
                 {
-                    fileVariable = GetVariable(varname.TrimStart('$'), new List<string> { (varObj as FileInterpreter).FAccess });
+                    fileVariable = GetVariable(varname.TrimStart('$'), new List<string> { fileInterpreter.FAccess });
                 }
 
                 if (fileVariable != null)
@@ -896,14 +878,13 @@ namespace Interpreter
                         throw new Exception($"The access to variable {varname} was denied!");
                     }
 
-                    if (fileVariable is Variable)
+                    if (fileVariable is Variable variable)
                     {
-                        return (fileVariable as Variable).Value;
+                        return variable.Value;
                     }
 
                     var output = interpreter.GetOutput();
                     interpreter.SetOutput(new NoOutput(), output.eOutput);
-                    var fileInterpreter = varObj as FileInterpreter;
                     var result = interpreter.InterpretLine(varname, new List<string> { fileInterpreter.FAccess }, fileInterpreter);
                     interpreter.SetOutput(output.output, output.eOutput);
                     return result;
@@ -927,9 +908,8 @@ namespace Interpreter
                         ? $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=undefined\n"
                         : $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}={kvpAsVar.Value}\n");
                 }
-                else if (keyValuePair.Value is Variables.Array)
+                else if (keyValuePair.Value is Array kvpAsArray)
                 {
-                    var kvpAsArray = (Variables.Array)keyValuePair.Value;
                     sb.Append(kvpAsArray.Values.Count == 0
                         ? $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}=undefined\n"
                         : $"{keyValuePair.Key.Name}@{keyValuePair.Key.Owner}={kvpAsArray.Values.Select(a => $"\n    [{a.Key}]:{a.Value}").Aggregate(Empty, (current, s) => current + s)}\n");
@@ -986,7 +966,7 @@ namespace Interpreter
             {
                 throw new Exception(exist.Message);
             }
-            var path = string.Format($"{Cache.Instance.LibraryLocation}{{0}}{fn}.dll",Path.DirectorySeparatorChar);
+            var path = Format($"{Cache.Instance.LibraryLocation}{{0}}{fn}.dll",Path.DirectorySeparatorChar);
 
             if (!File.Exists(path))
             {
@@ -1057,11 +1037,11 @@ namespace Interpreter
             {
                 lineToInterprete = ReplaceWithVars(lineToInterprete, scopes, interpreter, file);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (!lineToInterprete.Contains("->"))
                 {
-                    throw e;
+                    throw;
                 }
             }
 
@@ -1147,7 +1127,7 @@ namespace Interpreter
                 }
             }
 
-            var result = Empty;
+            string result;
             var ex = new Expression(expressionAsString);
 
             var calc = ex.calculate();
@@ -1206,10 +1186,6 @@ namespace Interpreter
                 result = interpreter.InterpretLine(RegexCollection.Store.Raw.Match(lineToInterprete).Groups[1].Value,
                     scopes, file);
             }
-            catch (Exception e)
-            {
-                throw e;
-            }
             finally
             {
                 interpreter.SetOutput(output.output, output.eOutput);
@@ -1231,10 +1207,6 @@ namespace Interpreter
             {
                 result = interpreter.InterpretLine(IsNullOrEmpty(groups[1].Value) ? groups[2].Value : groups[1].Value,
                     scopes, file);
-            }
-            catch (Exception e)
-            {
-                throw e;
             }
             finally
             {
@@ -1286,11 +1258,11 @@ namespace Interpreter
             {
                 var variable = GetVariable(groups[1],scopes);
 
-                if (variable is Library)
+                if (variable is Library library)
                 {
                     var methodGroups = RegexCollection.Store.Function.Match(groups[2]).Groups.OfType<Group>().Select(a => a.Value).ToArray();
 
-                    MethodInfo mi = (variable as Library).LibObject.GetType().GetMethod(methodGroups[1]);
+                    MethodInfo mi = library.LibObject.GetType().GetMethod(methodGroups[1]);
 
                     var args = methodGroups[2].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}'}).ToArray();
 
@@ -1299,7 +1271,7 @@ namespace Interpreter
                         args[i] = interpreter.InterpretLine(args[i], scopes, null);
                     }
 
-                    return mi.Invoke((variable as Library).LibObject, args);
+                    return mi.Invoke(library.LibObject, args);
                 }
 
                 if (variable is FileInterpreter fileInterpreter)
@@ -1323,21 +1295,14 @@ namespace Interpreter
             {
                 if (RegexCollection.Store.Alias.IsMatch(alias))
                 {
-                    try
-                    {
-                        var groups = RegexCollection.Store.Alias.Match(alias).Groups.OfType<Group>()
-                            .Select(a => a.Value).ToList();
+                    var groups = RegexCollection.Store.Alias.Match(alias).Groups.OfType<Group>()
+                        .Select(a => a.Value).ToList();
 
-                        if (Cache.Instance.Alias.ContainsKey(groups[2]))
-                        {
-                            return;
-                        }
-                        Add(groups[2],groups[1]);
-                    }
-                    catch (Exception e)
+                    if (Cache.Instance.Alias.ContainsKey(groups[2]))
                     {
-                        throw e;
+                        return;
                     }
+                    Add(groups[2],groups[1]);
 
                     var aliasList = Cache.Instance.Alias.ToList();
                     aliasList.Sort((firstPair, nextPair) => nextPair.Value.Length.CompareTo(firstPair.Value.Length));

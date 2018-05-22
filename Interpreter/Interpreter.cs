@@ -9,7 +9,9 @@ using Output;
 using StringExtension;
 using Variables;
 using static System.String;
+using Array = Variables.Array;
 using Function = Variables.Function;
+// ReSharper disable RedundantEnumerableCastCall
 
 namespace Interpreter
 {
@@ -45,8 +47,8 @@ namespace Interpreter
 
             //Custom default library location
             Cache.Instance.LibraryLocation =
-                File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + string.Format("{0}deflib",Path.DirectorySeparatorChar))
-                    ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + string.Format("{0}deflib",Path.DirectorySeparatorChar))
+                File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Format("{0}deflib",Path.DirectorySeparatorChar))
+                    ? File.ReadAllText(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Format("{0}deflib",Path.DirectorySeparatorChar))
                     : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             if (!Directory.Exists(Cache.Instance.LibraryLocation))
@@ -227,7 +229,7 @@ namespace Interpreter
                     if (RegexCollection.Store.Pipeline.IsMatch(lineToInterprete))
                     {
                         var stringDict = new Dictionary<string, string>();
-                        var tempLine = lineToInterprete.ToString();
+                        var tempLine = lineToInterprete;
 
                         foreach (Match variable in RegexCollection.Store.IsWord.Matches(tempLine))
                         {
@@ -931,7 +933,7 @@ namespace Interpreter
 
         private string GetVarValue(string lineToInterprete, List<string> scopes, IVariable file)
         {
-            IVariable variable = null;
+            IVariable variable;
             try
             {
                 variable = Evaluator.GetVariable(lineToInterprete.TrimStart('$'), scopes);
@@ -942,15 +944,13 @@ namespace Interpreter
                 Error(e);
                 return Empty;
             }
-            if (variable is Variable)
+            if (variable is Variable o1)
             {
-                var o = variable as Variable;
-                Output.WriteLine(o.Value);
-                return o.Value;
+                Output.WriteLine(o1.Value);
+                return o1.Value;
             }
-            if (variable is Variables.Array)
+            if (variable is Array o)
             {
-                var o = variable as Variables.Array;
                 var result = o.Values.Aggregate("{", (current, keyValuePair) => current + $"{keyValuePair.Value},")
                                  .TrimEnd(',') + "}";
                 Output.WriteLine(result);
@@ -1068,7 +1068,7 @@ namespace Interpreter
                     if (RegexCollection.Store.Pipeline.IsMatch(lineToInterprete))
                     {
                         var stringDict = new Dictionary<string, string>();
-                        var tempLine = lineToInterprete.ToString();
+                        var tempLine = lineToInterprete;
 
                         foreach (Match variable in RegexCollection.Store.IsWord.Matches(tempLine))
                         {
@@ -1299,7 +1299,6 @@ namespace Interpreter
             if (RegexCollection.Store.ForceThrough.IsMatch(lineToInterprete))
             {
                 Cache.Instance.CallCache.Add(lineToInterprete, ForceThrough);
-                return;
             }
         }
 
