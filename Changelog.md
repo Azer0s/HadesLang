@@ -182,3 +182,10 @@ end
     ```
 
   * Can also be used in HadesWeb
+
+**<u>22/05/2018</u>**
+
+* Refactored rand and range to be extension functions
+* Implemented length and positionIn function
+* Added option for route caching in HadesWeb
+
