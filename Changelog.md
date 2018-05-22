@@ -188,4 +188,5 @@ end
 * Refactored rand and range to be extension functions
 * Implemented length and positionIn function
 * Added option for route caching in HadesWeb
+* Added docfx documentation
 

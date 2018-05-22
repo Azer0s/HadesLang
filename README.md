@@ -117,5 +117,30 @@ a as num reachable = 18
 uload:a
 ```
 
+# And it even works in the web!
+
+###index.hd
+
+```vb
+title as word = 'Hades in the web is super cool!'
+
+put 200 //Status code for the response
+```
+
+### index.hdhtml
+
+```html
+%import wwwroot/view/head.html%
+
+<div class="jumbotron">
+    <h1>${title}</h1>
+    <p class="lead">HadesWeb is a powerful framework to build web apps in Hades.</p>
+    <p><a class="btn btn-lg btn-success" href="#">Learn more</a></p>
+</div>
+	  
+%import wwwroot/view/bottom.html%
+```
+
 ## Credits
+
 [mXparser](https://github.com/mariuszgromada/MathParser.org-mXparser) by Mariusz Gromada
