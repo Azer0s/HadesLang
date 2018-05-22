@@ -1248,10 +1248,31 @@ namespace Interpreter
 
         #region Custom functions
 
-        public string CallCustomFunction(Group[] groups)
+        public string CallCustomFunction(Group[] groups, Interpreter interpreter, List<string> scopes, FileInterpreter file)
         {
+            var output = interpreter.GetOutput();
+            interpreter.SetOutput(new NoOutput(), output.eOutput);
+
             var firstOrDefault = Cache.Instance.Functions.FirstOrDefault(a => a.Name == groups[1].Value);
-            return firstOrDefault?.Execute(groups[2].Value.StringSplit(',').Select(a => a.Replace("'", "")));
+            try
+            {
+                var objects = groups[2].Value
+                    .StringSplit(',', new[] {'\'', '[', ']', '(', ')', '{', '}'})
+                    .Select(a => interpreter.InterpretLine(a, scopes, file).Replace("'", "").Trim());
+                interpreter.SetOutput(output.output, output.eOutput);
+
+                var result = firstOrDefault?.Execute(objects);
+                return result;
+            }
+            catch (Exception e)
+            {
+                interpreter.ExplicitOutput.WriteLine(e.Message);
+                return Empty;
+            }
+            finally
+            {
+                interpreter.SetOutput(output.output, output.eOutput);
+            }
         }
 
         #endregion
