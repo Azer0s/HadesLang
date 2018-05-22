@@ -170,10 +170,6 @@ public class RegexCollection
     /// </summary>
     public Regex Debug { get; set; } = new Regex("^debug:(\\d)", RegexOptions.Compiled);
     /// <summary>
-    /// Regex for random number function
-    /// </summary>
-    public Regex RandomNum { get; set; } = new Regex("^rand:\\[? *(\\d*) *\\]?", RegexOptions.Compiled);
-    /// <summary>
     /// Regex for array access
     /// </summary>
     public Regex ArrayVariable { get; set; } = new Regex("(\\$\\w*)\\[(.*)\\]", RegexOptions.Compiled);
@@ -189,10 +185,6 @@ public class RegexCollection
     /// Values outside of function call
     /// </summary>
     public Regex Outside { get; set; } = new Regex("(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
-    /// <summary>
-    /// Numeric range
-    /// </summary>
-    public Regex Range { get; set; } = new Regex("^range:\\[(.*),(.*)\\]", RegexOptions.Compiled);
     /// <summary>
     /// Import - Same as include in C/C++
     /// </summary>

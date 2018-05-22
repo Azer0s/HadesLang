@@ -84,6 +84,76 @@ namespace Interpreter
                     Output.WriteLine(Math.PI.ToString(CultureInfo.InvariantCulture));
                     return Math.PI.ToString(CultureInfo.InvariantCulture);
                 });
+
+                // Length
+                RegisterFunction(new Function("length", objects =>
+                {
+                    var parameters = objects.Select(a => a.ToString()).ToList();
+                    if (parameters.Count != 1 || IsNullOrEmpty(parameters[0]))
+                    {
+                        throw new Exception("Invalid invocation of method length!");
+                    }
+
+                    if (RegexCollection.Store.ObjCode.IsMatch(parameters[0]))
+                    {
+                        throw new Exception("Can't get length of an object!");
+                    }
+
+                    var length = RegexCollection.Store.ArrayValues.IsMatch(parameters[0])
+                        ? parameters[0].TrimStart('{').TrimEnd('}').StringSplit(',').ToList().Count.ToString()
+                        : parameters[0].Length.ToString();
+                    Output.WriteLine(length);
+                    return length;
+                }));
+
+                //Position in
+                RegisterFunction(new Function("positionIn", objects =>
+                {
+                    var parameters = objects.Select(a => a.ToString()).ToList();
+
+                    if (parameters.Count != 2 
+                        || !RegexCollection.Store.ArrayValues.IsMatch(parameters[0]) || IsNullOrEmpty(parameters[0]) 
+                        || RegexCollection.Store.ArrayValues.IsMatch(parameters[1]) || IsNullOrEmpty(parameters[1]))
+                    {
+                        throw new Exception("Invalid invocation of method positionIn!");
+                    }
+
+                    var returndat = parameters[0].TrimStart('{').TrimEnd('}').StringSplit(',').ToList().IndexOf(parameters[1])
+                        .ToString();
+                    Output.WriteLine(returndat);
+                    return returndat;
+                }));
+
+                //Range
+                RegisterFunction(new Function("range", objects =>
+                {
+                    var parameters = objects.Select(a => a.ToString()).ToList();
+
+                    if (parameters.Count != 2 || !int.TryParse(parameters[0], out _) ||
+                        !int.TryParse(parameters[1], out _))
+                    {
+                        throw new Exception("Invalid invocation of method range!");
+                    }
+
+                    var rangeArray = $"{{{Join(",", Enumerable.Range(int.Parse(parameters[0]), int.Parse(parameters[1])))}}}";
+                    Output.WriteLine(rangeArray);
+                    return rangeArray;
+                }));
+
+                //Random number
+                RegisterFunction(new Function("rand", objects =>
+                {
+                    var parameters = objects.Select(a => a.ToString()).ToList();
+
+                    if (parameters.Count != 1 || !int.TryParse(parameters[0], out _))
+                    {
+                        throw new Exception("Invalid invocation of method rand!");
+                    }
+
+                    var random = new Random().Next(int.Parse(parameters[0])).ToString();
+                    Output.WriteLine(random);
+                    return random;
+                }));
             }
             catch (Exception)
             {
@@ -337,13 +407,6 @@ namespace Interpreter
                     return GetFields(lineToInterprete, scopes, file);
                 }
 
-                //Range
-                if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
-                {
-                    Cache.Instance.CallCache.Add(lineToInterprete,GetRange);
-                    return GetRange(lineToInterprete, scopes, file);
-                }
-
                 #region Console-Specific
 
                 //Input
@@ -351,13 +414,6 @@ namespace Interpreter
                 {
                     Cache.Instance.CallCache.Add(lineToInterprete,GetInput);
                     return GetInput(lineToInterprete,scopes,file);
-                }
-
-                //Random number
-                if (RegexCollection.Store.RandomNum.IsMatch(lineToInterprete))
-                {
-                    Cache.Instance.CallCache.Add(lineToInterprete,GetRandomNumber);
-                    return GetRandomNumber(lineToInterprete,scopes,file);
                 }
 
                 //Type/dtype
@@ -714,7 +770,7 @@ namespace Interpreter
         private string CallCustomFunction(string lineToInterprete, List<string> scopes, IVariable file)
         {
             var groups = RegexCollection.Store.Function.Match(lineToInterprete).Groups.OfType<Group>().ToArray();
-            return Evaluator.CallCustomFunction(groups);
+            return Evaluator.CallCustomFunction(groups,this,scopes,file as FileInterpreter);
         }
 
         private string Unload(string lineToInterprete, List<string> scopes, IVariable file)
@@ -739,39 +795,9 @@ namespace Interpreter
             return result;
         }
 
-        private string GetRange(string lineToInterprete, List<string> scopes, IVariable file)
-        {
-            try
-            {
-                lineToInterprete = Evaluator.ReplaceWithVars(lineToInterprete, scopes, this, file as FileInterpreter);
-            }
-            catch (Exception e)
-            {
-                ExplicitOutput.WriteLine(e.Message);
-                Error(e);
-                return Empty;
-            }
-
-            var range = RegexCollection.Store.Range.Match(lineToInterprete).Groups.OfType<Group>()
-                .Select(a => a.Value).ToList();
-            var rangeArray = $"{{{Join(",", Enumerable.Range(int.Parse(range[1]), int.Parse(range[2])))}}}";
-
-            Output.WriteLine(rangeArray);
-
-            return rangeArray;
-        }
-
         private string GetInput(string lineToInterprete, List<string> scopes, IVariable file)
         {
             return $"'{ExplicitOutput.ReadLine()}'";
-        }
-
-        private string GetRandomNumber(string lineToInterprete, List<string> scopes, IVariable file)
-        {
-            var result = new Random().Next(int.Parse(RegexCollection.Store.RandomNum.Match(lineToInterprete).Groups[1].Value))
-                .ToString();
-            Output.WriteLine(result);
-            return result;
         }
 
         private string GetType(string lineToInterprete, List<string> scopes, IVariable file)
@@ -1191,26 +1217,12 @@ namespace Interpreter
                     return;
                 }
 
-                //Range
-                if (RegexCollection.Store.Range.IsMatch(lineToInterprete))
-                {
-                    Cache.Instance.CallCache.Add(lineToInterprete, GetRange);
-                    return;
-                }
-
                 #region Console-Specific
 
                 //Input
                 if (RegexCollection.Store.Input.IsMatch(lineToInterprete))
                 {
                     Cache.Instance.CallCache.Add(lineToInterprete, GetInput);
-                    return;
-                }
-
-                //Random number
-                if (RegexCollection.Store.RandomNum.IsMatch(lineToInterprete))
-                {
-                    Cache.Instance.CallCache.Add(lineToInterprete, GetRandomNumber);
                     return;
                 }
 
