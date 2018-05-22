@@ -22,6 +22,7 @@ namespace HadesWeb.Server
         private readonly bool StartBrowser;
         private readonly Dictionary<string, string> Routes;
         private readonly List<string> Forward;
+        private readonly List<string> Static;
 
         #region RegquestParams
 
@@ -31,7 +32,7 @@ namespace HadesWeb.Server
 
         #endregion
 
-        public Server(string address, string port, bool routingEnabled, bool startBrowser, Interpreter.Interpreter interpreter, Dictionary<string, string> routes, List<string> forward)
+        public Server(string address, string port, bool routingEnabled, bool startBrowser, Interpreter.Interpreter interpreter, Dictionary<string, string> routes, List<string> forward, List<string> staticitems)
         {
             RoutingEnabled = routingEnabled;
             Address = address;
@@ -40,6 +41,7 @@ namespace HadesWeb.Server
             Interpreter = interpreter;
             Routes = routes;
             Forward = forward;
+            Static = staticitems;
         }
 
         public void Start()
@@ -80,6 +82,8 @@ namespace HadesWeb.Server
                 BrowserHelper.OpenUrl($"http://{Address}:{Port}/");
             }
 
+            var cached = new Dictionary<string, byte[]>();
+
             while (true)
             {
                 context = listener.GetContext();
@@ -89,6 +93,12 @@ namespace HadesWeb.Server
                 var rawUrl = request.RawUrl.Split('?')[0];
 
                 Log.Info($"Request - {rawUrl}");
+
+                if (Static.Contains(request.RawUrl) && cached.ContainsKey(request.RawUrl))
+                {
+                    returnBytes = cached[request.RawUrl];
+                    goto sendBack;
+                }
 
                 if (RoutingEnabled)
                 {
@@ -150,6 +160,12 @@ namespace HadesWeb.Server
                     }
                 }
 
+                if (Static.Contains(request.RawUrl) && !cached.ContainsKey(request.RawUrl))
+                {
+                    cached.Add(request.RawUrl,returnBytes);
+                }
+
+                sendBack:
                 response.ContentLength64 = returnBytes.Length;
                 var output = response.OutputStream;
                 output.Write(returnBytes, 0, returnBytes.Length);
