@@ -11,7 +11,12 @@ namespace file
 {
     public class Library
     {
-        public string readAllLines(string path)
+        public string readAllText(string path)
+	{
+	    return $"'{File.ReadAllText(path.TrimStart('\'').TrimEnd('\''))}'";
+	}
+
+	public string readAllLines(string path)
         {
             var lines = File.ReadAllLines(path.TrimStart('\'').TrimEnd('\''));
             for (var i = 0; i < lines.Length; i++)
