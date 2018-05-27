@@ -18,5 +18,6 @@ web:
 runlang:
 	@dotnet run --project HadesLang
 
+.ONESHELL:
 runweb:
-	@dotnet run --project HadesWeb
+	$(shell cd HadesWeb/bin/Debug/netcoreapp2.0/; dotnet HadesWeb.dll)
