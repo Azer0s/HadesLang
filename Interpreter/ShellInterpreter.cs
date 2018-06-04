@@ -17,7 +17,7 @@ namespace Interpreter
         {
             if (IsNullOrEmpty(path))
             {
-                PrintStart(new decimal(0.4));
+                //PrintStart(new decimal(0.4));
             }
 
             var interpreter = new Interpreter(new ConsoleOutput(), new ConsoleOutput());
