@@ -15,7 +15,10 @@ namespace Interpreter
     {
         public ShellInterpreter(string path = null)
         {
-            PrintStart(new decimal(0.4));
+            if (IsNullOrEmpty(path))
+            {
+                PrintStart(new decimal(0.4));
+            }
 
             var interpreter = new Interpreter(new ConsoleOutput(), new ConsoleOutput());
             interpreter.RegisterFunction(new Function("print", a =>
