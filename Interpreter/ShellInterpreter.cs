@@ -38,9 +38,10 @@ namespace Interpreter
                 return;
             }
 
+            Console.Clear();
+
             while (true)
             {
-                Console.Clear();
                 Console.Write(">");
 
                 var input = Console.ReadLine();
