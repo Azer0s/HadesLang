@@ -15,9 +15,11 @@ namespace Interpreter
     {
         public ShellInterpreter(string path = null)
         {
-            if (IsNullOrEmpty(path))
+            path = path?.Trim();
+
+            if (path == "-v" || path == "--version")
             {
-                //PrintStart(new decimal(0.4));
+                PrintStart(new decimal(0.4));
             }
 
             var interpreter = new Interpreter(new ConsoleOutput(), new ConsoleOutput());
@@ -28,7 +30,7 @@ namespace Interpreter
             }));
             Evaluator.AliasManager.Add("clear","cls");
 
-            if (path != null)
+            if (path != null && path != "-v" && path != "--version")
             {
                 //File interpreter
                 //TODO: support constructor params
@@ -38,6 +40,7 @@ namespace Interpreter
 
             while (true)
             {
+                Console.Clear();
                 Console.Write(">");
 
                 var input = Console.ReadLine();
@@ -76,6 +79,7 @@ namespace Interpreter
 
         private static void PrintStart(decimal version)
         {
+            Console.BackgroundColor = Color.Black;
             Console.Title = "HadesLang - REPL";
             Console.Clear();
             Console.WriteAscii(" HadesLang", Purple);
@@ -100,6 +104,7 @@ namespace Interpreter
             Console.WriteLine();
             Thread.Sleep(1500);
             Console.Clear();
+            Console.BackgroundColor = Color.Black;
 
             Console.WriteAscii(" HadesLang", Purple);
             Console.WriteLine();
@@ -124,6 +129,7 @@ namespace Interpreter
             Thread.Sleep(90);
             Console.Clear();
 
+            Console.BackgroundColor = Color.Black;
             Console.WriteAscii(" HadesLang", Purple);
             Console.WriteLine();
             Console.Write("\t\t\n");
@@ -147,6 +153,7 @@ namespace Interpreter
             Thread.Sleep(90);
             Console.Clear();
 
+            Console.BackgroundColor = Color.Black;
             Console.WriteAscii(" HadesLang", Purple);
             Console.WriteLine();
             Console.Write("\t\t\n");
@@ -170,6 +177,7 @@ namespace Interpreter
             Thread.Sleep(90);
             Console.Clear();
 
+            Console.BackgroundColor = Color.Black;
             Console.WriteAscii(" HadesLang", Purple);
             Console.WriteLine();
             Console.Write("\t\t\n");
@@ -193,6 +201,7 @@ namespace Interpreter
             Thread.Sleep(90);
             Console.Clear();
 
+            Console.BackgroundColor = Color.Black;
             Console.WriteAscii(" HadesLang", Purple);
             Console.WriteLine();
             Console.Write("\t\t\n");
@@ -216,6 +225,7 @@ namespace Interpreter
             Thread.Sleep(90);
             Console.Clear();
 
+            Console.BackgroundColor = Color.Black;
             Console.WriteAscii(" HadesLang", Purple);
             Console.WriteLine();
             Console.Write("\t\t\n");
@@ -239,6 +249,7 @@ namespace Interpreter
             Thread.Sleep(90);
             Console.Clear();
 
+            Console.BackgroundColor = Color.Black;
             Console.WriteAscii(" HadesLang", Purple);
             Console.WriteLine();
             Console.Write("\t\t                /:+\n", Orange);
@@ -264,6 +275,8 @@ namespace Interpreter
             Console.WriteLine();
             Console.ReadKey();
             Console.Clear();
+
+            Console.ForegroundColor = Color.White;
         }
 
         #endregion
