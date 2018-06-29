@@ -1,0 +1,10 @@
+﻿for[num i in range:[99,3]]
+	out:$i + ' bottles of beer on the wall, ' + $i + ' bottles of beer.'
+	j as num = $i - 1
+	out:'Take one down and pass it around, ' + $j + ' bottles of beer on the wall.\n'
+end
+
+out:'1 bottle of beer on the wall, 1 bottle of beer.'
+out:'Take one down and pass it around, no more bottles of beer on the wall.\n'
+out:No more bottles of beer on the wall, no more bottles of beer.'
+out:'Go to the store and buy some more, 99 bottles of beer on the wall.'

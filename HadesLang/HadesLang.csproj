@@ -10,6 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="99bottles.hd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ctor.hd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
