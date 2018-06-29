@@ -140,7 +140,7 @@ namespace Interpreter
                     var start = int.Parse(parameters[0]);
                     var end = int.Parse(parameters[1]);
 
-                    var rangeArray = start < end ? $"{{{Join(",", Enumerable.Range(start,end+1))}}}" : $"{{{Join(",", Enumerable.Range(end, start+1))}}}";
+                    var rangeArray = start < end ? $"{{{Join(",", Enumerable.Range(start,end+1))}}}" : $"{{{Join(",", Enumerable.Range(end, (start - end) + 1).Reverse())}}}";
                     Output.WriteLine(rangeArray);
                     return rangeArray;
                 }));
