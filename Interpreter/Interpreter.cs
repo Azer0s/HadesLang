@@ -137,7 +137,10 @@ namespace Interpreter
                         throw new Exception("Invalid invocation of method range!");
                     }
 
-                    var rangeArray = $"{{{Join(",", Enumerable.Range(int.Parse(parameters[0]), int.Parse(parameters[1])))}}}";
+                    var start = int.Parse(parameters[0]);
+                    var end = int.Parse(parameters[1]);
+
+                    var rangeArray = start < end ? $"{{{Join(",", Enumerable.Range(start,end+1))}}}" : $"{{{Join(",", Enumerable.Range(end, start+1))}}}";
                     Output.WriteLine(rangeArray);
                     return rangeArray;
                 }));
