@@ -966,7 +966,14 @@ namespace Interpreter
             {
                 throw new Exception(exist.Message);
             }
-            var path = Format($"{Cache.Instance.LibraryLocation}{{0}}{fn}.dll",Path.DirectorySeparatorChar);
+
+            var libfile = fn;
+            if (libfile.Contains("."))
+            {
+                libfile = fn.Split('.').First();
+            }
+
+            var path = Format($"{Cache.Instance.LibraryLocation}{{0}}{libfile}.dll",Path.DirectorySeparatorChar);
 
             if (!File.Exists(path))
             {
@@ -978,7 +985,7 @@ namespace Interpreter
                 var asl = new AssemblyLoader();
                 var asm = asl.LoadFromAssemblyPath(new FileInfo(path).FullName);
 
-                var type = asm.GetType($"{fn}.Library");
+                var type = asm.GetType(fn);
                 Cache.Instance.Variables.Add(new Meta
                 {
                     Name = varname,
@@ -1265,11 +1272,11 @@ namespace Interpreter
                     MethodInfo mi = library.LibObject.GetType().GetMethod(methodGroups[1]);
 
                     string[] args;
-                    if (groups[4] != Empty)
+                    if (methodGroups[4] != Empty)
                     {
                         args = methodGroups[4].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}' }).ToArray();
                     }
-                    else if (groups[3] != Empty)
+                    else if (methodGroups[3] != Empty)
                     {
                         args = methodGroups[3].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}' }).ToArray();
                     }

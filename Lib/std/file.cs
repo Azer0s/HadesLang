@@ -1,29 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using StringExtension;
-// ReSharper disable InconsistentNaming
 
-namespace file
+namespace std
 {
-    public class Library
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    [SuppressMessage("ReSharper", "ArrangeTypeModifiers")]
+    class file
     {
         public string readAllText(string path)
-	{
-	    return $"'{File.ReadAllText(path.TrimStart('\'').TrimEnd('\''))}'";
-	}
+        {
+            return $"'{File.ReadAllText(path.TrimStart('\'').TrimEnd('\''))}'";
+        }
 
-	public string readAllLines(string path)
+        public string readAllLines(string path)
         {
             var lines = File.ReadAllLines(path.TrimStart('\'').TrimEnd('\''));
             for (var i = 0; i < lines.Length; i++)
             {
                 lines[i] = lines[i].Replace("'", "\"");
             }
-            return $"{{'{string.Join("','",lines)}'}}";
+            return $"{{'{string.Join("','", lines)}'}}";
         }
 
         public string writeAllLines(string path, string data)
