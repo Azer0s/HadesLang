@@ -84,11 +84,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for matching built-in functions
     /// </summary>
-    public Regex Function { get; set; } = new Regex("^(\\w*):(?:\\[(.*)\\]|(.*))", RegexOptions.Compiled);
+    public Regex Function { get; set; } = new Regex("^(\\w*):(?:\\[(.*)\\]|([^,]*)|(\'[^\']*\'))$", RegexOptions.Compiled);
     /// <summary>
     /// Function decleration
     /// </summary>
-    public Regex FunctionDecleration { get; set; } = new Regex("^func +(\\w*) *\\[(.*)\\](?: +requires +(.*))?", RegexOptions.Compiled);
+    public Regex FunctionDecleration { get; set; } = new Regex("^func +(\\w+) *\\[(.*)\\](?: +requires +(.+))?", RegexOptions.Compiled);
     /// <summary>
     /// If or unless statement
     /// </summary>
@@ -108,11 +108,11 @@ public class RegexCollection
     /// <summary>
     /// Regex for matching method calls
     /// </summary>
-    public Regex MethodCall { get; set; } = new Regex("^\\$(\\w*) *-> *(\\w*:(?:\\[.*\\]|[^\\[\\],]*))$", RegexOptions.Compiled);
+    public Regex MethodCall { get; set; } = new Regex("^\\$(\\w+) *-> *(\\w+:(?:\\[.*\\]|[^,]*|\'[^\']*\'))$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for getting var from object
     /// </summary>
-    public Regex VarCall { get; set; } = new Regex("^\\$(\\w*) *-> *\\$?(\\w*(?:\\[(.*)\\])?)$", RegexOptions.Compiled);
+    public Regex VarCall { get; set; } = new Regex("^\\$(\\w+) *-> *\\$?(\\w+(?:\\[(.+)\\])?)$", RegexOptions.Compiled);
     /// <summary>
     /// Regex for setting var from object
     /// </summary>

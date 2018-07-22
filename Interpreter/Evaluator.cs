@@ -1264,7 +1264,19 @@ namespace Interpreter
 
                     MethodInfo mi = library.LibObject.GetType().GetMethod(methodGroups[1]);
 
-                    var args = methodGroups[2].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}'}).ToArray();
+                    string[] args;
+                    if (groups[4] != Empty)
+                    {
+                        args = methodGroups[4].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}' }).ToArray();
+                    }
+                    else if (groups[3] != Empty)
+                    {
+                        args = methodGroups[3].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}' }).ToArray();
+                    }
+                    else
+                    {
+                        args = methodGroups[2].StringSplit(',', new[] { '\'', '[', ']', '(', ')', '{', '}' }).ToArray();
+                    }
 
                     for (var i = 0; i < args.Length; i++)
                     {

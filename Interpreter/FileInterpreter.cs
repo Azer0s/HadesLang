@@ -246,7 +246,7 @@ namespace Interpreter
 
                 try
                 {
-                    interpreter.OptimizeLine(line);
+                    interpreter.InterpretLine(line,new List<string>{nameof(Optimize)},this,false,true);
                 }
                 catch (Exception)
                 {
@@ -562,7 +562,21 @@ namespace Interpreter
             var groups = RegexCollection.Store.Function.Match(function).Groups.OfType<Group>().Select(a => a.Value)
                 .ToList();
             var guid = Guid.NewGuid().ToString().ToLower();
-            var args = groups[2].StringSplit(',').ToList();
+            List<string> args;
+
+            if (groups[4] != Empty)
+            {
+                args = groups[4].StringSplit(',').ToList();
+            }
+            else if (groups[3] != Empty)
+            {
+                args = groups[3].StringSplit(',').ToList();
+            }
+            else
+            {
+                args = groups[2].StringSplit(',').ToList();
+            }
+
             if (Functions.Any(a => a.Name == groups[1] && a.Parameters.Count == args.Count))
             {
                 var funcs = Functions.Where(a => a.Name == groups[1] && a.Parameters.Count == args.Count).ToList();
