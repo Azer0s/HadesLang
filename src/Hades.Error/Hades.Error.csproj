@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Hades.Common\Hades.Common.csproj" />
+    <ProjectReference Include="..\Hades.Source\Hades.Source.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+letter = ? UNICODE Letter ? ;
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+identifier = ( letter | "_" ), { letter | digit | "_" } ;
+string = "\"", { letter }, "\"" ;
+int = digit, { digit } ;
+bool = "true" | "false" ;
+dec = int, ".", int ;
+
+block keywords = "class" | "func" | "requires" | "if" | "else" | "while" | "for" | "in" | "stop" | "skip" | "try" | "catch" | "default" | "end" ;
+var keywords = "var" | "let" | "null" | "undefined" | "be" | "is" ;
+access modifier keywords = "global" | "public" | "private" ;
+comparison keywords = "equals" | "not" | "and" | "or" ;
+import keywords = "with" | "from" | "as" ;
+misc keywords = "put"
+
+keyword = block keywords | var keywords | access modifier keywords | comparison keywords | import keywords ;
+
+new line = \n ;
+
+lineComment = "//", { letter - new line }, + new line ;
+blockComment = "/*", { letter }, "*/" ;
+
+arithmetic punctuation = "+" | "-" | "*" | "/" | "<" | "<=" | ">" | ">=" ;
+logical punctuation = ""==" | "!=" | "&&" | "||" ;
+bitwise punctuation = "<<" | ">>" | "&" | "|" | "^" | "~" ;
+misc punctuation = "!" | "@" | "*";
+punctuation = arithmetic punctuation | logical punctuation | bitwise punctuation | misc punctuation ;
