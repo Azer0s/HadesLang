@@ -36,9 +36,7 @@ namespace Hades.Language
             "var",
             "let",
             "null",
-            "undefined",
-            "be",
-            "is"
+            "undefined"
         };
 
         private static readonly string[] _accessModifierKeywords =
@@ -50,7 +48,7 @@ namespace Hades.Language
 
         private static readonly string[] _comparisonKeywords =
         {
-            "equals",
+            "is",
             "not",
             "and",
             "or" 
@@ -60,7 +58,8 @@ namespace Hades.Language
         {
             "with",
             "from",
-            "as"
+            "as",
+            "sets"
         };
 
         private static readonly string[] _miscKeywords =

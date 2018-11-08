@@ -8,10 +8,10 @@ bool = "true" | "false" ;
 dec = int, ".", int ;
 
 block keywords = "class" | "func" | "requires" | "if" | "else" | "while" | "for" | "in" | "stop" | "skip" | "try" | "catch" | "default" | "end" ;
-var keywords = "var" | "let" | "null" | "undefined" | "be" | "is" ;
+var keywords = "var" | "let" | "null" | "undefined" ;
 access modifier keywords = "global" | "public" | "private" ;
-comparison keywords = "equals" | "not" | "and" | "or" ;
-import keywords = "with" | "from" | "as" ;
+comparison keywords = "is" | "not" | "and" | "or" ;
+import keywords = "with" | "from" | "as" | "sets";
 misc keywords = "put"
 
 keyword = block keywords | var keywords | access modifier keywords | comparison keywords | import keywords ;
@@ -24,5 +24,5 @@ blockComment = "/*", { letter }, "*/" ;
 arithmetic punctuation = "+" | "-" | "*" | "/" | "<" | "<=" | ">" | ">=" ;
 logical punctuation = ""==" | "!=" | "&&" | "||" ;
 bitwise punctuation = "<<" | ">>" | "&" | "|" | "^" | "~" ;
-misc punctuation = "!" | "@" | "*";
+misc punctuation = "!" | "@" | "*" | "=";
 punctuation = arithmetic punctuation | logical punctuation | bitwise punctuation | misc punctuation ;
