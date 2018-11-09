@@ -143,6 +143,7 @@ namespace Hades.Language.Lexer
                 case Classifier.BitwiseNegateEqual:
                 case Classifier.Assignment:
                 case Classifier.NullCondition:
+                case Classifier.Pipeline:
                     return Category.Operator;
 
                 case Classifier.BlockComment:

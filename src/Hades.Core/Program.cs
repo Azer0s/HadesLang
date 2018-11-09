@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Hades.Language.Lexer;
 
 namespace Hades.Core
@@ -10,7 +11,7 @@ namespace Hades.Core
             while (true)
             {
                 var lexer = new Lexer();
-                var result = lexer.LexFile(Console.ReadLine());
+                var result = lexer.LexFile(Console.ReadLine()).ToList();
             
                 foreach (var token in result)
                 {

@@ -84,7 +84,7 @@ namespace Hades.Language.Lexer
             return _keywordList;
         }
 
-        private static List<string> Keywords => GetKeywordList();
+        public static List<string> Keywords => GetKeywordList();
 
         #endregion
 
@@ -546,6 +546,9 @@ namespace Hades.Language.Lexer
                         case '=':
                             Consume();
                             return CreateToken(Classifier.BitwiseOrEqual);
+                        case '>':
+                            Consume();
+                            return CreateToken(Classifier.Pipeline);
                         default:
                             return CreateToken(Classifier.BitwiseOr);
                     }

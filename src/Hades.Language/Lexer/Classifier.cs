@@ -102,6 +102,8 @@ namespace Hades.Language.Lexer
         Question, //?
         NullCondition, //::
         
+        Pipeline, //|>
+        
         #endregion
         
         #region Punctuation
