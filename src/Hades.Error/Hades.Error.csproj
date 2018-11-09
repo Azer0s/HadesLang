@@ -6,4 +6,7 @@
     <ProjectReference Include="..\Hades.Common\Hades.Common.csproj" />
     <ProjectReference Include="..\Hades.Source\Hades.Source.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+  </ItemGroup>
 </Project>

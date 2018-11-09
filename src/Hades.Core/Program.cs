@@ -4,9 +4,9 @@ using Hades.Language.Lexer;
 
 namespace Hades.Core
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             while (true)
             {
@@ -18,7 +18,7 @@ namespace Hades.Core
                     Console.WriteLine($"{token.Kind} : {token.Value}");
                 }
             }
-            
+            // ReSharper disable once FunctionNeverReturns
         }
     }
 }

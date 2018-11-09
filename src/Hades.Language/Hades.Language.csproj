@@ -5,4 +5,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Hades.Error\Hades.Error.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+  </ItemGroup>
 </Project>
