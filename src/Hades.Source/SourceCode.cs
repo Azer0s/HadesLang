@@ -5,7 +5,7 @@ using Hades.Syntax;
 
 namespace Hades.Source
 {
-    public sealed class Code
+    public sealed class SourceCode
     {
         private readonly Lazy<string[]> _lines;
         private readonly string _sourceCode;
@@ -16,7 +16,7 @@ namespace Hades.Source
 
         public char this[int index] => _sourceCode.CharAt(index);
 
-        public Code(string sourceCode)
+        public SourceCode(string sourceCode)
         {
             _sourceCode = sourceCode;
             _lines = new Lazy<string[]>(() => _sourceCode.Split(new[] { Environment.NewLine }, StringSplitOptions.None));

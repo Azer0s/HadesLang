@@ -5,13 +5,13 @@ namespace Hades.Common
 {
     public struct Span : IEquatable<Span>
     {
-        public Location End { get; }
+        public SourceLocation End { get; }
         
         public int Length => End.Index - Start.Index;
         
-        public Location Start { get; }
+        public SourceLocation Start { get; }
 
-        public Span(Location start, Location end)
+        public Span(SourceLocation start, SourceLocation end)
         {
             Start = start;
             End = end;

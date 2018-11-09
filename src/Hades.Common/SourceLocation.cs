@@ -2,7 +2,7 @@
 
 namespace Hades.Source
 {
-    public struct Location : IEquatable<Location>
+    public struct SourceLocation : IEquatable<SourceLocation>
     {
         public int Column { get; }
         
@@ -10,33 +10,33 @@ namespace Hades.Source
         
         public int Line { get; }
 
-        public Location(int index, int line, int column)
+        public SourceLocation(int index, int line, int column)
         {
             Index = index;
             Line = line;
             Column = column;
         }
 
-        public static bool operator !=(Location left, Location right)
+        public static bool operator !=(SourceLocation left, SourceLocation right)
         {
             return !left.Equals(right);
         }
 
-        public static bool operator ==(Location left, Location right)
+        public static bool operator ==(SourceLocation left, SourceLocation right)
         {
             return left.Equals(right);
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is Location location)
+            if (obj is SourceLocation location)
             {
                 return Equals(location);
             }
             return base.Equals(obj);
         }
 
-        public bool Equals(Location other)
+        public bool Equals(SourceLocation other)
         {
             return other.GetHashCode() == GetHashCode();
         }

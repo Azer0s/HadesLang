@@ -12,7 +12,7 @@ namespace Hades.Error
         public IEnumerable<Entry> Errors => _errors.AsReadOnly();
         public bool HasErrors => _errors.Count > 0;
 
-        public void Add(string message, Code sourceCode, Severity severity, Span span)
+        public void Add(string message, SourceCode sourceCode, Severity severity, Span span)
         {
             _errors.Add(new Entry(message,sourceCode.GetLines(span.Start.Line, span.End.Line), severity, span));
         }

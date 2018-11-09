@@ -16,7 +16,7 @@ namespace Hades.Language.Lexer
 
         public string Value { get; }
 
-        public Token(Classifier kind, string contents, Location start, Location end)
+        public Token(Classifier kind, string contents, SourceLocation start, SourceLocation end)
         {
             Kind = kind;
             Value = contents;

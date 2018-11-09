@@ -93,8 +93,8 @@ namespace Hades.Language.Lexer
         private int _column;
         private int _index;
         private int _line;
-        private Code _sourceCode;
-        private Location _tokenStart;
+        private SourceCode _sourceCode;
+        private SourceLocation _tokenStart;
         private char Ch => _sourceCode[_index];
         // ReSharper disable once UnusedMember.Local
         private char Last => Peek(-1);
@@ -111,9 +111,9 @@ namespace Hades.Language.Lexer
             Collector = collector;
         }
 
-        public IEnumerable<Token> LexFile(string sourceCode) => LexFile(new Code(sourceCode));
+        public IEnumerable<Token> LexFile(string sourceCode) => LexFile(new SourceCode(sourceCode));
         
-        public IEnumerable<Token> LexFile(Code source)
+        public IEnumerable<Token> LexFile(SourceCode source)
         {
             _sourceCode = source;
             _builder.Clear();
@@ -127,7 +127,7 @@ namespace Hades.Language.Lexer
         
         private void AddError(string message, Severity severity)
         {
-            var span = new Span(_tokenStart, new Location(_index, _line, _column));
+            var span = new Span(_tokenStart, new SourceLocation(_index, _line, _column));
             Collector.Add(message, _sourceCode, severity, span);
         }
 
@@ -146,7 +146,7 @@ namespace Hades.Language.Lexer
         private Token CreateToken(Classifier kind)
         {
             var contents = _builder.ToString();
-            var end = new Location(_index, _line, _column);
+            var end = new SourceLocation(_index, _line, _column);
             var start = _tokenStart;
 
             _tokenStart = end;
