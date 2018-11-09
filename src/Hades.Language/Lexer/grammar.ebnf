@@ -9,7 +9,7 @@ int = digit, { digit } ;
 bool = "true" | "false" ;
 dec = int, ".", int ;
 
-block keywords = "class" | "func" | "requires" | "if" | "else" | "while" | "for" | "in" | "stop" | "skip" | "try" | "catch" | "default" | "end" ;
+block keywords = "class" | "func" | "args" | "requires" | "if" | "else" | "while" | "for" | "in" | "stop" | "skip" | "try" | "catch" | "default" | "end" ;
 var keywords = "var" | "let" | "null" | "undefined" ;
 access modifier keywords = "global" | "public" | "private" ;
 comparison keywords = "is" | "not" | "and" | "or" ;

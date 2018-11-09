@@ -17,6 +17,7 @@ namespace Hades.Language.Lexer
         {
             "class",
             "func",
+            "args",
             "requires",
             "if",
             "else",
