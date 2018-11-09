@@ -144,6 +144,7 @@ namespace Hades.Language.Lexer
                 case Classifier.Assignment:
                 case Classifier.NullCondition:
                 case Classifier.Pipeline:
+                case Classifier.Tag:
                     return Category.Operator;
 
                 case Classifier.BlockComment:

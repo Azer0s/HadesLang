@@ -103,6 +103,7 @@ namespace Hades.Language.Lexer
         NullCondition, //::
         
         Pipeline, //|>
+        Tag, //#
         
         #endregion
         
@@ -115,7 +116,6 @@ namespace Hades.Language.Lexer
         Underscore, //_
         At //@
 
-        #endregion Punctuation
-        
+        #endregion Punctuation 
     }
 }

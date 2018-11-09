@@ -11,9 +11,9 @@ namespace Hades.Core
             while (true)
             {
                 var lexer = new Lexer();
-                var result = lexer.LexFile(Console.ReadLine()).ToList();
+                var result = lexer.LexFile(Console.ReadLine());
             
-                foreach (var token in result)
+                foreach (var token in result.Where(a => a.Kind != Classifier.WhiteSpace))
                 {
                     Console.WriteLine($"{token.Kind} : {token.Value}");
                 }

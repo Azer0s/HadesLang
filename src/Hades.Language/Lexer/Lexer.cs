@@ -204,7 +204,7 @@ namespace Hades.Language.Lexer
 
         private bool IsPunctuation()
         {
-            return "<>{}()[]!%^&*+-=/,?:|~".Contains(Ch);
+            return "<>{}()[]!%^&*+-=/,?:|~#".Contains(Ch);
         }
 
         private bool IsWhiteSpace()
@@ -566,6 +566,10 @@ namespace Hades.Language.Lexer
                     Consume();
                     return CreateToken(Classifier.At);
                 
+                case '#':
+                    Consume();
+                    return CreateToken(Classifier.Tag);
+                
                 case '?':
                     Consume();
 
@@ -580,6 +584,7 @@ namespace Hades.Language.Lexer
             Advance();
 
             var multiLine = Peek(0) == '"' && Peek(1) == '"';
+            var hasError = false;
 
             if (multiLine)
             {
@@ -598,7 +603,7 @@ namespace Hades.Language.Lexer
                 if (IsNewLine() && !multiLine)
                 {
                     AddError("No newline in strings allowed!", Severity.Fatal);
-                    return CreateToken(Classifier.Error);
+                    hasError = true;
                 }
 
                 var consume = true;
@@ -637,7 +642,7 @@ namespace Hades.Language.Lexer
 
             Advance();
 
-            return CreateToken(Classifier.StringLiteral);
+            return hasError ? CreateToken(Classifier.Error) : CreateToken(Classifier.StringLiteral);
         }
 
         private Token ScanWhiteSpace()

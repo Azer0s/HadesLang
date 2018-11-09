@@ -26,5 +26,5 @@ blockComment = "/*", { letter }, "*/" ;
 arithmetic punctuation = "+" | "-" | "*" | "/" | "%" | "<" | "<=" | ">" | ">=" ;
 logical punctuation = ""==" | "!=" | "&&" | "||" ;
 bitwise punctuation = "<<" | ">>" | "&" | "|" | "^" | "~" ;
-misc punctuation = "!" | "@" | "*" | "=" | "|>";
+misc punctuation = "!" | "@" | "*" | "=" | "|>" | "#";
 punctuation = arithmetic punctuation | logical punctuation | bitwise punctuation | misc punctuation ;
