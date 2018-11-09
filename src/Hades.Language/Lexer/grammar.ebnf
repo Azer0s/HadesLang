@@ -2,7 +2,9 @@ letter = ? UNICODE Letter ? ;
 digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 identifier = ( letter | "_" ), { letter | digit | "_" } ;
-string = "\"", { letter }, "\"" ;
+string = "\"", { letter - new line }, "\"" ;
+multiline strings = "\"\"\"", { letter }, "\"\"\"" ;
+
 int = digit, { digit } ;
 bool = "true" | "false" ;
 dec = int, ".", int ;
@@ -21,7 +23,7 @@ new line = \n ;
 lineComment = "//", { letter - new line }, + new line ;
 blockComment = "/*", { letter }, "*/" ;
 
-arithmetic punctuation = "+" | "-" | "*" | "/" | "<" | "<=" | ">" | ">=" ;
+arithmetic punctuation = "+" | "-" | "*" | "/" | "%" | "<" | "<=" | ">" | ">=" ;
 logical punctuation = ""==" | "!=" | "&&" | "||" ;
 bitwise punctuation = "<<" | ">>" | "&" | "|" | "^" | "~" ;
 misc punctuation = "!" | "@" | "*" | "=";

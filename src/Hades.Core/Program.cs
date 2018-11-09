@@ -1,4 +1,5 @@
 ﻿using System;
+using Hades.Language.Lexer;
 
 namespace Hades.Core
 {
@@ -6,7 +7,17 @@ namespace Hades.Core
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            while (true)
+            {
+                var lexer = new Lexer();
+                var result = lexer.LexFile(Console.ReadLine());
+            
+                foreach (var token in result)
+                {
+                    Console.WriteLine($"{token.Kind} : {token.Value}");
+                }
+            }
+            
         }
     }
 }
