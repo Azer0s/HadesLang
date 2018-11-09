@@ -96,6 +96,7 @@ namespace Hades.Language.Lexer
         private Code _sourceCode;
         private Location _tokenStart;
         private char Ch => _sourceCode[_index];
+        // ReSharper disable once UnusedMember.Local
         private char Last => Peek(-1);
         private char Next => Peek(1);
         
@@ -341,12 +342,7 @@ namespace Hades.Language.Lexer
                 return ScanWord();
             }
 
-            if (IsKeyword())
-            {
-                return CreateToken(Classifier.Keyword);
-            }
-
-            return CreateToken(Classifier.Identifier);
+            return CreateToken(IsKeyword() ? Classifier.Keyword : Classifier.Identifier);
         }
 
         private Token ScanInteger()
@@ -387,12 +383,9 @@ namespace Hades.Language.Lexer
             {
                 case ':':
                     Consume();
-                    if (Ch == ':')
-                    {
-                        Consume();
-                        return CreateToken(Classifier.NullCondition);
-                    }
-                    return CreateToken(Classifier.Colon);
+                    if (Ch != ':') return CreateToken(Classifier.Colon);
+                    Consume();
+                    return CreateToken(Classifier.NullCondition);
 
                 case '{':
                     Consume();
@@ -446,12 +439,9 @@ namespace Hades.Language.Lexer
                             return CreateToken(Classifier.LessThanOrEqual);
                         case '<':
                             Consume();
-                            if (Ch == '=')
-                            {
-                                Consume();
-                                return CreateToken(Classifier.BitShiftLeftEqual);
-                            }
-                            return CreateToken(Classifier.BitShiftLeft);
+                            if (Ch != '=') return CreateToken(Classifier.BitShiftLeft);
+                            Consume();
+                            return CreateToken(Classifier.BitShiftLeftEqual);
                         default:
                             return CreateToken(Classifier.LessThan);
                     }
