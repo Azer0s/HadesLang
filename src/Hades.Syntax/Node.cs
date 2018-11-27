@@ -1,19 +1,15 @@
-﻿using System;
-using Hades.Common;
-using Hades.Source;
+﻿using Hades.Common;
 
 namespace Hades.Syntax
 {
     public abstract class Node
     {
         public Classifier Classifier { get;  }
-        
-        public Span Span { get; }
+        public new abstract string ToString();
 
-        protected Node(Span span, Classifier classifier)
+        protected Node(Classifier classifier)
         {
             Classifier = classifier;
-            Span = span;
         }
     }
 }

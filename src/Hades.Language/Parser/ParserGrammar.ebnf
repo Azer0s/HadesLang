@@ -1,0 +1,13 @@
+main = 
+    statement
+    | assignment
+    | ifBlock
+    | forBlock
+    | whileBlock
+    | matchBlock
+    | tryBlock
+    | funcBlock
+    | classBlock
+    | structBlock
+    | main
+    ;

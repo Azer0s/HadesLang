@@ -1,10 +1,9 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Hades.Common;
-using Hades.Error;
 using Hades.Source;
 
 namespace Hades.Language.Lexer
@@ -15,57 +14,57 @@ namespace Hades.Language.Lexer
 
         private static readonly string[] BlockKeywords =
         {
-            "class",
-            "func",
-            "args",
-            "requires",
-            "if",
-            "else",
-            "while",
-            "for",
-            "in",
-            "stop",
-            "skip",
-            "try",
-            "catch",
-            "default",
-            "end"
+            Keyword.Class,
+            Keyword.Func,
+            Keyword.Args,
+            Keyword.Requires,
+            Keyword.If,
+            Keyword.Else,
+            Keyword.While,
+            Keyword.For,
+            Keyword.In,
+            Keyword.Stop,
+            Keyword.Skip,
+            Keyword.Try,
+            Keyword.Catch,
+            Keyword.Default,
+            Keyword.End
         };
 
         private static readonly string[] VarKeywords =
         {
-            "var",
-            "let",
-            "null",
-            "undefined"
+            Keyword.Var,
+            Keyword.Let,
+            Keyword.Null,
+            Keyword.Undefined,
         };
 
         private static readonly string[] AccessModifierKeywords =
         {
-            "global",
-            "public",
-            "private"
+            Keyword.Global,
+            Keyword.Public,
+            Keyword.Private
         };
 
         private static readonly string[] ComparisonKeywords =
         {
-            "is",
-            "not",
-            "and",
-            "or" 
+            Keyword.Is,
+            Keyword.Not,
+            Keyword.And,
+            Keyword.Or
         };
         
         private static readonly string[] ImportKeywords =
         {
-            "with",
-            "from",
-            "as",
-            "sets"
+            Keyword.With,
+            Keyword.From,
+            Keyword.As,
+            Keyword.Sets
         };
 
         private static readonly string[] MiscKeywords =
         {
-            "put"
+            Keyword.Put
         };
         
         private static List<string> _keywordList = new List<string>();
@@ -99,37 +98,14 @@ namespace Hades.Language.Lexer
         // ReSharper disable once UnusedMember.Local
         private char Last => Peek(-1);
         private char Next => Peek(1);
-        
-        public Collector Collector { get; }
-        
-        public Lexer(): this(new Collector()){}
 
-        public Lexer(Collector collector)
+        public Lexer()
         {
             _builder = new StringBuilder();
             _sourceCode = null;
-            Collector = collector;
         }
 
-        public IEnumerable<Token> LexFile(string sourceCode) => LexFile(new SourceCode(sourceCode));
-        
-        public IEnumerable<Token> LexFile(SourceCode source)
-        {
-            _sourceCode = source;
-            _builder.Clear();
-            _line = 1;
-            _index = 0;
-            _column = 0;
-            CreateToken(Classifier.EndOfFile);
-
-            return LexContents();
-        }
-        
-        private void AddError(string message, Severity severity)
-        {
-            var span = new Span(_tokenStart, new SourceLocation(_index, _line, _column));
-            Collector.Add(message, _sourceCode, severity, span);
-        }
+        #region Helper
 
         private void Advance()
         {
@@ -165,6 +141,10 @@ namespace Hades.Language.Lexer
         {
             return _sourceCode[_index + ahead];
         }
+
+        #endregion
+        
+        #region Checks
 
         private bool IsDigit()
         {
@@ -210,6 +190,24 @@ namespace Hades.Language.Lexer
         private bool IsWhiteSpace()
         {
             return (char.IsWhiteSpace(Ch) || IsEOF()) && !IsNewLine();
+        }
+
+        #endregion
+        
+        #region Lexing
+
+        public IEnumerable<Token> LexFile(string sourceCode) => LexFile(new SourceCode(sourceCode));
+        
+        public IEnumerable<Token> LexFile(SourceCode source)
+        {
+            _sourceCode = source;
+            _builder.Clear();
+            _line = 1;
+            _index = 0;
+            _column = 0;
+            CreateToken(Classifier.EndOfFile);
+
+            return LexContents();
         }
 
         private IEnumerable<Token> LexContents()
@@ -322,7 +320,7 @@ namespace Hades.Language.Lexer
             {
                 if (IsLetter())
                 {
-                    return ScanWord(message: "'{0}' is an invalid float value");
+                    return ScanWord("'{0}' is an invalid float value");
                 }
                 return ScanWord();
             }
@@ -596,14 +594,12 @@ namespace Hades.Language.Lexer
             {
                 if (IsEOF())
                 {
-                    AddError("Unexpected End Of File", Severity.Fatal);
-                    return CreateToken(Classifier.Error);
+                    throw new Exception("Unexpected End Of File");
                 }
 
                 if (IsNewLine() && !multiLine)
                 {
-                    AddError("No newline in strings allowed!", Severity.Fatal);
-                    hasError = true;
+                    throw new Exception("No newline in strings allowed!");
                 }
 
                 var consume = true;
@@ -654,14 +650,15 @@ namespace Hades.Language.Lexer
             return CreateToken(Classifier.WhiteSpace);
         }
 
-        private Token ScanWord(Severity severity = Severity.Error, string message = "Unexpected Token '{0}'")
+        private Token ScanWord(string message = "Unexpected Token '{0}'")
         {
             while (!IsWhiteSpace() && !IsEOF() && !IsPunctuation())
             {
                 Consume();
             }
-            AddError(string.Format(message, _builder.ToString()), severity);
-            return CreateToken(Classifier.Error);
+            throw new Exception(string.Format(message, _builder.ToString()));
         }
+        
+        #endregion
     }
 }

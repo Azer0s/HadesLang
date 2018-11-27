@@ -3,12 +3,10 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Hades.Error\Hades.Error.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Parser" />
+    <ProjectReference Include="..\Hades.Error\Hades.Error.csproj" />
+    <ProjectReference Include="..\Hades.Source\Hades.Source.csproj" />
   </ItemGroup>
 </Project>
