@@ -12,20 +12,21 @@ namespace Hades.Core
             while (true)
             {
                 var lexer = new Lexer();
-    
-                try
+                var tokens = lexer.LexFile(Console.ReadLine()).Where(a => a.Kind != Classifier.WhiteSpace).ToList();
+                var parser = new Parser(tokens);
+                var instructions = parser.Parse();
+                
+                foreach (var token in tokens.Where(a => a.Kind != Classifier.WhiteSpace))
                 {
-                    var tokens = lexer.LexFile(Console.ReadLine()).Where(a => a.Kind != Classifier.WhiteSpace).ToList();
-                    var parser = new Parser(tokens);
-                    var instructions = parser.Parse();
-                    foreach (var token in tokens.Where(a => a.Kind != Classifier.WhiteSpace))
-                        Console.WriteLine($"{token.Kind} : {token.Value}");
-                    foreach (var instruction in instructions)
-                        Console.WriteLine($"{instruction.Classifier}:{instruction}");
+                    Console.WriteLine($"{token.Kind} : {token.Value}");
                 }
-                catch (Exception e)
+                
+                foreach (var instruction in instructions)
                 {
-                    Console.WriteLine(e.Message);
+                    if (instruction != null)
+                    {
+                        Console.WriteLine($"{instruction.Classifier} => {instruction}");
+                    }
                 }
             }
         }

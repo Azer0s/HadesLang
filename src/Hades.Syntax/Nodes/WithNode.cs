@@ -13,7 +13,7 @@ namespace Hades.Syntax.Nodes
         public string Source
         {
             set => _source = value;
-            get => string.IsNullOrEmpty(_source) ? Target : _name;
+            get => string.IsNullOrEmpty(_source) ? Target : _source;
         } //source
 
         public string NativePackage { get; set; } //source of the native package
@@ -26,17 +26,11 @@ namespace Hades.Syntax.Nodes
         } //the name to be set
         
         public bool Native { get; set; } //for native imports like std libs
-        public bool File { get; set;  } //when the statement is something like `with main.hd` or `with server`
         
         public WithNode() : base(Classifier.With){}
 
         public override string ToString()
-        {           
-            if (File)
-            {
-                return $"Import {Target} as {Name}";
-            }
-
+        {
             return Native ? $"Import {Target} from native package {NativePackage}:{Source} as {Name}" : $"Import {Target} from {Source} as {Name}";
         }
     }

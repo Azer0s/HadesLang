@@ -56,7 +56,12 @@ namespace Hades.Language.Parser
         
         private bool IsDecleration()
         {
-            return IsKeyword() && (Current.Value == Keyword.Var || Current.Value == Keyword.Let);
+            return IsKeyword() && (Current == Keyword.Var || Current == Keyword.Let);
+        }
+
+        private bool IsIdentifier()
+        {
+            return Current == Classifier.Identifier;
         }
 
         #endregion
@@ -77,11 +82,11 @@ namespace Hades.Language.Parser
             var node = new WithNode();
             Advance();
             
-            if (Current != Classifier.Identifier)
+            if (!IsIdentifier())
             {
                 Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
             }
-
+            
             node.Target = Current.Value;
 
             if (Next == Keyword.As)
@@ -89,7 +94,7 @@ namespace Hades.Language.Parser
                 Advance();
                 Advance();
 
-                if (Current != Classifier.Identifier)
+                if (!IsIdentifier())
                 {
                     Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
                 }
@@ -101,7 +106,32 @@ namespace Hades.Language.Parser
             
             if (Current == Keyword.From)
             {
-                //TODO
+                Advance();
+                if (!IsIdentifier())
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+                }
+
+                if (Next == Classifier.Colon)
+                {
+                    node.Native = true;
+                    node.NativePackage = Current.Value;
+                    
+                    Advance();
+                    Advance();
+                    if (!IsIdentifier())
+                    {
+                        Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+                    }
+
+                    node.Source = Current.Value;
+                }
+                else
+                {
+                    node.Source = Current.Value;
+                }
+                
+                Advance();
             }
 
             return node;
@@ -126,9 +156,18 @@ namespace Hades.Language.Parser
                         return ParseVariableDeclaration();
                     
                     default:
-                        Error(string.Format(ErrorStrings.UNKNOWN_KEYWORD,Current.Value)); // this really never happens, I just...whatever
+                        Error(string.Format(ErrorStrings.MESSAGE_UNKNOWN_KEYWORD,Current.Value)); // this really never happens, I just...whatever
                         break;
                 }
+            }
+
+            if (IsIdentifier())
+            {
+                
+            }
+            else
+            {
+                Error(string.Format(ErrorStrings.MESSAGE_UNEXPECTED_TOKEN, Current.Value));
             }
 
             return null;
