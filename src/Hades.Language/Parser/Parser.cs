@@ -72,7 +72,7 @@ namespace Hades.Language.Parser
         }
 
         //TODO: WIP
-        private Node ParseWith()
+        private Node ParsePackageImport()
         {
             var node = new WithNode();
             Advance();
@@ -107,6 +107,11 @@ namespace Hades.Language.Parser
             return node;
         }
         
+        private Node ParseVariableDeclaration()
+        {
+            throw new NotImplementedException();
+        }
+        
         private Node ParseNext()
         {
             if (IsKeyword())
@@ -114,12 +119,20 @@ namespace Hades.Language.Parser
                 switch (Current.Value)
                 {
                     case Keyword.With:
-                        return ParseWith();
+                        return ParsePackageImport();
+                    
+                    case Keyword.Var:
+                    case Keyword.Let:
+                        return ParseVariableDeclaration();
+                    
+                    default:
+                        Error(string.Format(ErrorStrings.UNKNOWN_KEYWORD,Current.Value)); // this really never happens, I just...whatever
+                        break;
                 }
             }
 
             return null;
-        }
+        } 
 
         #endregion
     }
