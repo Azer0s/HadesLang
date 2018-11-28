@@ -2,6 +2,7 @@
 {
     public enum Classifier
     {
+        Root,
         With
     }
 }

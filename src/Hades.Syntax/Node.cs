@@ -5,7 +5,9 @@ namespace Hades.Syntax
     public abstract class Node
     {
         public Classifier Classifier { get;  }
-        public new abstract string ToString();
+        public Node Child { set; get; }
+
+        public abstract override string ToString();
 
         protected Node(Classifier classifier)
         {
