@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Hades.Language.Lexer;
+using Hades.Syntax.Lexeme;
 using NUnit.Framework;
 
 namespace Hades.Testing

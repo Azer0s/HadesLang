@@ -1,8 +1,6 @@
 // ReSharper disable MemberCanBePrivate.Global
 
-using System;
-
-namespace Hades.Syntax.Nodes
+namespace Hades.Syntax.Expression.Nodes
 {
     public class WithNode : Node
     {

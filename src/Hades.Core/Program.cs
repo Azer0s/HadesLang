@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Hades.Core.Tools;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
 
@@ -7,19 +8,22 @@ namespace Hades.Core
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
+            switch (args.First())
+            {
+                    case "new":
+                        return ProjectInitializer.Run(args.Skip(1).ToList());
+                    case "package":
+                        return 0;
+            }
+            
             while (true)
             {
                 var lexer = new Lexer();
-                var tokens = lexer.LexFile(Console.ReadLine()).Where(a => a.Kind != Classifier.WhiteSpace).ToList();
+                var tokens = lexer.LexFile(Console.ReadLine());
                 var parser = new Parser(tokens);
                 var instructions = parser.Parse();
-                
-                foreach (var token in tokens.Where(a => a.Kind != Classifier.WhiteSpace))
-                {
-                    Console.WriteLine($"{token.Kind} : {token.Value}");
-                }
                 
                 foreach (var instruction in instructions)
                 {

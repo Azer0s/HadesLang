@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Hades.Common;
 using Hades.Error;
 using Hades.Language.Lexer;
 using Hades.Syntax;
-using Hades.Syntax.Nodes;
-using Classifier = Hades.Language.Lexer.Classifier;
+using Hades.Syntax.Expression;
+using Hades.Syntax.Expression.LiteralNodes;
+using Hades.Syntax.Expression.Nodes;
+using Hades.Syntax.Lexeme;
+using Classifier = Hades.Syntax.Lexeme.Classifier;
 
 namespace Hades.Language.Parser
 {
@@ -19,7 +23,7 @@ namespace Hades.Language.Parser
 
         public Parser(IEnumerable<Token> tokens)
         {
-            _tokens = tokens;
+            _tokens = tokens.ToList().Where(a => a.Kind != Classifier.WhiteSpace);
             _index = 0;
         }
 
@@ -46,22 +50,47 @@ namespace Hades.Language.Parser
 
         private bool IsEof()
         {
-            return Current == Classifier.EndOfFile;
+            return Is(Classifier.EndOfFile);
         }
 
         private bool IsKeyword()
         {
             return Lexer.Lexer.Keywords.Contains(Current.Value);
         }
-        
-        private bool IsDecleration()
+
+        private bool IsType()
         {
-            return IsKeyword() && (Current == Keyword.Var || Current == Keyword.Let);
+            return Enum.GetValues(typeof(Datatype)).Cast<Datatype>().Select(a => a.ToString().ToLower()).Contains(Current.Value);
         }
 
         private bool IsIdentifier()
         {
-            return Current == Classifier.Identifier;
+            return Is(Classifier.Identifier);
+        }
+
+        private bool Is(string token)
+        {
+            return Current == token;
+        }
+
+        private bool Is(Classifier classifier)
+        {
+            return Current == classifier;
+        }
+
+        private bool Is(Category category)
+        {
+            return Current.Category == category;
+        }
+
+        private bool Expect(string token)
+        {
+            return Next == token;
+        }
+
+        private bool Expect(Classifier classifier)
+        {
+            return Next == classifier;
         }
 
         #endregion
@@ -76,7 +105,6 @@ namespace Hades.Language.Parser
             }
         }
 
-        //TODO: WIP
         private Node ParsePackageImport()
         {
             var node = new WithNode();
@@ -89,7 +117,7 @@ namespace Hades.Language.Parser
             
             node.Target = Current.Value;
 
-            if (Next == Keyword.As)
+            if (Expect(Keyword.As))
             {
                 Advance();
                 Advance();
@@ -104,7 +132,7 @@ namespace Hades.Language.Parser
             
             Advance();
             
-            if (Current == Keyword.From)
+            if (Is(Keyword.From)) //with x FROM ...
             {
                 Advance();
                 if (!IsIdentifier())
@@ -112,7 +140,7 @@ namespace Hades.Language.Parser
                     Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
                 }
 
-                if (Next == Classifier.Colon)
+                if (Expect(Classifier.Colon))
                 {
                     node.Native = true;
                     node.NativePackage = Current.Value;
@@ -139,7 +167,64 @@ namespace Hades.Language.Parser
         
         private Node ParseVariableDeclaration()
         {
-            throw new NotImplementedException();
+            var variable = new VariableDeclarationNode {Mutable = Is(Keyword.Var)};            
+            Advance();
+
+            if (IsType())
+            {
+                variable.Datatype = (Datatype)Enum.Parse(typeof(Datatype),Current.Value.ToUpper());
+                Advance();
+            }
+
+            if (Is(Classifier.LeftBrace))
+            {
+                variable.Array = true;
+                Advance(); //[
+
+                if (!Is(Classifier.RightBrace))
+                {
+                    if (Is(Classifier.Mul))
+                     {
+                         variable.InfiniteArray = true;
+                         Advance();
+                         if (!Is(Classifier.RightBrace))
+                         {
+                             Error(string.Format(ErrorStrings.MESSAGE_EXPECTED_TOKEN, Current.Kind.ToString()));
+                         }
+                     }
+                     else
+                     {
+                         //TODO: Array size, handle multidimensional
+                     }
+                }
+                
+                Advance(); //]
+            }
+
+            if (IsIdentifier())
+            {
+                variable.Name = Current.Value;
+                Advance();
+            }
+            else
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+            }
+
+            return variable;
+        }
+        
+        private Node ParseVariableDeclarationAndAssignment()
+        {
+            var variable = ParseVariableDeclaration() as VariableDeclarationNode;
+            
+            if (Is(Classifier.Assignment))
+            {
+                Advance();
+                if (variable != null) variable.Assignment = ParseStatement(); //change to ParseStatement
+            }
+
+            return variable;
         }
         
         private Node ParseNext()
@@ -151,13 +236,8 @@ namespace Hades.Language.Parser
                     case Keyword.With:
                         return ParsePackageImport();
                     
-                    case Keyword.Var:
-                    case Keyword.Let:
-                        return ParseVariableDeclaration();
-                    
                     default:
-                        Error(string.Format(ErrorStrings.MESSAGE_UNKNOWN_KEYWORD,Current.Value)); // this really never happens, I just...whatever
-                        break;
+                        return ParseStatement();
                 }
             }
 
@@ -171,7 +251,58 @@ namespace Hades.Language.Parser
             }
 
             return null;
-        } 
+        }
+
+        private Node ParseStatement()
+        {
+            if (IsEof())
+            {
+                Error(ErrorStrings.MESSAGE_UNEXPECTED_EOF);
+            }
+            
+            if (IsKeyword())
+            {
+                switch (Current.Value)
+                {
+                    case Keyword.Var:
+                    case Keyword.Let:
+                        return ParseVariableDeclarationAndAssignment();
+                }
+            }
+
+            if (Is(Category.Literal))
+            {
+                Node node = null;
+                switch (Current.Kind)
+                {
+                    case Classifier.IntLiteral:
+                        node = new IntLiteralNode(Current);
+                        break;
+                    
+                    case Classifier.BoolLiteral:
+                        node = new BoolLiteralNode(Current);
+                        break;
+                    
+                    case Classifier.StringLiteral:
+                        node = new StringLiteralNode(Current);
+                        break;
+                    
+                    case Classifier.DecLiteral:
+                        node = new DecLiteralNode(Current);
+                        break;
+                }
+                
+                if (node == null)
+                {
+                    Error(string.Format(ErrorStrings.MESSAGE_INVALID_LITERAL, Current.Value));
+                }
+                
+                Advance();
+                return node;
+            }
+
+            return null;
+        }
 
         #endregion
     }

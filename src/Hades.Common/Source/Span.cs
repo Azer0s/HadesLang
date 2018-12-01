@@ -1,7 +1,6 @@
 ﻿using System;
-using Hades.Source;
 
-namespace Hades.Common
+namespace Hades.Common.Source
 {
     public struct Span : IEquatable<Span>
     {

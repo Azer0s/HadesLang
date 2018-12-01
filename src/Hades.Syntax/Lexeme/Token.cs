@@ -1,8 +1,9 @@
 using System;
 using Hades.Common;
-using Hades.Source;
+using Hades.Common.Source;
+using Hades.Language.Lexer;
 
-namespace Hades.Language.Lexer
+namespace Hades.Syntax.Lexeme
 {
     public sealed class Token : IEquatable<Token>
     {
@@ -22,7 +23,7 @@ namespace Hades.Language.Lexer
             Value = contents;
             Span = new Span(start, end);
 
-            _category = new Lazy<Category>(GetTokenCatagory);
+            _category = new Lazy<Category>(GetTokenCategory);
         }
 
         public static bool operator !=(Token left, string right)
@@ -95,7 +96,7 @@ namespace Hades.Language.Lexer
             return Category == Category.WhiteSpace || Category == Category.Comment;
         }
 
-        private Category GetTokenCatagory()
+        private Category GetTokenCategory()
         {
             switch (Kind)
             {

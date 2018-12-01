@@ -6,7 +6,11 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Hades.Common\Hades.Common.csproj" />
     <ProjectReference Include="..\Hades.Error\Hades.Error.csproj" />
-    <ProjectReference Include="..\Hades.Source\Hades.Source.csproj" />
+    <ProjectReference Include="..\Hades.Syntax\Hades.Syntax.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Runtime" />
   </ItemGroup>
 </Project>

@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Hades.Source;
+using Hades.Common;
+using Hades.Common.Source;
+using Hades.Syntax.Lexeme;
 
 namespace Hades.Language.Lexer
 {
