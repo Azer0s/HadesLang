@@ -7,7 +7,9 @@ namespace Hades.Syntax.Expression
         protected LiteralNode(Classifier classifier) : base(classifier)
         {
         }
-        
+
+        protected override string ToStr() {return string.Empty;}
+
         public override string ToString()
         {
             return $"Value: {Value}";

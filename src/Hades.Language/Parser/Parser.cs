@@ -117,14 +117,17 @@ namespace Hades.Language.Parser
 
         #region Parsing
 
-        public IEnumerable<Node> Parse()
+        #region Blocks
+        
+        private Node ParseFunc()
         {
-            while (!IsEof())
-            {
-                yield return ParseNext();
-            }
+            throw new NotImplementedException();
         }
+        
+        #endregion
 
+        #region Statements
+        
         private Node ParsePackageImport()
         {
             var node = new WithNode();
@@ -184,6 +187,10 @@ namespace Hades.Language.Parser
 
             return node;
         }
+        
+        #endregion
+        
+        #region Variables
         
         private Node ParseVariableDeclaration()
         {
@@ -249,9 +256,9 @@ namespace Hades.Language.Parser
                          }
                      }
                      else
-                     {
-                         //TODO: Array size, handle multidimensional
-                     }
+                    {
+                        variable.ArraySize = ParseStatement();
+                    }
                 }
                 
                 Advance(); //]
@@ -281,6 +288,18 @@ namespace Hades.Language.Parser
             }
 
             return variable;
+        }
+        
+        #endregion
+        
+        #region Entry
+        
+        public IEnumerable<Node> Parse()
+        {
+            while (!IsEof())
+            {
+                yield return ParseNext();
+            }
         }
         
         private Node ParseNext()
@@ -323,6 +342,9 @@ namespace Hades.Language.Parser
                     case Keyword.Var:
                     case Keyword.Let:
                         return ParseVariableDeclarationAndAssignment();
+                    
+                    case Keyword.Func:
+                        return ParseFunc();
                 }
             }
 
@@ -357,8 +379,16 @@ namespace Hades.Language.Parser
                 return node;
             }
 
+            if (Is(Classifier.MultidimensionalArrayAccess))
+            {
+                Advance();
+                return new MultidimensionalArrayAccessNode(Last.Value);
+            }
+            
             return null;
         }
+        
+        #endregion
 
         #endregion
     }

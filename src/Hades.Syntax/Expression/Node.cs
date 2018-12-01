@@ -5,7 +5,12 @@
         public Classifier Classifier { get;  }
         public Node Child { set; get; }
 
-        public abstract override string ToString();
+        protected abstract string ToStr();
+        
+        public override string ToString()
+        {
+            return $"{GetType().Name.Replace("Node", "")} => {ToStr()}";
+        }
 
         protected Node(Classifier classifier)
         {

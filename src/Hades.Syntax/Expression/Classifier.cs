@@ -8,6 +8,7 @@
         IntLiteral,
         BoolLiteral,
         StringLiteral,
-        DecLiteral
+        DecLiteral,
+        MultidimensionalArrayAccess
     }
 }

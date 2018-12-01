@@ -27,7 +27,7 @@ namespace Hades.Syntax.Expression.Nodes
         
         public WithNode() : base(Classifier.With){}
 
-        public override string ToString()
+        protected override string ToStr()
         {
             return Native ? $"Import {Target} from native package {NativePackage}:{Source} as {Name}" : $"Import {Target} from {Source} as {Name}";
         }

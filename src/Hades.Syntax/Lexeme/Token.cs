@@ -106,6 +106,8 @@ namespace Hades.Syntax.Lexeme
                 case Classifier.Comma:
                 case Classifier.Underscore:
                 case Classifier.At:
+                case Classifier.Dot:
+                case Classifier.MultidimensionalArrayAccess:
                     return Category.Punctuation;
 
                 case Classifier.Equal:
@@ -180,6 +182,11 @@ namespace Hades.Syntax.Lexeme
                 
                 default: return Category.Unknown;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{Kind} : {Value}";
         }
     }
 }

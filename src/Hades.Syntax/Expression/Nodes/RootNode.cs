@@ -4,7 +4,7 @@ namespace Hades.Syntax.Expression.Nodes
     {
         public RootNode() : base(Classifier.Root){}
 
-        public override string ToString()
+        protected override string ToStr()
         {
             return "ROOT";
         }

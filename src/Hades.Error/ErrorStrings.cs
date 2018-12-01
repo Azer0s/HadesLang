@@ -2,6 +2,7 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_EXPECTED_INT = "Expected a value of type int!";
         public const string MESSAGE_IMMUTABLE_CANT_BE_NULLABLE = "An immutable variable can't be nullable!";
         public const string MESSAGE_TYPE_INFERED_CANT_BE_NULLABLE = "A type infered variable can't be nullable!";
         public const string MESSAGE_IMMUTABLE_CANT_BE_DYNAMIC = "An immutable variable can't be dynamic!";

@@ -6,6 +6,7 @@ namespace Hades.Syntax.Expression.LiteralNodes
     {
         public DecLiteralNode(Token token) : base(Classifier.DecLiteral)
         {
+            Value = decimal.Parse(token.Value);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Hades.Core
                 {
                     if (instruction != null)
                     {
-                        Console.WriteLine($"{instruction.Classifier} => {instruction}");
+                        Console.WriteLine(instruction);
                     }
                 }
             }

@@ -101,6 +101,8 @@ namespace Hades.Language.Lexer
         private char Last => Peek(-1);
         private char Next => Peek(1);
 
+        private bool inBracket;
+
         public Lexer()
         {
             _builder = new StringBuilder();
@@ -186,7 +188,7 @@ namespace Hades.Language.Lexer
 
         private bool IsPunctuation()
         {
-            return "<>{}()[]!%^&*+-=/,?:|~#".Contains(Ch);
+            return "<>{}()[]!%^&*+-=/,?:|~#.".Contains(Ch);
         }
 
         private bool IsWhiteSpace()
@@ -304,6 +306,16 @@ namespace Hades.Language.Lexer
         
         private Token ScanDec()
         {
+            if (inBracket)
+            {
+                while (Ch != ']')
+                {
+                    Consume();
+                }
+
+                return CreateToken(Classifier.MultidimensionalArrayAccess);
+            }
+            
             if (Ch == '.')
             {
                 Consume();
@@ -357,7 +369,7 @@ namespace Hades.Language.Lexer
 
             if (Ch == '.')
             {
-                return i > 0 ? ScanDec() : ScanWord(message:"Literal can't start with .");
+                return i > 0 ? ScanDec() : ScanWord("Literal can't start with .");
             }
 
             if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF())
@@ -396,10 +408,12 @@ namespace Hades.Language.Lexer
                     return CreateToken(Classifier.RightBracket);
 
                 case '[':
+                    inBracket = !inBracket;
                     Consume();
                     return CreateToken(Classifier.LeftBrace);
 
                 case ']':
+                    inBracket = !inBracket;
                     Consume();
                     return CreateToken(Classifier.RightBrace);
 
@@ -572,9 +586,12 @@ namespace Hades.Language.Lexer
                 
                 case '?':
                     Consume();
-
                     return CreateToken(Classifier.Question);
 
+                case '.':
+                    Consume();
+                    return CreateToken(Classifier.Dot);
+                
                 default: return ScanWord();
             }
         }

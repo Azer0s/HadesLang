@@ -114,7 +114,9 @@ namespace Hades.Syntax.Lexeme
         Arrow, // ->
         FatArrow, // =>
         Underscore, //_
-        At //@
+        At, //@
+        Dot, //.
+        MultidimensionalArrayAccess //1.2.3.4.5
 
         #endregion Punctuation 
     }

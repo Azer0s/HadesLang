@@ -9,7 +9,7 @@ namespace Hades.Syntax.Expression.Nodes
         // ReSharper disable once MemberCanBePrivate.Global
         public Datatype? Datatype { get; set; } = null;
         public bool Array { get; set; }
-        public int ArraySize { get; set; }
+        public Node ArraySize { get; set; }
         public bool InfiniteArray { get; set; }
         public Node Assignment { get; set; }
         public bool Dynamic { get; set; }
@@ -19,16 +19,17 @@ namespace Hades.Syntax.Expression.Nodes
         {
         }
 
-        public override string ToString()
+        protected override string ToStr()
         {
             var nullable = Nullable ? " nullable" : "";
             var dynamic = Dynamic ? " dynamic" : "";
             var mutable = Mutable ? " mutable" : " imutable";
             var array = Array ? " array" : "";
-            var datatype = Datatype == null ? "" : " " + Datatype.ToString().ToLower();
+            var arraySize = ArraySize != null ? " (" + ArraySize + ")" : "";
+            var datatype = Datatype != null ? " " + Datatype.ToString().ToLower() : "";
             var assignment = Assignment != null ? "'" + Assignment + "'" : "";
             var withAssignment = assignment != "" ? " with assignment " : ""; 
-            return $"Create{nullable}{dynamic}{mutable}{array}{datatype} variable {Name}{withAssignment}{assignment}";
+            return $"Create{nullable}{dynamic}{mutable}{datatype}{array}{arraySize} variable {Name}{withAssignment}{assignment}";
         }
     }
 }
