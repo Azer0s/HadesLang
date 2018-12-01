@@ -1,4 +1,4 @@
-namespace Hades.Syntax.Nodes
+namespace Hades.Syntax.Expression.Nodes
 {
     public class RootNode : Node
     {

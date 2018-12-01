@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hades.Core", "Hades.Core\Hades.Core.csproj", "{54BC2912-B7A1-44B3-B2E9-41A0C48FBADE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hades.Source", "Hades.Source\Hades.Source.csproj", "{BA0B3145-12A6-4A91-807C-151A62C4D59D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hades.Syntax", "Hades.Syntax\Hades.Syntax.csproj", "{9CBB69AF-EAC6-4556-9495-4F06D295726C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hades.Common", "Hades.Common\Hades.Common.csproj", "{1F693DED-1D90-47C8-9EC0-EEE047E24C59}"
@@ -24,10 +22,6 @@ Global
 		{54BC2912-B7A1-44B3-B2E9-41A0C48FBADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54BC2912-B7A1-44B3-B2E9-41A0C48FBADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54BC2912-B7A1-44B3-B2E9-41A0C48FBADE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BA0B3145-12A6-4A91-807C-151A62C4D59D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA0B3145-12A6-4A91-807C-151A62C4D59D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA0B3145-12A6-4A91-807C-151A62C4D59D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA0B3145-12A6-4A91-807C-151A62C4D59D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9CBB69AF-EAC6-4556-9495-4F06D295726C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9CBB69AF-EAC6-4556-9495-4F06D295726C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CBB69AF-EAC6-4556-9495-4F06D295726C}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hades.Source
+namespace Hades.Common.Source
 {
     public struct SourceLocation : IEquatable<SourceLocation>
     {

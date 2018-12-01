@@ -1,4 +1,4 @@
-namespace Hades.Language.Lexer
+namespace Hades.Syntax.Lexeme
 {
     public enum Classifier
     {

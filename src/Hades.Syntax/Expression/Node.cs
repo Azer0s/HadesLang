@@ -1,6 +1,4 @@
-﻿using Hades.Common;
-
-namespace Hades.Syntax
+﻿namespace Hades.Syntax.Expression
 {
     public abstract class Node
     {
