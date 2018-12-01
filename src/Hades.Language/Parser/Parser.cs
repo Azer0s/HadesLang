@@ -43,6 +43,11 @@ namespace Hades.Language.Parser
         {
             throw new Exception($"{error} {Current.Span.Start.Line}:{Current.Span.Start.Index}");
         }
+
+        private void Error(string error, params object[] format)
+        {
+            Error(string.Format(error,format));
+        }
         
         #endregion
 
@@ -58,9 +63,19 @@ namespace Hades.Language.Parser
             return Lexer.Lexer.Keywords.Contains(Current.Value);
         }
 
+        private bool Type(Token token)
+        {
+            return Enum.GetValues(typeof(Datatype)).Cast<Datatype>().Select(a => a.ToString().ToLower()).Contains(token.Value);
+        }
+
         private bool IsType()
         {
-            return Enum.GetValues(typeof(Datatype)).Cast<Datatype>().Select(a => a.ToString().ToLower()).Contains(Current.Value);
+            return Type(Current);
+        }
+
+        private bool ExpectType()
+        {
+            return Type(Next);
         }
 
         private bool IsIdentifier()
@@ -68,6 +83,11 @@ namespace Hades.Language.Parser
             return Is(Classifier.Identifier);
         }
 
+        private bool Was(string token)
+        {
+            return Last == token;
+        }
+        
         private bool Is(string token)
         {
             return Current == token;
@@ -167,7 +187,27 @@ namespace Hades.Language.Parser
         
         private Node ParseVariableDeclaration()
         {
-            var variable = new VariableDeclarationNode {Mutable = Is(Keyword.Var)};            
+            var variable = new VariableDeclarationNode {Mutable = Is(Keyword.Var)};
+
+            if (Expect(Classifier.Mul))
+            {
+                if (Is(Keyword.Let))
+                {
+                    Advance();
+                    Error(ErrorStrings.MESSAGE_IMMUTABLE_CANT_BE_DYNAMIC);
+                }
+                
+                Advance();
+
+                if (ExpectType())
+                {
+                    Advance();
+                    Error(ErrorStrings.MESSAGE_DYNAMIC_NOT_POSSIBLE_WITH_STATIC_TYPES);
+                }
+                
+                variable.Dynamic = true;
+            }
+            
             Advance();
 
             if (IsType())
@@ -176,6 +216,22 @@ namespace Hades.Language.Parser
                 Advance();
             }
 
+            if (Is(Classifier.Question))
+            {
+                if (variable.Datatype == null)
+                {
+                    Error(ErrorStrings.MESSAGE_TYPE_INFERED_CANT_BE_NULLABLE);
+                }
+
+                if (!variable.Mutable)
+                {
+                    Advance(-2);
+                    Error(ErrorStrings.MESSAGE_IMMUTABLE_CANT_BE_NULLABLE);
+                }
+
+                variable.Nullable = true;
+            }
+            
             if (Is(Classifier.LeftBrace))
             {
                 variable.Array = true;
@@ -189,7 +245,7 @@ namespace Hades.Language.Parser
                          Advance();
                          if (!Is(Classifier.RightBrace))
                          {
-                             Error(string.Format(ErrorStrings.MESSAGE_EXPECTED_TOKEN, Current.Kind.ToString()));
+                             Error(ErrorStrings.MESSAGE_EXPECTED_TOKEN, Current.Kind.ToString());
                          }
                      }
                      else
@@ -247,7 +303,7 @@ namespace Hades.Language.Parser
             }
             else
             {
-                Error(string.Format(ErrorStrings.MESSAGE_UNEXPECTED_TOKEN, Current.Value));
+                Error(ErrorStrings.MESSAGE_UNEXPECTED_TOKEN, Current.Value);
             }
 
             return null;
@@ -294,7 +350,7 @@ namespace Hades.Language.Parser
                 
                 if (node == null)
                 {
-                    Error(string.Format(ErrorStrings.MESSAGE_INVALID_LITERAL, Current.Value));
+                    Error(ErrorStrings.MESSAGE_INVALID_LITERAL, Current.Value);
                 }
                 
                 Advance();
