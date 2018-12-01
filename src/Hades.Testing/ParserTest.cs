@@ -57,7 +57,7 @@ namespace Hades.Testing
         [TestCase("var a")]
         [TestCase("let a")]
         [Test]
-        public void EnsureVariableDeclaration()
+        public void EnsureVariableDeclaration(string code)
         {
             
         }
