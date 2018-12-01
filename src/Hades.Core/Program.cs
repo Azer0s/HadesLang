@@ -10,12 +10,15 @@ namespace Hades.Core
     {
         public static int Main(string[] args)
         {
-            switch (args.First())
+            if (args.Length != 0)
             {
+                switch (args.First())
+                {
                     case "new":
                         return ProjectInitializer.Run(args.Skip(1).ToList());
                     case "package":
                         return 0;
+                }
             }
             
             while (true)
