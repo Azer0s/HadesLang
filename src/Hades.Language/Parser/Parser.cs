@@ -82,6 +82,11 @@ namespace Hades.Language.Parser
         {
             return Is(Classifier.Identifier);
         }
+
+        private bool Was(Classifier classifier)
+        {
+            return Last == classifier;
+        }
         
         private bool Is(string token)
         {
@@ -121,7 +126,83 @@ namespace Hades.Language.Parser
         
         private Node ParseFunc()
         {
-            throw new NotImplementedException();
+            Advance();
+            var node = new FunctionNode();
+            if (Is(Classifier.Not))
+            {
+                node.Override = true;
+                Advance();
+            }
+
+            if (!Is(Category.Identifier))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+            }
+            
+            if (Expect(Category.Operator))
+            {
+                if (!node.Override)
+                {
+                    Error(ErrorStrings.MESSAGE_OVERRIDE_WITHOUT_DECLARATION);
+                }
+                Advance();
+                node.Name = Current.Value;
+            }
+            else
+            {
+                if (!Is(Category.Identifier))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+                }
+
+                node.Name = Current.Value;
+                Advance();
+            }
+
+            if (!Is(Classifier.LeftParenthesis))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
+            }
+
+            if (!Expect(Classifier.RightParenthesis))
+            {            
+                do
+                {
+                    Advance();
+                    if (IsType())
+                    {
+                        node.Parameters.Add(new IdentifierNode(Next.Value),(Datatype)Enum.Parse(typeof(Datatype), Current.Value.ToUpper()));
+                        Advance(2);
+                    }
+                    else
+                    {
+                        node.Parameters.Add(new IdentifierNode(Current.Value),null);
+                        Advance();
+                    }
+                } while (Is(Classifier.Comma));
+                
+                if (!Is(Classifier.RightParenthesis))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+                }
+                
+                Advance();
+            }
+
+            if (Is(Keyword.Requires))
+            {
+                Advance();
+                node.Guard = ParseStatement();
+            }
+            
+            while (!Is(Keyword.End))
+            {
+                node.Children.Add(ParseNext());
+            }
+            
+            Advance();
+            node.Children = node.Children.Where(a => a != null).ToList();
+            return node;
         }
         
         #endregion
@@ -197,6 +278,11 @@ namespace Hades.Language.Parser
             var node = new CallNode {Source = baseNode, Target = new IdentifierNode(Current.Value)};
             Advance();
 
+            return ParseCallSignature(node);
+        }
+        
+        private Node ParseCallSignature(CallNode node)
+        {
             if (Is(Classifier.LeftParenthesis))
             {
                 Advance();
@@ -345,6 +431,49 @@ namespace Hades.Language.Parser
 
             return variable;
         }
+
+        private Node ParseArrayOrLambda()
+        {
+            Advance();
+
+            var parameters = new List<Node>();
+            
+            while ((Expect(Classifier.Comma) && !Is(Classifier.FatArrow)) || Expect(Classifier.FatArrow))
+            {
+                parameters.Add(ParseStatement());
+                Advance();
+            }
+
+            //Lambda
+            Node n;
+            if (parameters.TrueForAll(a => a.Classifier == Syntax.Expression.Classifier.Identifier) && Was(Classifier.FatArrow))
+            {
+                var node = new LambdaNode();
+                node.Parameters.AddRange(parameters);
+                
+                while (!Is(Classifier.RightBracket))
+                {
+                    node.Children.Add(ParseNext());
+                }
+
+                if (node.Children.Count == 1)
+                {
+                    node.Complex = false;
+                }
+                
+                Advance();
+                node.Children = node.Children.Where(a => a != null).ToList();
+                n = node;
+            }
+            else
+            {
+                //TODO: Array
+                var node = new IdentifierNode("");
+                n = node;
+            }
+
+            return n;
+        }
         
         #endregion
         
@@ -358,6 +487,7 @@ namespace Hades.Language.Parser
                 node.Children.Add(ParseNext());
             }
 
+            node.Children = node.Children.Where(a => a != null).ToList();
             return node;
         }
         
@@ -381,12 +511,19 @@ namespace Hades.Language.Parser
             {
                 switch (Current.Value)
                 {
+                    case Keyword.Put:
+                        Advance();
+                        return new PutNode {Statement = ParseStatement()};
+                    
+                    case Keyword.Func:
+                        return ParseFunc();
+                    
                     default:
                         return ParseStatement();
                 }
             }
 
-            if (IsIdentifier() || (Is(Category.Literal) && Expect(Classifier.Arrow)) || (Is(Category.Literal) && Expect(Category.Operator)) || Is(Classifier.LeftParenthesis))
+            if (IsIdentifier() || (Is(Category.Literal) && Expect(Classifier.Arrow)) || (Is(Category.Literal) && Expect(Category.Operator)) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket))
             {
                 return ParseStatement();
             }
@@ -421,7 +558,7 @@ namespace Hades.Language.Parser
 
             Node getOperation(Node initial = null)
             {
-                var ops = new OperationListNode();
+                var ops = new OperationNode();
                 if (initial != null)
                 {
                     ops.Operations.Add(initial);
@@ -429,13 +566,13 @@ namespace Hades.Language.Parser
                 
                 while (Is(Category.Operator))
                 {
-                    ops.Operations.Add(new OperationNode(Current.Kind, Current.Value));
+                    ops.Operations.Add(new OperationNodeNode(Current.Kind, Current.Value));
                     Advance();
                     ops.Operations.Add(ParseStatement());
                 }
                 return ops;
             }
-
+            
             if (Is(Category.Operator))
             {
                 node = getOperation(node);
@@ -445,6 +582,15 @@ namespace Hades.Language.Parser
             {
                 Advance();
                 return new NullConditionNode{Condition = node, Operation = ParseStatement()};
+            }
+
+            //Call on lambdas
+            if (node is LambdaNode)
+            {
+                if (Is(Classifier.Colon) || Is(Classifier.LeftParenthesis))
+                {
+                    return ParseCallSignature(new CallNode{Source = node, Target = new IdentifierNode("anonymous")});
+                }
             }
             
             return node;
@@ -535,6 +681,11 @@ namespace Hades.Language.Parser
                 return node;
             }
 
+            if (Is(Classifier.LeftBracket))
+            {
+                return ParseArrayOrLambda();
+            }
+            
             if (Is(Classifier.MultidimensionalArrayAccess))
             {
                 Advance();

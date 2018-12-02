@@ -117,5 +117,12 @@ namespace Hades.Testing
         {
             FailTest(code,fail);
         }
+
+        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\nconsole->out:\"a is 11\"\nend",false)]
+        [Test]
+        public void ProgramTest(string code, bool fail)
+        {
+            FailTest(code,fail);
+        }
     }
 }

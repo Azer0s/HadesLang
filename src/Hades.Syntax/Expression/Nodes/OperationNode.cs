@@ -3,11 +3,11 @@ using Hades.Syntax.Expression.LiteralNodes;
 
 namespace Hades.Syntax.Expression.Nodes
 {
-    public class OperationListNode : Node
+    public class OperationNode : Node
     {
         public List<Node> Operations { get; set; } = new List<Node>();
         
-        public OperationListNode() : base(Classifier.Operation){}
+        public OperationNode() : base(Classifier.Operation){}
 
         protected override string ToStr()
         {
@@ -17,10 +17,10 @@ namespace Hades.Syntax.Expression.Nodes
             {
                 switch (operation)
                 {
-                    case OperationListNode _:
+                    case OperationNode _:
                         str += $"[{operation}]";
                         break;
-                    case OperationNode operationNode:
+                    case OperationNodeNode operationNode:
                         str += $" {operationNode.Representation} ";
                         break;
                     default:

@@ -347,7 +347,7 @@ namespace Hades.Language.Lexer
                 Consume();
             }
 
-            if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF())
+            if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF() && !IsNewLine())
             {
                 return ScanWord();
             }
@@ -387,7 +387,7 @@ namespace Hades.Language.Lexer
                 return i > 0 ? ScanDec() : ScanWord("Literal can't start with .");
             }
 
-            if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF())
+            if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF() && !IsNewLine())
             {
                 return ScanWord();
             }

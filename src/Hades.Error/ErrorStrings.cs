@@ -3,6 +3,8 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_EXPECTED_LEFT_PARENTHESIS = "Expected left parenthesis!";
+        public const string MESSAGE_OVERRIDE_WITHOUT_DECLARATION = "Function can't override another function or an operator without being marked as an override function!";
         public const string MESSAGE_EXPECTED_RIGHT_PARENTHESIS = "Expected right parenthesis!";
         public const string MESSAGE_EXPECTED_COMMA = "Expected a comma!";
         public const string MESSAGE_EXPECTED_PARAMETERS = "Expected parameters!";

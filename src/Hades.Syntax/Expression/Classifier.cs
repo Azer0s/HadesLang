@@ -14,6 +14,9 @@
         Identifier,
         Operation,
         NullCondition,
-        Exception
+        Exception,
+        Lambda,
+        Put,
+        Function
     }
 }
