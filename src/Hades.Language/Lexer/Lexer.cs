@@ -27,6 +27,7 @@ namespace Hades.Language.Lexer
             Keyword.In,
             Keyword.Stop,
             Keyword.Skip,
+            Keyword.Raise,
             Keyword.Try,
             Keyword.Catch,
             Keyword.Default,

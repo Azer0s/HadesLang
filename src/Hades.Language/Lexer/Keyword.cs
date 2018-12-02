@@ -29,5 +29,6 @@ namespace Hades.Language.Lexer
         public const string As = "as";
         public const string Sets = "sets";
         public const string Put = "put";
+        public const string Raise = "raise";
     }
 }

@@ -1,4 +1,4 @@
-namespace Hades.Syntax.Expression.Nodes
+namespace Hades.Syntax.Expression.LiteralNodes
 {
     public class OperationNode : LiteralNode<Hades.Syntax.Lexeme.Classifier>
     {

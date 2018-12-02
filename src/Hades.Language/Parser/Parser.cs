@@ -361,6 +361,10 @@ namespace Hades.Language.Parser
             return node;
         }
         
+        /// <summary>
+        /// Parses blocks
+        /// </summary>
+        /// <returns></returns>
         private Node ParseNext()
         {
             while(Is(Classifier.NewLine) || Is(Category.Comment))
@@ -377,9 +381,6 @@ namespace Hades.Language.Parser
             {
                 switch (Current.Value)
                 {
-                    case Keyword.With:
-                        return ParsePackageImport();
-                    
                     default:
                         return ParseStatement();
                 }
@@ -395,6 +396,10 @@ namespace Hades.Language.Parser
             return null;
         }
 
+        /// <summary>
+        /// For statements that can have more complex nodes within the statement
+        /// </summary>
+        /// <returns></returns>
         private Node ParseStatement()
         {
             if (Is(Classifier.LeftParenthesis))
@@ -435,10 +440,20 @@ namespace Hades.Language.Parser
             {
                 node = getOperation(node);
             }
+
+            if (Is(Classifier.NullCondition))
+            {
+                Advance();
+                return new NullConditionNode{Condition = node, Operation = ParseStatement()};
+            }
             
             return node;
         }
 
+        /// <summary>
+        /// For less complex statements (statements that do not require a preceding node
+        /// </summary>
+        /// <returns>Node</returns>
         private Node ParseStatementWithoutOperation()
         {
             if (IsEof())
@@ -454,19 +469,25 @@ namespace Hades.Language.Parser
                     case Keyword.Let:
                         return ParseVariableDeclarationAndAssignment();
                     
-                    case Keyword.Func:
-                        return ParseFunc();
+                    case Keyword.With:
+                        return ParsePackageImport();
+                    
+                    case Keyword.Raise:
+                        Advance();
+                        return new RaiseNode {Exception = ParseStatement()};
                 }
             }
 
             if (Is(Classifier.Identifier) && !IsKeyword())
             {
+                //Call on object
                 if (Expect(Classifier.Arrow))
                 {
                     Advance(2);
                     return ParseCall(new IdentifierNode(Peek(-2).Value));
                 }
 
+                //Call on this
                 if (Expect(Classifier.Colon) || Expect(Classifier.LeftParenthesis))
                 {
                     return ParseCall(new IdentifierNode("this"));
@@ -522,7 +543,7 @@ namespace Hades.Language.Parser
             
             return null;
         }
-        
+
         #endregion
 
         #endregion

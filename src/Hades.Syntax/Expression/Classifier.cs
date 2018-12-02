@@ -12,6 +12,8 @@
         MultidimensionalArrayAccess,
         Call,
         Identifier,
-        Operation
+        Operation,
+        NullCondition,
+        Exception
     }
 }
