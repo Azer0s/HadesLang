@@ -7,7 +7,7 @@ namespace Hades.Syntax.Expression.Nodes
         public bool Mutable { get; set; }
         public string Name { get; set; }
         // ReSharper disable once MemberCanBePrivate.Global
-        public Datatype? Datatype { get; set; } = null;
+        public Datatype? Datatype { get; set; }
         public bool Array { get; set; }
         public Node ArraySize { get; set; }
         public bool InfiniteArray { get; set; }

@@ -142,8 +142,8 @@ namespace Hades.Language.Parser
 
             if (Expect(Keyword.As))
             {
-                Advance();
-                Advance();
+                Advance(2);
+                
 
                 if (!IsIdentifier())
                 {
@@ -168,8 +168,7 @@ namespace Hades.Language.Parser
                     node.Native = true;
                     node.NativePackage = Current.Value;
                     
-                    Advance();
-                    Advance();
+                    Advance(2);
                     if (!IsIdentifier())
                     {
                         Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
@@ -187,7 +186,62 @@ namespace Hades.Language.Parser
 
             return node;
         }
-        
+
+        private Node ParseCall(Node baseNode)
+        {
+            if (!Is(Classifier.Identifier))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+            }
+
+            var node = new CallNode {Source = baseNode, Target = new IdentifierNode(Current.Value)};
+            Advance();
+
+            if (Is(Classifier.LeftParenthesis))
+            {
+                Advance();
+                if (Is(Classifier.RightParenthesis))
+                {
+                    Advance();
+                }
+                else
+                {
+                    do
+                    {
+                        var name = "";
+                        if (Is(Classifier.Identifier) && Expect(Classifier.Assignment))
+                        {
+                            name = Current.Value;
+                            Advance(2);
+                        }
+                        
+                        node.Parameters.Add(ParseStatement(),name);
+
+                        if (!Is(Classifier.RightParenthesis))
+                        {
+                            if (!Is(Classifier.Comma))
+                            {
+                                Error(ErrorStrings.MESSAGE_EXPECTED_COMMA);
+                            }
+                            Advance();
+                        }
+                        
+                    } while (!Is(Classifier.RightParenthesis));
+                    Advance();
+                }
+            }
+            else if (Is(Classifier.Colon))
+            {
+                Advance();
+                node.Parameters.Add(ParseStatement(),"");
+            }
+            else
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_PARAMETERS);
+            }
+
+            return node;
+        }
         #endregion
         
         #region Variables
@@ -320,14 +374,12 @@ namespace Hades.Language.Parser
                 }
             }
 
-            if (IsIdentifier())
+            if (IsIdentifier() || (Is(Category.Literal) && Expect(Classifier.Arrow)))
             {
-                
+                return ParseStatement();
             }
-            else
-            {
-                Error(ErrorStrings.MESSAGE_UNEXPECTED_TOKEN, Current.Value);
-            }
+
+            Error(ErrorStrings.MESSAGE_UNEXPECTED_TOKEN, Current.Value);
 
             return null;
         }
@@ -352,6 +404,23 @@ namespace Hades.Language.Parser
                 }
             }
 
+            if (Is(Classifier.Identifier) && !IsKeyword())
+            {
+                if (Expect(Classifier.Arrow))
+                {
+                    Advance(2);
+                    return ParseCall(new IdentifierNode(Peek(-2).Value));
+                }
+
+                if (Expect(Classifier.Colon) || Expect(Classifier.LeftParenthesis))
+                {
+                    return ParseCall(new IdentifierNode("this"));
+                }
+                
+                Advance();
+                return new IdentifierNode(Last.Value);
+            }
+            
             if (Is(Category.Literal))
             {
                 Node node = null;
@@ -380,6 +449,13 @@ namespace Hades.Language.Parser
                 }
                 
                 Advance();
+                
+                if (Is(Classifier.Arrow))
+                {
+                    Advance();
+                    return ParseCall(node);
+                }
+                
                 return node;
             }
 

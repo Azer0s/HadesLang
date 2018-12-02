@@ -9,6 +9,8 @@
         BoolLiteral,
         StringLiteral,
         DecLiteral,
-        MultidimensionalArrayAccess
+        MultidimensionalArrayAccess,
+        Call,
+        Identifier
     }
 }

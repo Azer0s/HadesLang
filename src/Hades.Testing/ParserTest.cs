@@ -10,6 +10,21 @@ namespace Hades.Testing
     [TestFixture]
     public class ParserTest
     {
+        private void FailTest(string code, bool fail)
+        {
+            var lexer = new Lexer();
+            var parser = new Parser(lexer.LexFile(code));
+
+            if (fail)
+            {
+                Assert.Throws<Exception>(() => parser.Parse());
+            }
+            else
+            {
+                Assert.DoesNotThrow(() => parser.Parse());
+            }
+        }
+        
         [TestCase("with server", "server", "server", "server", false, null)]
         [TestCase("with server as foo", "server", "server", "foo", false, null)]
         [TestCase("with console from std:io","io","console","console",true, "std")]
@@ -87,17 +102,20 @@ namespace Hades.Testing
         [Test]
         public void EnsureVariableDeclaration(string code, bool fail)
         {
-            var lexer = new Lexer();
-            var parser = new Parser(lexer.LexFile(code));
+            FailTest(code,fail);
+        }
 
-            if (fail)
-            {
-                Assert.Throws<Exception>(() => parser.Parse());
-            }
-            else
-            {
-                Assert.DoesNotThrow(() => parser.Parse());
-            }
+        [TestCase("exceptions->ArgumentNullException(\"{} is null\"->format(nameof(b)))", false)]
+        [TestCase("console->print(\"Variable is of type string\")", false)]
+        [TestCase("console->out:\"Connection open!\"", false)]
+        [TestCase("square(a)", false)]
+        [TestCase("root(a)", false)]
+        [TestCase("square:a,b", true)]
+        [TestCase("root(a", true)]
+        [Test]
+        public void EnsureCall(string code, bool fail)
+        {
+            FailTest(code,fail);
         }
     }
 }
