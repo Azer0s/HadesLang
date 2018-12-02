@@ -11,6 +11,7 @@
         DecLiteral,
         MultidimensionalArrayAccess,
         Call,
-        Identifier
+        Identifier,
+        Operation
     }
 }

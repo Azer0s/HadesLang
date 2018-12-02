@@ -82,11 +82,6 @@ namespace Hades.Language.Parser
         {
             return Is(Classifier.Identifier);
         }
-
-        private bool Was(string token)
-        {
-            return Last == token;
-        }
         
         private bool Is(string token)
         {
@@ -111,6 +106,11 @@ namespace Hades.Language.Parser
         private bool Expect(Classifier classifier)
         {
             return Next == classifier;
+        }
+        
+        private bool Expect(Category category)
+        {
+            return Next.Category == category;
         }
 
         #endregion
@@ -281,7 +281,7 @@ namespace Hades.Language.Parser
             {
                 if (variable.Datatype == null && Peek(2) != Classifier.Assignment)
                 {
-                    Error(ErrorStrings.MESSAGE_TYPE_INFERED_CANT_BE_NULLABLE);
+                    Error(ErrorStrings.MESSAGE_TYPE_INFERRED_CANT_BE_NULLABLE);
                 }
 
                 if (!variable.Mutable)
@@ -362,6 +362,16 @@ namespace Hades.Language.Parser
         
         private Node ParseNext()
         {
+            while(Is(Classifier.NewLine) || Is(Category.Comment))
+            {
+                Advance();
+            }
+
+            if (Is(Classifier.EndOfFile))
+            {
+                return null;
+            }
+            
             if (IsKeyword())
             {
                 switch (Current.Value)
@@ -374,7 +384,7 @@ namespace Hades.Language.Parser
                 }
             }
 
-            if (IsIdentifier() || (Is(Category.Literal) && Expect(Classifier.Arrow)))
+            if (IsIdentifier() || (Is(Category.Literal) && Expect(Classifier.Arrow)) || (Is(Category.Literal) && Expect(Category.Operator)) || Is(Classifier.LeftParenthesis))
             {
                 return ParseStatement();
             }
@@ -385,6 +395,50 @@ namespace Hades.Language.Parser
         }
 
         private Node ParseStatement()
+        {
+            if (Is(Classifier.LeftParenthesis))
+            {
+                Advance();
+                var n = ParseStatement();
+                
+                if (!Is(Classifier.RightParenthesis))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+                }
+                
+                Advance();
+                
+                return n;
+            }
+            
+            var node = ParseStatementWithoutOperation();
+
+            Node getOperation(Node initial = null)
+            {
+                var ops = new OperationListNode();
+                if (initial != null)
+                {
+                    ops.Operations.Add(initial);
+                }
+                
+                while (Is(Category.Operator))
+                {
+                    ops.Operations.Add(new OperationNode(Current.Kind, Current.Value));
+                    Advance();
+                    ops.Operations.Add(ParseStatement());
+                }
+                return ops;
+            }
+
+            if (Is(Category.Operator))
+            {
+                node = getOperation(node);
+            }
+            
+            return node;
+        }
+
+        private Node ParseStatementWithoutOperation()
         {
             if (IsEof())
             {

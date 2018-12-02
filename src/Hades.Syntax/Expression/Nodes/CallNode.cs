@@ -28,9 +28,14 @@ namespace Hades.Syntax.Expression.Nodes
 
                 str += $"{keyValuePair.Key}),";
             }
+
+            if (!string.IsNullOrEmpty(str))
+            {
+                str = str.Substring(0, str.Length - 1);
+                str = $" with parameters {str}";
+            }
             
-            str = str.Substring(0, str.Length - 1);
-            return $"{Target.Value} on ({Source}) with parameters {str}";
+            return $"{Target.Value} on ({Source}){str}";
         }
     }
 }

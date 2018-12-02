@@ -1,4 +1,4 @@
-namespace Hades.Language.Lexer
+namespace Hades.Syntax.Lexeme
 {
     public enum Category
     {
@@ -13,5 +13,8 @@ namespace Hades.Language.Lexer
         Operator,
 
         Invalid,
+        LeftHand,
+        Other,
+        Assignment
     }
 }

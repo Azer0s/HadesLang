@@ -1,7 +1,6 @@
 using System;
 using Hades.Common;
 using Hades.Common.Source;
-using Hades.Language.Lexer;
 
 namespace Hades.Syntax.Lexeme
 {
@@ -108,8 +107,8 @@ namespace Hades.Syntax.Lexeme
                 case Classifier.At:
                 case Classifier.Dot:
                 case Classifier.MultidimensionalArrayAccess:
-                    return Category.Punctuation;
-
+                    return Category.Punctuation;                
+                
                 case Classifier.Equal:
                 case Classifier.NotEqual:
                 case Classifier.Not:
@@ -118,37 +117,37 @@ namespace Hades.Syntax.Lexeme
                 case Classifier.GreaterThan:
                 case Classifier.GreaterThanOrEqual:
                 case Classifier.Minus:
-                case Classifier.MinusEqual:
-                case Classifier.MinusMinus:
                 case Classifier.Mod:
-                case Classifier.ModEqual:
                 case Classifier.Mul:
-                case Classifier.MulEqual:
                 case Classifier.Plus:
-                case Classifier.PlusEqual:
-                case Classifier.PlusPlus:
-                case Classifier.Question:
-                case Classifier.DivEqual:
                 case Classifier.Div:
                 case Classifier.BooleanOr:
                 case Classifier.BooleanAnd:
-                case Classifier.BitwiseXorEqual:
                 case Classifier.BitwiseXor:
-                case Classifier.BitwiseOrEqual:
                 case Classifier.BitwiseOr:
-                case Classifier.BitwiseAndEqual:
                 case Classifier.BitwiseAnd:
                 case Classifier.BitShiftLeft:
                 case Classifier.BitShiftRight:
+                case Classifier.BitwiseNegate:
+                    return Category.Operator;
+
+                case Classifier.MinusMinus:
+                case Classifier.PlusPlus:
+                    return Category.LeftHand;
+                    
+                case Classifier.Assignment:
+                case Classifier.MulEqual:
+                case Classifier.MinusEqual:
+                case Classifier.ModEqual:
+                case Classifier.PlusEqual:
+                case Classifier.BitwiseXorEqual:
+                case Classifier.BitwiseOrEqual:
+                case Classifier.BitwiseAndEqual:
                 case Classifier.BitShiftLeftEqual:
                 case Classifier.BitShiftRightEqual:
-                case Classifier.BitwiseNegate:
                 case Classifier.BitwiseNegateEqual:
-                case Classifier.Assignment:
-                case Classifier.NullCondition:
-                case Classifier.Pipeline:
-                case Classifier.Tag:
-                    return Category.Operator;
+                case Classifier.DivEqual:
+                    return Category.Assignment;
 
                 case Classifier.BlockComment:
                 case Classifier.LineComment:
@@ -179,6 +178,12 @@ namespace Hades.Syntax.Lexeme
 
                 case Classifier.Error:
                     return Category.Invalid;
+                
+                case Classifier.Pipeline:
+                case Classifier.Tag:
+                case Classifier.Question:
+                    return Category.Other;
+                
                 
                 default: return Category.Unknown;
             }

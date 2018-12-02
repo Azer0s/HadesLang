@@ -199,7 +199,7 @@ namespace Hades.Language.Lexer
 
         private bool IsWhiteSpace()
         {
-            return (char.IsWhiteSpace(Ch) || IsEOF()) && !IsNewLine();
+            return (char.IsWhiteSpace(Ch) || IsEOF() || Ch == 8203) && !IsNewLine();
         }
 
         #endregion
@@ -360,8 +360,24 @@ namespace Hades.Language.Lexer
                 return ScanWord();
             }
 
-            return IsBoolLiteral() ? CreateToken(Classifier.BoolLiteral) 
-                : CreateToken(IsKeyword() ? Classifier.Keyword : Classifier.Identifier);
+            if (IsBoolLiteral())
+            {
+                return CreateToken(Classifier.BoolLiteral);
+            }
+
+            switch (_builder.ToString())
+            {
+                case "and":
+                    return CreateToken(Classifier.BooleanAnd);
+                case "or":
+                    return CreateToken(Classifier.BooleanOr);
+                case "not":
+                    return CreateToken(Classifier.Not);
+                case "is":
+                    return CreateToken(Classifier.Equal);
+            }
+            
+            return CreateToken(IsKeyword() ? Classifier.Keyword : Classifier.Identifier);
         }
 
         private Token ScanInteger()

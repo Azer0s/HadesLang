@@ -27,7 +27,7 @@ namespace Hades.Syntax.Expression.Nodes
             var array = Array ? " array" : "";
             var arraySize = ArraySize != null ? " (" + ArraySize + ")" : "";
             var datatype = Datatype != null ? " " + Datatype.ToString().ToLower() : "";
-            var assignment = Assignment != null ? "'" + Assignment + "'" : "";
+            var assignment = Assignment != null ? "(" + Assignment + ")" : "";
             var withAssignment = assignment != "" ? " with assignment " : ""; 
             return $"Create{nullable}{dynamic}{mutable}{datatype}{array}{arraySize} variable {Name}{withAssignment}{assignment}";
         }
