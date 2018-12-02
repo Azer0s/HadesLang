@@ -685,7 +685,7 @@ namespace Hades.Language.Lexer
 
         private Token ScanWhiteSpace()
         {
-            while (IsWhiteSpace())
+            while (IsWhiteSpace() && Ch != '\0')
             {
                 Consume();
             }
