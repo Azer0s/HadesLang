@@ -4,7 +4,6 @@ using System.Linq;
 using Hades.Common;
 using Hades.Error;
 using Hades.Language.Lexer;
-using Hades.Syntax;
 using Hades.Syntax.Expression;
 using Hades.Syntax.Expression.LiteralNodes;
 using Hades.Syntax.Expression.Nodes;

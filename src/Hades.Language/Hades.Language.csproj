@@ -10,7 +10,4 @@
     <ProjectReference Include="..\Hades.Error\Hades.Error.csproj" />
     <ProjectReference Include="..\Hades.Syntax\Hades.Syntax.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Runtime" />
-  </ItemGroup>
 </Project>
