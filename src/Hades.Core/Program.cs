@@ -24,7 +24,9 @@ namespace Hades.Core
             while (true)
             {
                 var lexer = new Lexer();
+                Console.Write("hades>");
                 var tokens = lexer.LexFile(Console.ReadLine());
+                Console.WriteLine();
                 var parser = new Parser(tokens);
                 var root = parser.Parse();
                 Console.WriteLine(root);
