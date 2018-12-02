@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Hades.Syntax.Expression.Nodes
+namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
     public class LambdaNode : BlockNode
     {

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Hades.Syntax.Expression.LiteralNodes;
+using Hades.Syntax.Expression.Nodes.LiteralNodes;
 
 namespace Hades.Syntax.Expression.Nodes
 {

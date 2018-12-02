@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using Hades.Common;
 
-namespace Hades.Syntax.Expression.Nodes
+namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
     public class FunctionNode : BlockNode
     {

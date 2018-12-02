@@ -5,8 +5,9 @@ using Hades.Common;
 using Hades.Error;
 using Hades.Language.Lexer;
 using Hades.Syntax.Expression;
-using Hades.Syntax.Expression.LiteralNodes;
 using Hades.Syntax.Expression.Nodes;
+using Hades.Syntax.Expression.Nodes.BlockNodes;
+using Hades.Syntax.Expression.Nodes.LiteralNodes;
 using Hades.Syntax.Lexeme;
 using Classifier = Hades.Syntax.Lexeme.Classifier;
 
@@ -46,6 +47,18 @@ namespace Hades.Language.Parser
         private void Error(string error, params object[] format)
         {
             Error(string.Format(error,format));
+        }
+
+        private BlockNode ReadToEnd(BlockNode node, bool allowSkipStop = false)
+        {
+            while (!Is(Keyword.End))
+            {
+                node.Children.Add(ParseNext(allowSkipStop));
+            }
+            
+            Advance();
+            node.Children = node.Children.Where(a => a != null).ToList();
+            return node;
         }
         
         #endregion
@@ -194,14 +207,30 @@ namespace Hades.Language.Parser
                 node.Guard = ParseStatement();
             }
             
-            while (!Is(Keyword.End))
+            return ReadToEnd(node);
+        }
+
+        private Node ParseWhile()
+        {
+            Advance();
+            var node = new WhileNode();
+            if (!Is(Classifier.LeftParenthesis))
             {
-                node.Children.Add(ParseNext());
+                Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
             }
             
             Advance();
-            node.Children = node.Children.Where(a => a != null).ToList();
-            return node;
+
+            node.Condition = ParseStatement();
+
+            if (!Is(Classifier.RightParenthesis))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+            }
+
+            Advance();
+
+            return ReadToEnd(node,true);
         }
         
         #endregion
@@ -494,7 +523,7 @@ namespace Hades.Language.Parser
         /// Parses blocks
         /// </summary>
         /// <returns></returns>
-        private Node ParseNext()
+        private Node ParseNext(bool allowSkipStop = false)
         {
             while(Is(Classifier.NewLine) || Is(Category.Comment))
             {
@@ -508,6 +537,19 @@ namespace Hades.Language.Parser
             
             if (IsKeyword())
             {
+                if (allowSkipStop)
+                {
+                    if (Is(Keyword.Skip))
+                    {
+                        return new CommandNode(Keyword.Skip);
+                    }
+
+                    if (Is(Keyword.Stop))
+                    {
+                        return new CommandNode(Keyword.Stop);
+                    }
+                }
+                
                 switch (Current.Value)
                 {
                     case Keyword.Put:
@@ -517,6 +559,14 @@ namespace Hades.Language.Parser
                     case Keyword.Func:
                         return ParseFunc();
                     
+                    case Keyword.While:
+                        return ParseWhile();
+                    
+                    case Keyword.Skip:
+                    case Keyword.Stop:
+                        Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD,Current.Value);
+                        break;
+                        
                     default:
                         return ParseStatement();
                 }

@@ -1,7 +1,7 @@
 using System.Globalization;
 using Hades.Syntax.Lexeme;
 
-namespace Hades.Syntax.Expression.LiteralNodes
+namespace Hades.Syntax.Expression.Nodes.LiteralNodes
 {
     public class DecLiteralNode : LiteralNode<decimal>
     {

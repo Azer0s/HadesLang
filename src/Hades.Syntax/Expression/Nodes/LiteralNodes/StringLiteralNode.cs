@@ -1,6 +1,6 @@
 using Hades.Syntax.Lexeme;
 
-namespace Hades.Syntax.Expression.LiteralNodes
+namespace Hades.Syntax.Expression.Nodes.LiteralNodes
 {
     public class StringLiteralNode : LiteralNode<string>
     {

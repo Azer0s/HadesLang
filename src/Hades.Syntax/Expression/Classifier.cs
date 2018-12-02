@@ -17,6 +17,8 @@
         Exception,
         Lambda,
         Put,
-        Function
+        Function,
+        While,
+        Command
     }
 }

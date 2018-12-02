@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Hades.Syntax.Expression.Nodes
+namespace Hades.Syntax.Expression
 {
     public class RootNode : BlockNode
     {

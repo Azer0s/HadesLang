@@ -119,6 +119,8 @@ namespace Hades.Testing
         }
 
         [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\nconsole->out:\"a is 11\"\nend",false)]
+        [TestCase("while(c not 10)\nconsole->out(\"c is {}\"->format(c))\nend",false)]
+        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\nskip\nend",true)]
         [Test]
         public void ProgramTest(string code, bool fail)
         {
