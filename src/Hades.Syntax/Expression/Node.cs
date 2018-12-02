@@ -3,7 +3,6 @@
     public abstract class Node
     {
         public Classifier Classifier { get;  }
-        public Node Child { set; get; }
 
         protected abstract string ToStr();
         

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
@@ -18,8 +19,8 @@ namespace Hades.Testing
         {
             var lexer = new Lexer();
             var parser = new Parser(lexer.LexFile(code));
-            var nodes = parser.Parse();
-            var node = nodes.First();
+            var root = parser.Parse();
+            var node = root.Children.First();
             Assert.IsTrue(node is WithNode);
             var withNode = node as WithNode;
 
@@ -30,36 +31,73 @@ namespace Hades.Testing
             Assert.AreEqual(withNode.NativePackage, nativepackage);
         }
 
-        [TestCase("var string a = \"Hello\"")]
-        [TestCase("var int a = 12")]
-        [TestCase("var dec a = 1.2")]
-        [TestCase("var bool a = false")]
-        [TestCase("let string a = \"Hello\"")]
-        [TestCase("let int a = 12")]
-        [TestCase("let dec a = 1.2")]
-        [TestCase("let bool a = false")]
-        [TestCase("var a = \"Hello\"")]
-        [TestCase("var a = 12")]
-        [TestCase("var a = 1.2")]
-        [TestCase("var a = false")]
-        [TestCase("let a = \"Hello\"")]
-        [TestCase("let a = 12")]
-        [TestCase("let a = 1.2")]
-        [TestCase("let a = false")]
-        [TestCase("var string a")]
-        [TestCase("var int a")]
-        [TestCase("var dec a")]
-        [TestCase("var bool a")]
-        [TestCase("let string a")]
-        [TestCase("let int a")]
-        [TestCase("let dec a")]
-        [TestCase("let bool a")]
-        [TestCase("var a")]
-        [TestCase("let a")]
+        [TestCase("var string a = \"Hello\"", false)]
+        [TestCase("var int a = 12", false)]
+        [TestCase("var dec a = 1.2", false)]
+        [TestCase("var bool a = false", false)]
+        [TestCase("let string a = \"Hello\"", false)]
+        [TestCase("let int a = 12", false)]
+        [TestCase("let dec a = 1.2", false)]
+        [TestCase("let bool a = false", false)]
+        [TestCase("var a = \"Hello\"", false)]
+        [TestCase("var a = 12", false)]
+        [TestCase("var a = 1.2", false)]
+        [TestCase("var a = false", false)]
+        [TestCase("let a = \"Hello\"", false)]
+        [TestCase("let a = 12", false)]
+        [TestCase("let a = 1.2", false)]
+        [TestCase("let a = false", false)]
+        [TestCase("var string a", false)]
+        [TestCase("var int a", false)]
+        [TestCase("var dec a", false)]
+        [TestCase("var bool a", false)]
+        [TestCase("let string a", false)]
+        [TestCase("let int a", false)]
+        [TestCase("let dec a", false)]
+        [TestCase("let bool a", false)]
+        [TestCase("var a", false)]
+        [TestCase("let a", false)]
+        [TestCase("var string? a = \"Hello\"", false)]
+        [TestCase("var int? a = 12", false)]
+        [TestCase("var dec? a = 1.2", false)]
+        [TestCase("var bool? a = false", false)]
+        [TestCase("var* a = \"Hello\"", false)]
+        [TestCase("var* a = 12", false)]
+        [TestCase("var* a = 1.2", false)]
+        [TestCase("var* a = false", false)]
+        [TestCase("var? a = \"Hello\"", false)]
+        [TestCase("var? a = 12", false)]
+        [TestCase("var? a = 1.2", false)]
+        [TestCase("var? a = false", false)]
+        [TestCase("var string?[*] a", false)]
+        [TestCase("var int?[*] a", false)]
+        [TestCase("var dec?[*] a", false)]
+        [TestCase("var bool?[*] a", false)]
+        [TestCase("var*[] a", false)]
+        [TestCase("var* string a = \"Hello\"", true)]
+        [TestCase("var* int a = 12", true)]
+        [TestCase("var* dec a = 1.2", true)]
+        [TestCase("var* bool a = false", true)]
+        [TestCase("let* string a = \"Hello\"", true)]
+        [TestCase("let* int a = 12", true)]
+        [TestCase("let* dec a = 1.2", true)]
+        [TestCase("let* bool a = false", true)]
+        [TestCase("var? a", true)]
+        [TestCase("let? a", true)]
         [Test]
-        public void EnsureVariableDeclaration(string code)
+        public void EnsureVariableDeclaration(string code, bool fail)
         {
-            
+            var lexer = new Lexer();
+            var parser = new Parser(lexer.LexFile(code));
+
+            if (fail)
+            {
+                Assert.Throws<Exception>(() => parser.Parse());
+            }
+            else
+            {
+                Assert.DoesNotThrow(() => parser.Parse());
+            }
         }
     }
 }

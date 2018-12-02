@@ -1,3 +1,4 @@
+using System.Globalization;
 using Hades.Syntax.Lexeme;
 
 namespace Hades.Syntax.Expression.LiteralNodes
@@ -6,7 +7,7 @@ namespace Hades.Syntax.Expression.LiteralNodes
     {
         public DecLiteralNode(Token token) : base(Classifier.DecLiteral)
         {
-            Value = decimal.Parse(token.Value);
+            Value = decimal.Parse(token.Value, CultureInfo.InvariantCulture);
         }
     }
 }

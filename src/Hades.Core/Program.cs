@@ -26,15 +26,8 @@ namespace Hades.Core
                 var lexer = new Lexer();
                 var tokens = lexer.LexFile(Console.ReadLine());
                 var parser = new Parser(tokens);
-                var instructions = parser.Parse();
-                
-                foreach (var instruction in instructions)
-                {
-                    if (instruction != null)
-                    {
-                        Console.WriteLine(instruction);
-                    }
-                }
+                var root = parser.Parse();
+                Console.WriteLine(root);
             }
         }
     }

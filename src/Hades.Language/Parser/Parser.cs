@@ -225,7 +225,7 @@ namespace Hades.Language.Parser
 
             if (Is(Classifier.Question))
             {
-                if (variable.Datatype == null)
+                if (variable.Datatype == null && Peek(2) != Classifier.Assignment)
                 {
                     Error(ErrorStrings.MESSAGE_TYPE_INFERED_CANT_BE_NULLABLE);
                 }
@@ -236,6 +236,7 @@ namespace Hades.Language.Parser
                     Error(ErrorStrings.MESSAGE_IMMUTABLE_CANT_BE_NULLABLE);
                 }
 
+                Advance();
                 variable.Nullable = true;
             }
             
@@ -294,12 +295,15 @@ namespace Hades.Language.Parser
         
         #region Entry
         
-        public IEnumerable<Node> Parse()
+        public RootNode Parse()
         {
+            var node = new RootNode();
             while (!IsEof())
             {
-                yield return ParseNext();
+                node.Children.Add(ParseNext());
             }
+
+            return node;
         }
         
         private Node ParseNext()

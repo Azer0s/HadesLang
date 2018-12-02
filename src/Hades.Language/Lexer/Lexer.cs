@@ -171,6 +171,12 @@ namespace Hades.Language.Lexer
             return Keywords.Contains(_builder.ToString());
         }
 
+        private bool IsBoolLiteral()
+        {
+            var builder = _builder.ToString();
+            return builder == "true" || builder == "false";
+        }
+
         private bool IsLetter()
         {
             return char.IsLetter(Ch);
@@ -354,7 +360,8 @@ namespace Hades.Language.Lexer
                 return ScanWord();
             }
 
-            return CreateToken(IsKeyword() ? Classifier.Keyword : Classifier.Identifier);
+            return IsBoolLiteral() ? CreateToken(Classifier.BoolLiteral) 
+                : CreateToken(IsKeyword() ? Classifier.Keyword : Classifier.Identifier);
         }
 
         private Token ScanInteger()
