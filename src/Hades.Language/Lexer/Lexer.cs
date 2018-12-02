@@ -47,14 +47,6 @@ namespace Hades.Language.Lexer
             Keyword.Public,
             Keyword.Private
         };
-
-        private static readonly string[] ComparisonKeywords =
-        {
-            Keyword.Is,
-            Keyword.Not,
-            Keyword.And,
-            Keyword.Or
-        };
         
         private static readonly string[] ImportKeywords =
         {
@@ -78,7 +70,6 @@ namespace Hades.Language.Lexer
             var list = BlockKeywords.ToList();
             list.AddRange(VarKeywords.ToList());
             list.AddRange(AccessModifierKeywords.ToList());
-            list.AddRange(ComparisonKeywords.ToList());
             list.AddRange(ImportKeywords.ToList());
             list.AddRange(MiscKeywords.ToList());
 

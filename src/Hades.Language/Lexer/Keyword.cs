@@ -24,10 +24,6 @@ namespace Hades.Language.Lexer
         public const string Global = "global";
         public const string Public = "public";
         public const string Private = "private";
-        public const string Is = "is";
-        public const string Not = "not";
-        public const string And = "and";
-        public const string Or = "or";
         public const string With = "with";
         public const string From = "from";
         public const string As = "as";

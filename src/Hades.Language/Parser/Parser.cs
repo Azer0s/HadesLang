@@ -242,6 +242,7 @@ namespace Hades.Language.Parser
 
             return node;
         }
+        
         #endregion
         
         #region Variables
