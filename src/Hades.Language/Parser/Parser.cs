@@ -661,7 +661,7 @@ namespace Hades.Language.Parser
             {
                 if (Is(Classifier.Colon) || Is(Classifier.LeftParenthesis))
                 {
-                    return ParseCallSignature(new CallNode{Source = node, Target = new IdentifierNode("anonymous")}, false);
+                    node = ParseCallSignature(new CallNode{Source = node, Target = new IdentifierNode("anonymous")}, false);
                 }
             }
 
