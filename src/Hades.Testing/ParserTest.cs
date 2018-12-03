@@ -29,6 +29,8 @@ namespace Hades.Testing
         [TestCase("with server as foo", "server", "server", "foo", false, null)]
         [TestCase("with console from std:io","io","console","console",true, "std")]
         [TestCase("with math as m from std:math","math","math","m",true, "std")]
+        [TestCase("with console fixed from std:io","io","console","console",true, "std")]
+        [TestCase("with math fixed as m from std:math","math","math","m",true, "std")]
         [Test]
         public void EnsureWith(string code, string source, string target, string name, bool native, string nativepackage)
         {

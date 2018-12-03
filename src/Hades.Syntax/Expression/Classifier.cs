@@ -19,6 +19,8 @@
         Put,
         Function,
         While,
-        Command
+        Command,
+        ValueCall,
+        Assignment
     }
 }

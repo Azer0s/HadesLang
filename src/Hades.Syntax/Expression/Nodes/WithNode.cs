@@ -24,12 +24,14 @@ namespace Hades.Syntax.Expression.Nodes
         } //the name to be set
         
         public bool Native { get; set; } //for native imports like std libs
-        
+        public bool Fixed { get; set; }
+
         public WithNode() : base(Classifier.With){}
 
         protected override string ToStr()
         {
-            return Native ? $"Import {Target} from native package {NativePackage}:{Source} as {Name}" : $"Import {Target} from {Source} as {Name}";
+            var @fixed = Fixed ? " fixed " : " ";
+            return Native ? $"Import{@fixed}{Target} from native package {NativePackage}:{Source} as {Name}" : $"Import{@fixed}{Target} from {Source} as {Name}";
         }
     }
 }

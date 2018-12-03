@@ -54,7 +54,8 @@ namespace Hades.Language.Lexer
             Keyword.With,
             Keyword.From,
             Keyword.As,
-            Keyword.Sets
+            Keyword.Sets,
+            Keyword.Fixed
         };
 
         private static readonly string[] MiscKeywords =

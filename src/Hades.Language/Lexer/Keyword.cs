@@ -30,5 +30,6 @@ namespace Hades.Language.Lexer
         public const string Sets = "sets";
         public const string Put = "put";
         public const string Raise = "raise";
+        public const string Fixed = "fixed";
     }
 }

@@ -249,6 +249,12 @@ namespace Hades.Language.Parser
             
             node.Target = Current.Value;
 
+            if (Expect(Keyword.Fixed))
+            {
+                node.Fixed = true;
+                Advance();
+            }
+
             if (Expect(Keyword.As))
             {
                 Advance(2);
@@ -306,10 +312,10 @@ namespace Hades.Language.Parser
             var node = new CallNode {Source = baseNode, Target = new IdentifierNode(Current.Value)};
             Advance();
 
-            return ParseCallSignature(node);
+            return ParseCallSignature(node, true);
         }
         
-        private Node ParseCallSignature(CallNode node)
+        private Node ParseCallSignature(CallNode node, bool parseValueCall)
         {
             if (Is(Classifier.LeftParenthesis))
             {
@@ -351,10 +357,27 @@ namespace Hades.Language.Parser
             }
             else
             {
+                if (parseValueCall)
+                {
+                    return new ValueCallNode {Source = node.Source, Target = node.Target};
+                }
                 Error(ErrorStrings.MESSAGE_EXPECTED_PARAMETERS);
             }
 
             return node;
+        }
+
+        private Node ParseDeepCall(Node node)
+        {
+            Node deepcall = null;
+
+            while (Is(Classifier.Arrow))
+            {
+                Advance();
+                deepcall = ParseCall(deepcall ?? node);
+            }
+
+            return deepcall;
         }
         
         #endregion
@@ -638,8 +661,19 @@ namespace Hades.Language.Parser
             {
                 if (Is(Classifier.Colon) || Is(Classifier.LeftParenthesis))
                 {
-                    return ParseCallSignature(new CallNode{Source = node, Target = new IdentifierNode("anonymous")});
+                    return ParseCallSignature(new CallNode{Source = node, Target = new IdentifierNode("anonymous")}, false);
                 }
+            }
+
+            if (Is(Classifier.Arrow))
+            {
+                node = ParseDeepCall(node);
+            }
+
+            if (Is(Classifier.Assignment))
+            {
+                Advance();
+                return new AssignmentNode{Variable = node, Value = ParseStatement()};
             }
             
             return node;
