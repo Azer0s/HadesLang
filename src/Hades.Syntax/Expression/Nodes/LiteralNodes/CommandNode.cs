@@ -6,5 +6,10 @@ namespace Hades.Syntax.Expression.Nodes.LiteralNodes
         {
             Value = command;
         }
+
+        public override string ToString()
+        {
+            return $"Command: {Value}";
+        }
     }
 }

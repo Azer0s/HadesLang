@@ -23,7 +23,7 @@ namespace Hades.Language.Parser
 
         public Parser(IEnumerable<Token> tokens)
         {
-            _tokens = tokens.ToList().Where(a => a.Kind != Classifier.WhiteSpace);
+            _tokens = tokens.ToList().Where(a => a.Kind != Classifier.WhiteSpace && a.Category != Category.Comment);
             _index = 0;
         }
 
@@ -228,6 +228,50 @@ namespace Hades.Language.Parser
                 Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
             }
 
+            Advance();
+
+            return ReadToEnd(node,true);
+        }
+
+        private Node ParseFor()
+        {
+            Advance();
+            var node = new ForNode();
+
+            if (!Is(Classifier.LeftParenthesis))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
+            }
+            Advance();
+            var index = _index;
+            
+            try
+            {
+                node.Variable = ParseVariableDeclaration();
+            }
+            catch (Exception)
+            {
+                _index = index;
+                if (Is(Classifier.Identifier))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+                }
+                node.Variable = new IdentifierNode(Current.Value);
+                Advance();
+            }
+
+            if (!Is(Keyword.In))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_IN);
+            }
+            Advance();
+
+            node.Source = ParseStatement();
+
+            if (!Is(Classifier.RightParenthesis))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+            }
             Advance();
 
             return ReadToEnd(node,true);
@@ -548,12 +592,12 @@ namespace Hades.Language.Parser
         /// <returns></returns>
         private Node ParseNext(bool allowSkipStop = false)
         {
-            while(Is(Classifier.NewLine) || Is(Category.Comment))
+            while(Is(Classifier.NewLine))
             {
                 Advance();
             }
 
-            if (Is(Classifier.EndOfFile))
+            if (Is(Classifier.EndOfFile) || Is(Keyword.End))
             {
                 return null;
             }
@@ -564,11 +608,13 @@ namespace Hades.Language.Parser
                 {
                     if (Is(Keyword.Skip))
                     {
+                        Advance();
                         return new CommandNode(Keyword.Skip);
                     }
 
                     if (Is(Keyword.Stop))
                     {
+                        Advance();
                         return new CommandNode(Keyword.Stop);
                     }
                 }
@@ -584,6 +630,9 @@ namespace Hades.Language.Parser
                     
                     case Keyword.While:
                         return ParseWhile();
+                    
+                    case Keyword.For:
+                        return ParseFor();
                     
                     case Keyword.Skip:
                     case Keyword.Stop:

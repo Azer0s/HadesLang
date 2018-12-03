@@ -21,6 +21,7 @@
         While,
         Command,
         ValueCall,
-        Assignment
+        Assignment,
+        For
     }
 }
