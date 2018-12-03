@@ -124,6 +124,7 @@ namespace Hades.Testing
         [TestCase("while(c not 10)\nconsole->out(\"c is {}\"->format(c))\nend",false)]
         [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\nskip\nend",true)]
         [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\na->b = {x,y=>x+y}(1,2)->toString({x=>x})\nend",false)]
+        [TestCase("for(var arg in a)\nconsole->out:arg\nskip\nend\nfor(var arg in a)\nconsole->out:arg\nskip\nend", false)]
         [Test]
         public void ProgramTest(string code, bool fail)
         {
