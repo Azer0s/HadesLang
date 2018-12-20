@@ -1,5 +1,3 @@
-# Overview
-
 ## Getting Started
 
 Learning Hades and writing your first programs.
