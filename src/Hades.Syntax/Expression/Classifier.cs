@@ -22,6 +22,8 @@
         Command,
         ValueCall,
         Assignment,
-        For
+        For,
+        RightHand,
+        Misc
     }
 }

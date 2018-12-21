@@ -243,22 +243,30 @@ namespace Hades.Language.Parser
                 Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
             }
             Advance();
-            var index = _index;
-            
-            try
+
+            if (Is("_"))
             {
-                node.Variable = ParseVariableDeclaration();
-            }
-            catch (Exception)
-            {
-                _index = index;
-                if (Is(Classifier.Identifier))
-                {
-                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-                }
-                node.Variable = new IdentifierNode(Current.Value);
+                node.Variable = new NoVariableNode();
                 Advance();
             }
+            else
+            {
+                var index = _index;
+                try
+                {
+                    node.Variable = ParseVariableDeclaration();
+                }
+                catch (Exception)
+                {
+                    _index = index;
+                    if (Is(Classifier.Identifier))
+                    {
+                        Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+                    }
+                    node.Variable = new IdentifierNode(Current.Value);
+                    Advance();
+                }
+            }            
 
             if (!Is(Keyword.In))
             {
@@ -527,6 +535,36 @@ namespace Hades.Language.Parser
             return variable;
         }
 
+        private Node ParseAssignment(Node node)
+        {
+            Classifier GetNoAssignType(Classifier classifier)
+            {
+                return (Classifier) Enum.Parse(typeof(Classifier), classifier.ToString().Replace("Equal", ""));
+            }
+            
+            Advance();
+            switch (Last.Kind)
+            {
+                case Classifier.Assignment:
+                    return new AssignmentNode{Variable = node, Value = ParseStatement()};
+                default:
+                    return new AssignmentNode{Variable = node, Value = new OperationNode{Operations = new List<Node>{node,new OperationNodeNode(GetNoAssignType(Last.Kind),Last.Value.Replace("=","")),ParseStatement()}}};
+
+            }
+        }
+
+        private Node ParseRightHand(Node node)
+        {
+            Advance();
+            return new RightHandNode{BaseNode = node, Operation = new OperationNodeNode(Last.Kind, Last.Value), side = Side.RIGHT};
+        }
+
+        private Node ParseLeftHand(OperationNodeNode node)
+        {
+            Advance();
+            return new RightHandNode{BaseNode = ParseStatement(), Operation = node, side = Side.LEFT};
+        }
+
         private Node ParseArrayOrLambda()
         {
             Advance();
@@ -719,10 +757,19 @@ namespace Hades.Language.Parser
                 node = ParseDeepCall(node);
             }
 
-            if (Is(Classifier.Assignment))
+            if (Is(Category.Assignment))
             {
-                Advance();
-                return new AssignmentNode{Variable = node, Value = ParseStatement()};
+                return ParseAssignment(node);
+            }
+
+            if (Is(Category.RightHand))
+            {
+                return ParseRightHand(node);
+            }
+
+            if (Is(Category.LeftHand))
+            {
+                return ParseLeftHand(new OperationNodeNode(Current.Kind,Current.Value));
             }
             
             return node;

@@ -111,12 +111,10 @@ namespace Hades.Syntax.Lexeme
                 
                 case Classifier.Equal:
                 case Classifier.NotEqual:
-                case Classifier.Not:
                 case Classifier.LessThan:
                 case Classifier.LessThanOrEqual:
                 case Classifier.GreaterThan:
                 case Classifier.GreaterThanOrEqual:
-                case Classifier.Minus:
                 case Classifier.Mod:
                 case Classifier.Mul:
                 case Classifier.Plus:
@@ -133,6 +131,11 @@ namespace Hades.Syntax.Lexeme
 
                 case Classifier.MinusMinus:
                 case Classifier.PlusPlus:
+                    return Category.RightHand;
+                    
+                //Have to do this, check on runtime for cases like this
+                case Classifier.Minus:
+                case Classifier.Not:
                     return Category.LeftHand;
                     
                 case Classifier.Assignment:

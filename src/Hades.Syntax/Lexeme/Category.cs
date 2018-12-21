@@ -15,6 +15,7 @@ namespace Hades.Syntax.Lexeme
         Invalid,
         LeftHand,
         Other,
-        Assignment
+        Assignment,
+        RightHand
     }
 }
