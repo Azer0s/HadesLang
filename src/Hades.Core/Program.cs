@@ -25,18 +25,18 @@ namespace Hades.Core
             {
                 var lexer = new Lexer();
                 Console.Write("hades>");
-                var tokens = lexer.LexFile(Console.ReadLine());
-                Console.WriteLine();
-                var parser = new Parser(tokens);
-
+                
                 try
                 {
+                    var tokens = lexer.LexFile(Console.ReadLine());
+                    Console.WriteLine();
+                    var parser = new Parser(tokens);
                     var root = parser.Parse();
                     Console.WriteLine(root);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message + "\n");
+                    Console.WriteLine(e.Message);
                 }
             }
         }
