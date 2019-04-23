@@ -130,5 +130,16 @@ namespace Hades.Testing
         {
             FailTest(code,fail);
         }
+        
+        [TestCase("(1 + 2) + 3",false)]
+        [TestCase("(1 + 2) * (3 + (5 - 6))",false)]
+        [TestCase("(1) * (3 + (5))",false)]
+        [TestCase("1 + 2 * 3 - 4 / 5", false)]
+        [TestCase("1 + 2 * 3 - 4 / !5", false)]
+        [Test]
+        public void CalculationTest(string code, bool fail)
+        {
+            FailTest(code,fail);
+        }
     }
 }

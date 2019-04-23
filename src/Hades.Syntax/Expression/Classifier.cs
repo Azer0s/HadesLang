@@ -23,6 +23,7 @@
         ValueCall,
         Assignment,
         For,
+        LeftHand,
         RightHand,
         Misc
     }

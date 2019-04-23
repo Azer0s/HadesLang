@@ -8,17 +8,23 @@ namespace Hades.Syntax.Expression.Nodes
         RIGHT
     }
     
-    public class RightHandNode : Node
+    public class SideNode : Node
     {
-        public Node BaseNode;
-        public OperationNodeNode Operation;
-        public Side side;
+        private readonly Node BaseNode;
+        private readonly OperationNodeNode Operation;
+        private readonly Side Side;
         
-        public RightHandNode() : base(Classifier.RightHand){}
+        public SideNode(Node baseNode, OperationNodeNode operation, Side side) : base(side == Side.LEFT ? Classifier.LeftHand : Classifier.RightHand)
+        {
+            Side = side;
+            BaseNode = baseNode;
+            Operation = operation;
+        }
 
         protected override string ToStr()
         {
-            return $"{Operation.Representation} on ({BaseNode})";
+            var side = Side == Side.LEFT ? "LeftHand" : "RightHand";
+            return $"{side} {Operation.Representation} on ({BaseNode})";
         }
     }
 }

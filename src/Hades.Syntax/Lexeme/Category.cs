@@ -13,9 +13,9 @@ namespace Hades.Syntax.Lexeme
         Operator,
 
         Invalid,
-        LeftHand,
         Other,
         Assignment,
+        LeftHand,
         RightHand
     }
 }

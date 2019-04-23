@@ -556,13 +556,13 @@ namespace Hades.Language.Parser
         private Node ParseRightHand(Node node)
         {
             Advance();
-            return new RightHandNode{BaseNode = node, Operation = new OperationNodeNode(Last.Kind, Last.Value), side = Side.RIGHT};
+            return new SideNode(node, new OperationNodeNode(Last.Kind, Last.Value), Side.RIGHT);
         }
 
         private Node ParseLeftHand(OperationNodeNode node)
         {
             Advance();
-            return new RightHandNode{BaseNode = ParseStatement(), Operation = node, side = Side.LEFT};
+            return new SideNode(ParseStatement(), node, Side.LEFT);
         }
 
         private Node ParseArrayOrLambda()
@@ -682,7 +682,7 @@ namespace Hades.Language.Parser
                 }
             }
 
-            if (IsIdentifier() || (Is(Category.Literal) && Expect(Classifier.Arrow)) || (Is(Category.Literal) && Expect(Category.Operator)) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket))
+            if (IsIdentifier() || (Is(Category.Literal) && Expect(Classifier.Arrow)) || (Is(Category.Literal) && Expect(Category.Operator)) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket) || Is(Classifier.Not) || Is(Classifier.Minus))
             {
                 return ParseStatement();
             }
@@ -698,23 +698,6 @@ namespace Hades.Language.Parser
         /// <returns></returns>
         private Node ParseStatement()
         {
-            if (Is(Classifier.LeftParenthesis))
-            {
-                Advance();
-                var n = ParseStatement();
-                
-                if (!Is(Classifier.RightParenthesis))
-                {
-                    Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
-                }
-                
-                Advance();
-                
-                return n;
-            }
-            
-            var node = ParseStatementWithoutOperation();
-
             Node getOperation(Node initial = null)
             {
                 var ops = new OperationNode();
@@ -732,7 +715,29 @@ namespace Hades.Language.Parser
                 return ops;
             }
             
-            if (Is(Category.Operator))
+            if (Is(Classifier.LeftParenthesis))
+            {
+                Advance();
+                var n = ParseStatement();
+                
+                if (!Is(Classifier.RightParenthesis))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+                }
+                
+                Advance();
+
+                while (Is(Category.Operator))
+                {
+                    n = getOperation(n);
+                }
+                
+                return n;
+            }
+            
+            var node = ParseStatementWithoutOperation();   
+            
+            if (Is(Category.Operator) && node != null)
             {
                 node = getOperation(node);
             }
@@ -767,7 +772,7 @@ namespace Hades.Language.Parser
                 return ParseRightHand(node);
             }
 
-            if (Is(Category.LeftHand))
+            if (Is(Classifier.Not) || Is(Classifier.Minus))
             {
                 return ParseLeftHand(new OperationNodeNode(Current.Kind,Current.Value));
             }
