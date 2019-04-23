@@ -62,6 +62,80 @@ namespace Hades.Language.Parser
             return node;
         }
 
+        private void ExpectIdentifier()
+        {
+            if (!Expect(Classifier.Identifier))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+            }
+        }
+
+        private void EnforceIdentifier()
+        {
+            Advance(-1);
+            ExpectIdentifier();
+            Advance();
+        }
+        
+        private List<(Node Key, Datatype? Value)> ParseArguments(Classifier expectedClassifier, string expect)
+        {
+            var args = new List<(Node Key, Datatype? Value)>();
+            do
+            {
+                Advance();
+                if (IsType())
+                {
+                    ExpectIdentifier();
+                    
+                    args.Add((new IdentifierNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
+                    Advance(2);
+                }
+                else if (Is(Keyword.Args))
+                {
+                    Advance();
+                    if (IsType())
+                    {
+                        ExpectIdentifier();
+                        args.Add((new ArgsNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
+                        Advance();
+                    }
+                    else
+                    {
+                        EnforceIdentifier();
+                        args.Add((new ArgsNode(Current.Value), Datatype.NONE));
+                    }
+                    Advance();
+                }
+                else if (IsIdentifier())
+                {
+                    args.Add((new IdentifierNode(Current.Value), null));
+                    Advance();
+                }
+                else
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
+                }
+            } while (Is(Classifier.Comma));
+
+            if (args.Any(a => a.Key is ArgsNode))
+            {
+                if (args.Count(a => a.Key is ArgsNode) > 1)
+                {
+                    Error(ErrorStrings.MESSAGE_CANT_HAVE_MULTIPLE_VARARGS);
+                }
+            }
+
+            if (!Is(expectedClassifier))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_VALUE,expect);
+            }
+
+            Advance();
+
+            return args;
+        }
+
+
         #endregion
 
         #region Checks
@@ -147,10 +221,7 @@ namespace Hades.Language.Parser
                 Advance();
             }
 
-            if (!Is(Category.Identifier))
-            {
-                Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-            }
+            EnforceIdentifier();
 
             if (Expect(Category.Operator))
             {
@@ -164,10 +235,7 @@ namespace Hades.Language.Parser
             }
             else
             {
-                if (!Is(Category.Identifier))
-                {
-                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-                }
+                EnforceIdentifier();
 
                 node.Name = Current.Value;
                 Advance();
@@ -180,49 +248,7 @@ namespace Hades.Language.Parser
 
             if (!Expect(Classifier.RightParenthesis))
             {
-                do
-                {
-                    Advance();
-                    if (IsType())
-                    {
-                        node.Parameters.Add((new IdentifierNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
-                        Advance(2);
-                    }
-                    else if (Is(Keyword.Args))
-                    {
-                        Advance();
-                        if (IsType())
-                        {
-                            node.Parameters.Add((new ArgsNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
-                            Advance();
-                        }
-                        else
-                        {
-                            node.Parameters.Add((new ArgsNode(Current.Value), Datatype.NONE));
-                        }
-                        Advance();
-                    }
-                    else
-                    {
-                        node.Parameters.Add((new IdentifierNode(Current.Value), null));
-                        Advance();
-                    }
-                } while (Is(Classifier.Comma));
-
-                if (node.Parameters.Any(a => a.Key is ArgsNode))
-                {
-                    if (node.Parameters.Count(a => a.Key is ArgsNode) > 1)
-                    {
-                        Error(ErrorStrings.MESSAGE_CANT_HAVE_MULTIPLE_VARARGS);
-                    }
-                }
-
-                if (!Is(Classifier.RightParenthesis))
-                {
-                    Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
-                }
-
-                Advance();
+                node.Parameters = ParseArguments(Classifier.RightParenthesis, "right parenthesis");
             }
 
             if (Is(Keyword.Requires))
@@ -284,10 +310,7 @@ namespace Hades.Language.Parser
                 catch (Exception)
                 {
                     _index = index;
-                    if (Is(Classifier.Identifier))
-                    {
-                        Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-                    }
+                    EnforceIdentifier();
 
                     node.Variable = new IdentifierNode(Current.Value);
                     Advance();
@@ -325,10 +348,7 @@ namespace Hades.Language.Parser
             var node = new WithNode();
             Advance();
 
-            if (!IsIdentifier())
-            {
-                Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-            }
+            EnforceIdentifier();
 
             node.Target = Current.Value;
 
@@ -343,10 +363,7 @@ namespace Hades.Language.Parser
                 Advance(2);
 
 
-                if (!IsIdentifier())
-                {
-                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-                }
+                EnforceIdentifier();
 
                 node.Name = Current.Value;
             }
@@ -356,10 +373,7 @@ namespace Hades.Language.Parser
             if (Is(Keyword.From)) //with x FROM ...
             {
                 Advance();
-                if (!IsIdentifier())
-                {
-                    Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-                }
+                EnforceIdentifier();
 
                 if (Expect(Classifier.Colon))
                 {
@@ -367,10 +381,7 @@ namespace Hades.Language.Parser
                     node.NativePackage = Current.Value;
 
                     Advance(2);
-                    if (!IsIdentifier())
-                    {
-                        Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-                    }
+                    EnforceIdentifier();
 
                     node.Source = Current.Value;
                 }
@@ -387,10 +398,7 @@ namespace Hades.Language.Parser
 
         private Node ParseCall(Node baseNode)
         {
-            if (!Is(Classifier.Identifier))
-            {
-                Error(ErrorStrings.MESSAGE_EXPECTED_IDENTIFIER);
-            }
+            EnforceIdentifier();
 
             var node = new CallNode {Source = baseNode, Target = new IdentifierNode(Current.Value)};
             Advance();
@@ -601,18 +609,25 @@ namespace Hades.Language.Parser
         {
             Advance();
 
-            var parameters = new List<Node>();
-
+            var parameters = new List<(Node Key, Datatype? Value)>();
+            var isLambda = true;
             var index = _index;
-            while (Expect(Classifier.Comma) && !Is(Classifier.FatArrow) || Expect(Classifier.FatArrow))
-            {
-                parameters.Add(ParseStatement());
-                Advance();
-            }
 
+            try
+            {
+                Advance(-1);
+                //Assume it's a lambda and parse arguments
+                parameters = ParseArguments(Classifier.FatArrow, "fat arrow");
+            }
+            catch (Exception e)
+            {
+                //Not a lambda
+                isLambda = false;
+            }
+            
             //Lambda
             Node n;
-            if (parameters.TrueForAll(a => a.Classifier == Syntax.Expression.Classifier.Identifier) && Was(Classifier.FatArrow))
+            if (isLambda && Was(Classifier.FatArrow))
             {
                 var node = new LambdaNode();
                 node.Parameters.AddRange(parameters);
@@ -645,7 +660,7 @@ namespace Hades.Language.Parser
                     {
                         if (!Is(Classifier.Comma))
                         {
-                            Error(ErrorStrings.MESSAGE_EXPECTED_COMMA);
+                            Error(ErrorStrings.MESSAGE_INVALID_ARRAY_EXPECTED_COMMA);
                         }
 
                         Advance();

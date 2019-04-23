@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Hades.Common;
 
 namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
@@ -8,7 +9,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         {
         }
 
-        public List<Node> Parameters { get; } = new List<Node>();
+        public List<(Node Key, Datatype? Value)> Parameters { get; } = new List<(Node Key, Datatype? Value)>();
         public bool Complex { get; set; }
 
         protected override string ToStr()

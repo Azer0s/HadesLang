@@ -11,7 +11,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 
         public bool Override { get; set; }
         public string Name { get; set; }
-        public List<(Node Key, Datatype? Value)> Parameters { get; } = new List<(Node, Datatype?)>();
+        public List<(Node Key, Datatype? Value)> Parameters { get; set;  } = new List<(Node, Datatype?)>();
         public Node Guard { get; set; }
 
         protected override string ToStr()
