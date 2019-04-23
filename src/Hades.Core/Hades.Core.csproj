@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -9,10 +9,6 @@
 		<SourceRevisionId>build$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
 	</PropertyGroup>
 	
-	<PropertyGroup>
-		<SourceRevisionId>version0.0.1</SourceRevisionId>
-	</PropertyGroup>
-
     <ItemGroup>
       <ProjectReference Include="..\Hades.Language\Hades.Language.csproj" />
     </ItemGroup>

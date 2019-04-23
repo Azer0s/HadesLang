@@ -1,4 +1,8 @@
-﻿using Hades.Core.Tools;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using Hades.Common.Extensions;
+using Hades.Core.Tools;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
 
@@ -6,6 +10,8 @@ namespace Hades.Core
 {
     public static class Program
     {
+        private const string VERSION = "0.0.1";
+
         public static int Main(string[] args)
         {
             if (args.Length != 0)
@@ -24,7 +30,7 @@ namespace Hades.Core
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine($"Hades version {Assembly.GetExecutingAssembly().GetVersion()}");
+            Console.WriteLine($"Hades version {VERSION}");
             Console.WriteLine($"Running {Environment.OSVersion}");
 
             while (true)
