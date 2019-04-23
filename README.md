@@ -1,4 +1,4 @@
-![](assets/IconShort.png)
+<img src="assets/IconShort.png" alt="logo" width="200" align="left"/>
 
 ## Hades Programming Language
 
