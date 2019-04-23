@@ -7,14 +7,14 @@ namespace Hades.Common.Source
         private readonly Lazy<string[]> _lines;
         private readonly string _sourceCode;
 
-        public string[] Lines => _lines.Value;
-
-        public char this[int index] => _sourceCode.CharAt(index);
-
         public SourceCode(string sourceCode)
         {
             _sourceCode = sourceCode;
-            _lines = new Lazy<string[]>(() => _sourceCode.Split(new[] { Environment.NewLine }, StringSplitOptions.None));
+            _lines = new Lazy<string[]>(() => _sourceCode.Split(new[] {Environment.NewLine}, StringSplitOptions.None));
         }
+
+        public string[] Lines => _lines.Value;
+
+        public char this[int index] => _sourceCode.CharAt(index);
     }
 }

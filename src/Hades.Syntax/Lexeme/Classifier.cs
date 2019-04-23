@@ -35,7 +35,7 @@ namespace Hades.Syntax.Lexeme
         Keyword,
 
         #endregion
-        
+
         #region Groupings
 
         LeftBracket, // {
@@ -51,20 +51,20 @@ namespace Hades.Syntax.Lexeme
 
         GreaterThanOrEqual, //>=
         GreaterThan, //>
-        
+
         LessThanOrEqual, //<=
         LessThan, //<
-        
+
         PlusEqual, //+=
         PlusPlus, //++
         Plus, //+
-        
+
         MinusEqual, // -=
         MinusMinus, // --
         Minus, // -
-        
+
         Assignment, // =
-        
+
         Not, // !
         NotEqual, // !=
 
@@ -85,28 +85,28 @@ namespace Hades.Syntax.Lexeme
 
         ModEqual, // %=
         Mod, // %
-        
+
         BitwiseXorEqual, // ^=
         BitwiseXor, // ^
-        
+
         BitwiseNegate, //~
         BitwiseNegateEqual, //~=
-        
+
         Equal, //==
-        
+
         BitShiftLeft, // <<
         BitShiftRight, // >>
         BitShiftLeftEqual, // <<=
         BitShiftRightEqual, // >>=
-        
+
         Question, //?
         NullCondition, //::
-        
+
         Pipeline, //|>
         Tag, //#
-        
+
         #endregion
-        
+
         #region Punctuation
 
         Comma, //,

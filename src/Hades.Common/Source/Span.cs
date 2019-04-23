@@ -5,9 +5,9 @@ namespace Hades.Common.Source
     public struct Span : IEquatable<Span>
     {
         public SourceLocation End { get; }
-        
+
         public int Length => End.Index - Start.Index;
-        
+
         public SourceLocation Start { get; }
 
         public Span(SourceLocation start, SourceLocation end)
@@ -32,6 +32,7 @@ namespace Hades.Common.Source
             {
                 return Equals(span);
             }
+
             return base.Equals(obj);
         }
 

@@ -20,7 +20,7 @@ namespace Hades.Core
                         return 0;
                 }
             }
-            
+
             while (true)
             {
                 var lexer = new Lexer();

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Hades.Common;
 using Hades.Common.Source;
 using Hades.Syntax.Lexeme;
 
@@ -12,6 +11,27 @@ namespace Hades.Language.Lexer
 {
     public class Lexer
     {
+        private readonly StringBuilder _builder;
+        private int _column;
+        private int _index;
+        private int _line;
+        private SourceCode _sourceCode;
+        private SourceLocation _tokenStart;
+
+        private bool inBracket;
+
+        public Lexer()
+        {
+            _builder = new StringBuilder();
+            _sourceCode = null;
+        }
+
+        private char Ch => _sourceCode[_index];
+
+        // ReSharper disable once UnusedMember.Local
+        private char Last => Peek(-1);
+        private char Next => Peek(1);
+
         #region Keywords
 
         private static readonly string[] BlockKeywords =
@@ -39,7 +59,7 @@ namespace Hades.Language.Lexer
             Keyword.Var,
             Keyword.Let,
             Keyword.Null,
-            Keyword.Undefined,
+            Keyword.Undefined
         };
 
         private static readonly string[] AccessModifierKeywords =
@@ -48,7 +68,7 @@ namespace Hades.Language.Lexer
             Keyword.Public,
             Keyword.Private
         };
-        
+
         private static readonly string[] ImportKeywords =
         {
             Keyword.With,
@@ -62,13 +82,13 @@ namespace Hades.Language.Lexer
         {
             Keyword.Put
         };
-        
+
         private static List<string> _keywordList = new List<string>();
 
         private static List<string> GetKeywordList()
         {
             if (_keywordList.Count != 0) return _keywordList;
-            
+
             var list = BlockKeywords.ToList();
             list.AddRange(VarKeywords.ToList());
             list.AddRange(AccessModifierKeywords.ToList());
@@ -82,25 +102,6 @@ namespace Hades.Language.Lexer
         public static List<string> Keywords => GetKeywordList();
 
         #endregion
-
-        private readonly StringBuilder _builder;
-        private int _column;
-        private int _index;
-        private int _line;
-        private SourceCode _sourceCode;
-        private SourceLocation _tokenStart;
-        private char Ch => _sourceCode[_index];
-        // ReSharper disable once UnusedMember.Local
-        private char Last => Peek(-1);
-        private char Next => Peek(1);
-
-        private bool inBracket;
-
-        public Lexer()
-        {
-            _builder = new StringBuilder();
-            _sourceCode = null;
-        }
 
         #region Helper
 
@@ -133,14 +134,14 @@ namespace Hades.Language.Lexer
             _line++;
             _column = 0;
         }
-        
+
         private char Peek(int ahead)
         {
             return _sourceCode[_index + ahead];
         }
 
         #endregion
-        
+
         #region Checks
 
         private bool IsDigit()
@@ -196,11 +197,14 @@ namespace Hades.Language.Lexer
         }
 
         #endregion
-        
+
         #region Lexing
 
-        public IEnumerable<Token> LexFile(string sourceCode) => LexFile(new SourceCode(sourceCode));
-        
+        public IEnumerable<Token> LexFile(string sourceCode)
+        {
+            return LexFile(new SourceCode(sourceCode));
+        }
+
         public IEnumerable<Token> LexFile(SourceCode source)
         {
             _sourceCode = source;
@@ -262,20 +266,26 @@ namespace Hades.Language.Lexer
 
             return IsPunctuation() ? ScanPunctuation() : ScanWord();
         }
-        
+
         private Token ScanBlockComment()
         {
-            bool IsEndOfComment() => Ch == '*' && Next == '/';
+            bool IsEndOfComment()
+            {
+                return Ch == '*' && Next == '/';
+            }
+
             while (!IsEndOfComment())
             {
                 if (IsEOF())
                 {
                     return CreateToken(Classifier.Error);
                 }
+
                 if (IsNewLine())
                 {
                     DoNewLine();
                 }
+
                 Consume();
             }
 
@@ -284,7 +294,7 @@ namespace Hades.Language.Lexer
 
             return CreateToken(Classifier.BlockComment);
         }
-        
+
         private Token ScanComment()
         {
             Consume();
@@ -302,7 +312,7 @@ namespace Hades.Language.Lexer
 
             return CreateToken(Classifier.LineComment);
         }
-        
+
         private Token ScanDec()
         {
             if (inBracket)
@@ -314,11 +324,12 @@ namespace Hades.Language.Lexer
 
                 return CreateToken(Classifier.MultidimensionalArrayAccess);
             }
-            
+
             if (Ch == '.')
             {
                 Consume();
             }
+
             while (IsDigit())
             {
                 Consume();
@@ -335,6 +346,7 @@ namespace Hades.Language.Lexer
                 {
                     return ScanWord("'{0}' is an invalid float value");
                 }
+
                 return ScanWord();
             }
 
@@ -369,14 +381,14 @@ namespace Hades.Language.Lexer
                 case "is":
                     return CreateToken(Classifier.Equal);
             }
-            
+
             return CreateToken(IsKeyword() ? Classifier.Keyword : Classifier.Identifier);
         }
 
         private Token ScanInteger()
         {
             var i = 0;
-            
+
             while (IsDigit())
             {
                 Consume();
@@ -395,7 +407,7 @@ namespace Hades.Language.Lexer
 
             return CreateToken(Classifier.IntLiteral);
         }
-        
+
         private Token ScanNewLine()
         {
             Consume();
@@ -404,7 +416,7 @@ namespace Hades.Language.Lexer
 
             return CreateToken(Classifier.NewLine);
         }
-        
+
         private Token ScanPunctuation()
         {
             switch (Ch)
@@ -455,6 +467,7 @@ namespace Hades.Language.Lexer
                                 Consume();
                                 return CreateToken(Classifier.BitShiftRightEqual);
                             }
+
                             return CreateToken(Classifier.BitShiftRight);
                         default:
                             return CreateToken(Classifier.GreaterThan);
@@ -591,15 +604,15 @@ namespace Hades.Language.Lexer
                     if (Ch != '=') return CreateToken(Classifier.BitwiseNegate);
                     Consume();
                     return CreateToken(Classifier.BitwiseNegateEqual);
-                
+
                 case '@':
                     Consume();
                     return CreateToken(Classifier.At);
-                
+
                 case '#':
                     Consume();
                     return CreateToken(Classifier.Tag);
-                
+
                 case '?':
                     Consume();
                     return CreateToken(Classifier.Question);
@@ -607,11 +620,11 @@ namespace Hades.Language.Lexer
                 case '.':
                     Consume();
                     return CreateToken(Classifier.Dot);
-                
+
                 default: return ScanWord();
             }
         }
-        
+
         private Token ScanStringLiteral()
         {
             Advance();
@@ -624,7 +637,7 @@ namespace Hades.Language.Lexer
                 _index++;
                 _index++;
             }
-            
+
             while (true)
             {
                 if (IsEOF())
@@ -638,7 +651,7 @@ namespace Hades.Language.Lexer
                 }
 
                 var consume = true;
-                
+
                 if (Ch == '\\' && Next == '"')
                 {
                     Consume();
@@ -654,7 +667,7 @@ namespace Hades.Language.Lexer
                         {
                             _index++;
                             _index++;
-                            
+
                             Advance();
                             return CreateToken(Classifier.MultiLineStringLiteral);
                         }
@@ -662,13 +675,13 @@ namespace Hades.Language.Lexer
                     else
                     {
                         break;
-                    }                    
+                    }
                 }
 
                 if (consume)
                 {
                     Consume();
-                }               
+                }
             }
 
             Advance();
@@ -682,6 +695,7 @@ namespace Hades.Language.Lexer
             {
                 Consume();
             }
+
             return CreateToken(Classifier.WhiteSpace);
         }
 
@@ -691,9 +705,10 @@ namespace Hades.Language.Lexer
             {
                 Consume();
             }
-            throw new Exception(string.Format(message, _builder.ToString()));
+
+            throw new Exception(string.Format(message, _builder));
         }
-        
+
         #endregion
     }
 }

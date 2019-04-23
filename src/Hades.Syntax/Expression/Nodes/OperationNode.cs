@@ -5,14 +5,16 @@ namespace Hades.Syntax.Expression.Nodes
 {
     public class OperationNode : Node
     {
+        public OperationNode() : base(Classifier.Operation)
+        {
+        }
+
         public List<Node> Operations { get; set; } = new List<Node>();
-        
-        public OperationNode() : base(Classifier.Operation){}
 
         protected override string ToStr()
         {
             var str = "";
-            
+
             foreach (var operation in Operations)
             {
                 switch (operation)
@@ -28,7 +30,7 @@ namespace Hades.Syntax.Expression.Nodes
                         break;
                 }
             }
-            
+
             return str;
         }
     }

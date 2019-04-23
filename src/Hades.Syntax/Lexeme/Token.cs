@@ -1,5 +1,4 @@
 using System;
-using Hades.Common;
 using Hades.Common.Source;
 
 namespace Hades.Syntax.Lexeme
@@ -7,6 +6,15 @@ namespace Hades.Syntax.Lexeme
     public sealed class Token : IEquatable<Token>
     {
         private readonly Lazy<Category> _category;
+
+        public Token(Classifier kind, string contents, SourceLocation start, SourceLocation end)
+        {
+            Kind = kind;
+            Value = contents;
+            Span = new Span(start, end);
+
+            _category = new Lazy<Category>(GetTokenCategory);
+        }
 
         public Category Category => _category.Value;
 
@@ -16,13 +24,16 @@ namespace Hades.Syntax.Lexeme
 
         public string Value { get; }
 
-        public Token(Classifier kind, string contents, SourceLocation start, SourceLocation end)
+        public bool Equals(Token other)
         {
-            Kind = kind;
-            Value = contents;
-            Span = new Span(start, end);
+            if (other == null)
+            {
+                return false;
+            }
 
-            _category = new Lazy<Category>(GetTokenCategory);
+            return other.Value == Value &&
+                   other.Span == Span &&
+                   other.Kind == Kind;
         }
 
         public static bool operator !=(Token left, string right)
@@ -71,18 +82,8 @@ namespace Hades.Syntax.Lexeme
             {
                 return Equals(token);
             }
-            return base.Equals(obj);
-        }
 
-        public bool Equals(Token other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-            return other.Value == Value &&
-                   other.Span == Span &&
-                   other.Kind == Kind;
+            return base.Equals(obj);
         }
 
         public override int GetHashCode()
@@ -107,8 +108,8 @@ namespace Hades.Syntax.Lexeme
                 case Classifier.At:
                 case Classifier.Dot:
                 case Classifier.MultidimensionalArrayAccess:
-                    return Category.Punctuation;                
-                
+                    return Category.Punctuation;
+
                 case Classifier.Equal:
                 case Classifier.NotEqual:
                 case Classifier.LessThan:
@@ -132,11 +133,11 @@ namespace Hades.Syntax.Lexeme
 
                 case Classifier.Not:
                     return Category.LeftHand;
-                
+
                 case Classifier.MinusMinus:
                 case Classifier.PlusPlus:
                     return Category.RightHand;
-                    
+
                 case Classifier.Assignment:
                 case Classifier.MulEqual:
                 case Classifier.MinusEqual:
@@ -180,13 +181,13 @@ namespace Hades.Syntax.Lexeme
 
                 case Classifier.Error:
                     return Category.Invalid;
-                
+
                 case Classifier.Pipeline:
                 case Classifier.Tag:
                 case Classifier.Question:
                     return Category.Other;
-                
-                
+
+
                 default: return Category.Unknown;
             }
         }

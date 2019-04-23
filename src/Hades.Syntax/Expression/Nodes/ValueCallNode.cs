@@ -4,10 +4,12 @@ namespace Hades.Syntax.Expression.Nodes
 {
     public class ValueCallNode : Node
     {
+        public ValueCallNode() : base(Classifier.ValueCall)
+        {
+        }
+
         public Node Source { get; set; }
         public IdentifierNode Target { get; set; }
-
-        public ValueCallNode() : base(Classifier.ValueCall){}
 
         protected override string ToStr()
         {

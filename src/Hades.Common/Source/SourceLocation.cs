@@ -5,9 +5,9 @@ namespace Hades.Common.Source
     public struct SourceLocation : IEquatable<SourceLocation>
     {
         public int Column { get; }
-        
+
         public int Index { get; }
-        
+
         public int Line { get; }
 
         public SourceLocation(int index, int line, int column)
@@ -33,6 +33,7 @@ namespace Hades.Common.Source
             {
                 return Equals(location);
             }
+
             return base.Equals(obj);
         }
 

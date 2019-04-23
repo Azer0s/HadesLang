@@ -2,9 +2,11 @@ namespace Hades.Syntax.Expression.Nodes
 {
     public class PutNode : Node
     {
+        public PutNode() : base(Classifier.Put)
+        {
+        }
+
         public Node Statement { get; set; }
-        
-        public PutNode() : base(Classifier.Put){}
 
         protected override string ToStr()
         {

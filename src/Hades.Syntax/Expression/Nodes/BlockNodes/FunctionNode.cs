@@ -5,7 +5,10 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
     public class FunctionNode : BlockNode
     {
-        public FunctionNode() : base(Classifier.Function){}
+        public FunctionNode() : base(Classifier.Function)
+        {
+        }
+
         public bool Override { get; set; }
         public string Name { get; set; }
         public Dictionary<Node, Datatype?> Parameters { get; } = new Dictionary<Node, Datatype?>();
@@ -14,7 +17,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         protected override string ToStr()
         {
             var args = "";
-            
+
             foreach (var parameter in Parameters)
             {
                 if (parameter.Value != null)

@@ -2,10 +2,12 @@ namespace Hades.Syntax.Expression.Nodes
 {
     public class NullConditionNode : Node
     {
+        public NullConditionNode() : base(Classifier.NullCondition)
+        {
+        }
+
         public Node Condition { get; set; }
         public Node Operation { get; set; }
-        
-        public NullConditionNode() : base(Classifier.NullCondition){}
 
         protected override string ToStr()
         {

@@ -4,8 +4,13 @@ namespace Hades.Syntax.Expression.Nodes
 {
     public class VariableDeclarationNode : Node
     {
+        public VariableDeclarationNode() : base(Classifier.VariableDeclaration)
+        {
+        }
+
         public bool Mutable { get; set; }
         public string Name { get; set; }
+
         // ReSharper disable once MemberCanBePrivate.Global
         public Datatype? Datatype { get; set; }
         public bool Array { get; set; }
@@ -14,10 +19,6 @@ namespace Hades.Syntax.Expression.Nodes
         public Node Assignment { get; set; }
         public bool Dynamic { get; set; }
         public bool Nullable { get; set; }
-
-        public VariableDeclarationNode() : base(Classifier.VariableDeclaration)
-        {
-        }
 
         protected override string ToStr()
         {
@@ -28,7 +29,7 @@ namespace Hades.Syntax.Expression.Nodes
             var arraySize = ArraySize != null ? " (" + ArraySize + ")" : "";
             var datatype = Datatype != null ? " " + Datatype.ToString().ToLower() : "";
             var assignment = Assignment != null ? "(" + Assignment + ")" : "";
-            var withAssignment = assignment != "" ? " with assignment " : ""; 
+            var withAssignment = assignment != "" ? " with assignment " : "";
             return $"Create{nullable}{dynamic}{mutable}{datatype}{array}{arraySize} variable {Name}{withAssignment}{assignment}";
         }
     }

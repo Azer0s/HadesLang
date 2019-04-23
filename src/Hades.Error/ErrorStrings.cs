@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace Hades.Error
 {
     public static class ErrorStrings

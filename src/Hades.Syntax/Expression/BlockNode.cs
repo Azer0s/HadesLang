@@ -5,19 +5,21 @@ namespace Hades.Syntax.Expression
 {
     public abstract class BlockNode : Node
     {
+        protected BlockNode(Classifier classifier) : base(classifier)
+        {
+        }
+
         public List<Node> Children { get; set; } = new List<Node>();
-        
+
         protected override string ToStr()
         {
             var str = "";
             foreach (var child in Children)
             {
-                str += string.Join('\n',child.ToString().Split('\n').Select(a => $"  {a}")) + "\n";
+                str += string.Join('\n', child.ToString().Split('\n').Select(a => $"  {a}")) + "\n";
             }
 
             return str;
         }
-
-        protected BlockNode(Classifier classifier) : base(classifier){}
     }
 }

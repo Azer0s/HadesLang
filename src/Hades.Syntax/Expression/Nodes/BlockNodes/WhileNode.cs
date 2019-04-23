@@ -2,9 +2,11 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
     public class WhileNode : BlockNode
     {
+        public WhileNode() : base(Classifier.While)
+        {
+        }
+
         public Node Condition { get; set; }
-        
-        public WhileNode() : base(Classifier.While){}
 
         protected override string ToStr()
         {

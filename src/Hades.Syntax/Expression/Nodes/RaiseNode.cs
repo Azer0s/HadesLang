@@ -2,11 +2,11 @@ namespace Hades.Syntax.Expression.Nodes
 {
     public class RaiseNode : Node
     {
-        public Node Exception { get; set; }
-        
         public RaiseNode() : base(Classifier.Exception)
         {
         }
+
+        public Node Exception { get; set; }
 
         protected override string ToStr()
         {

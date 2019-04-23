@@ -11,6 +11,7 @@ namespace Hades.Core.Tools
     {
         private static readonly Regex simpleName = new Regex("^[^\\.]*$");
         private static readonly Regex orgName = new Regex("^([^\\.]*)\\.([^\\.]*)\\.([^\\.]*)$");
+
         public static int Run(List<string> args)
         {
             var name = args.First();
@@ -21,7 +22,7 @@ namespace Hades.Core.Tools
 
             var src = dir + "src" + Path.DirectorySeparatorChar;
             Directory.CreateDirectory(src);
-            
+
             //SRC folder
             if (simpleName.IsMatch(name))
             {
@@ -42,20 +43,20 @@ namespace Hades.Core.Tools
                 Console.Error.WriteLine("Could not create project: name has invalid format!");
                 return 1;
             }
-            
+
             var mainhd = src + Path.DirectorySeparatorChar + "main.hd";
             File.WriteAllText(mainhd, "with console from std:io\nconsole->out:\"Hello\"");
 
             var projectjson = dir + Path.DirectorySeparatorChar + "project.json";
-            File.WriteAllText(projectjson,""); //TODO: Fill project.json
-            
+            File.WriteAllText(projectjson, ""); //TODO: Fill project.json
+
             Directory.CreateDirectory(dir + "libs");
-            
+
             using (var repo = new Repository(dir))
             {
                 repo.Index.Add(projectjson.Substring(dir.Length + 1, projectjson.Length - dir.Length - 1));
-                repo.Index.Add(mainhd.Substring(dir.Length, mainhd.Length - dir.Length).Replace($"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}",$"{Path.DirectorySeparatorChar}"));
-                
+                repo.Index.Add(mainhd.Substring(dir.Length, mainhd.Length - dir.Length).Replace($"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}", $"{Path.DirectorySeparatorChar}"));
+
                 // Create the committer's signature and commit
                 var author = new Signature("HadesProjectInitializer", "@hpi", DateTime.Now);
                 var committer = author;
@@ -63,7 +64,7 @@ namespace Hades.Core.Tools
                 // Commit to the repository
                 repo.Commit("Initial commit", author, committer);
             }
-            
+
             return 0;
         }
     }
