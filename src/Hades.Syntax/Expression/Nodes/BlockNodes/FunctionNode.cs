@@ -34,7 +34,8 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             }
 
             var guard = Guard != null ? " with guard (" + Guard + ")" : "";
-            var str = $"{Name}{args}{guard}\n{base.ToStr()}";
+            var over = Override ? " override " : "";
+            var str = $"{Name}{over}{args}{guard}\n{base.ToStr()}";
             return str;
         }
     }
