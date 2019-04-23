@@ -25,6 +25,7 @@
         For,
         LeftHand,
         RightHand,
-        Misc
+        Misc,
+        ListLiteral
     }
 }

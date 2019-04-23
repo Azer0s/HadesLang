@@ -4,6 +4,7 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_CANT_HAVE_MULTIPLE_VARARGS = "Can't have multiple 'args' parameters in one function!";
         public const string MESSAGE_EXPECTED_IN = "Expected 'in' keyword!";
         public const string MESSAGE_UNEXPECTED_KEYWORD = "Unexpected keyword: {0}!";
         public const string MESSAGE_EXPECTED_LEFT_PARENTHESIS = "Expected left parenthesis!";

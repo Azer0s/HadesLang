@@ -9,6 +9,7 @@ namespace Hades.Common
         OBJECT,
         PROTO,
         STRUCT,
-        LAMBDA
+        LAMBDA,
+        NONE
     }
 }

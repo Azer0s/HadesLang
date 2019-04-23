@@ -185,15 +185,37 @@ namespace Hades.Language.Parser
                     Advance();
                     if (IsType())
                     {
-                        node.Parameters.Add(new IdentifierNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper()));
+                        node.Parameters.Add((new IdentifierNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
                         Advance(2);
+                    }
+                    else if (Is(Keyword.Args))
+                    {
+                        Advance();
+                        if (IsType())
+                        {
+                            node.Parameters.Add((new ArgsNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
+                            Advance();
+                        }
+                        else
+                        {
+                            node.Parameters.Add((new ArgsNode(Current.Value), Datatype.NONE));
+                        }
+                        Advance();
                     }
                     else
                     {
-                        node.Parameters.Add(new IdentifierNode(Current.Value), null);
+                        node.Parameters.Add((new IdentifierNode(Current.Value), null));
                         Advance();
                     }
                 } while (Is(Classifier.Comma));
+
+                if (node.Parameters.Any(a => a.Key is ArgsNode))
+                {
+                    if (node.Parameters.Count(a => a.Key is ArgsNode) > 1)
+                    {
+                        Error(ErrorStrings.MESSAGE_CANT_HAVE_MULTIPLE_VARARGS);
+                    }
+                }
 
                 if (!Is(Classifier.RightParenthesis))
                 {
@@ -290,6 +312,9 @@ namespace Hades.Language.Parser
 
             return ReadToEnd(node, true);
         }
+        
+        //TODO: Parse if
+        //TODO: Parse class
 
         #endregion
 
@@ -578,6 +603,7 @@ namespace Hades.Language.Parser
 
             var parameters = new List<Node>();
 
+            var index = _index;
             while (Expect(Classifier.Comma) && !Is(Classifier.FatArrow) || Expect(Classifier.FatArrow))
             {
                 parameters.Add(ParseStatement());
@@ -607,8 +633,26 @@ namespace Hades.Language.Parser
             }
             else
             {
-                //TODO: Array
-                var node = new IdentifierNode("");
+                _index = index;
+                
+                var vals = new List<Node>();
+                
+                //Collect array values
+                do
+                {
+                    vals.Add(ParseStatement());
+                    if (!Is(Classifier.RightBracket))
+                    {
+                        if (!Is(Classifier.Comma))
+                        {
+                            Error(ErrorStrings.MESSAGE_EXPECTED_COMMA);
+                        }
+
+                        Advance();
+                    }
+                } while (!Is(Classifier.RightBracket));
+                Advance();
+                var node = new ListNode{Value = vals};
                 n = node;
             }
 
