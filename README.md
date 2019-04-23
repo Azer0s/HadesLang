@@ -1,3 +1,14 @@
+![](assets/IconShort.png)
+
+## Hades Programming Language
+
+[![Build Status](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)](https://travis-ci.org/Azer0s/HadesLang)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Azer0s/HadesLang/blob/master/LICENSE)
+
+## Welcome!
+
+This is the official repository for the reference implementation of the Hades Programming Language (standard library & interpreter).
+
 ## Getting Started
 
 Learning Hades and writing your first programs.
