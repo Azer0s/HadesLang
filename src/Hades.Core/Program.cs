@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Hades.Core.Tools;
+﻿using Hades.Core.Tools;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
 
@@ -21,11 +19,21 @@ namespace Hades.Core
                 }
             }
 
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"Hades (Hades Interactive Console). Built {Assembly.GetExecutingAssembly().GetBuildDate():M/d/yy h:mm:ss tt}");
+            Console.ResetColor();
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"Hades version {Assembly.GetExecutingAssembly().GetVersion()}");
+            Console.WriteLine($"Running {Environment.OSVersion}");
+
             while (true)
             {
                 var lexer = new Lexer();
-                Console.Write("hades>");
-                
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("hd>");
+                Console.ResetColor();
+
                 try
                 {
                     var tokens = lexer.LexFile(Console.ReadLine());

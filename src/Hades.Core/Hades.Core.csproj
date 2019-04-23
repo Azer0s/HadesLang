@@ -5,6 +5,14 @@
         <TargetFramework>netcoreapp2.1</TargetFramework>
     </PropertyGroup>
 
+	<PropertyGroup>
+		<SourceRevisionId>build$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<SourceRevisionId>version0.0.1</SourceRevisionId>
+	</PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\Hades.Language\Hades.Language.csproj" />
     </ItemGroup>
