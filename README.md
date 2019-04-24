@@ -9,6 +9,56 @@
 
 This is the official repository for the reference implementation of the Hades Programming Language (standard library & interpreter).
 
+### Hello world
+```js
+with console from std:io
+console->out:"Hello world"
+```
+
+### Pipelines
+```js
+with list fixed from std:collections
+with console from std:io
+
+var fruits = list->of({"Apple", "Banana", "Mango", "Kiwi", "Avocado"})
+
+fruits
+|> map({x => x->toLower()}, ??)
+|> filter({x => x->startsWith("a")}, ??)
+|> forEach({x => console->out:x}, ??)
+```
+
+### Function guards
+```swift
+with console fixed from std:io
+
+func myFunction(int a) requires a < 10
+    console->out:"a is smaller than 10"
+end
+
+func myFunction(int a) requires a > 10
+    console->out:"a is greater than 10"
+end
+
+out:myFunction(5)   // a is smaller than 10
+out:myFunction(17)  // a is greater than 10
+```
+
+### Fibonacci sequence
+```js
+with console from std:io
+
+func fib(n)
+    if((n is 0) or (n is 1))
+        put n
+    end
+    
+    put fib(n-1) + fib(n-2)
+end
+
+fib(10) |> console->out
+```
+
 ## Getting Started
 
 Learning Hades and writing your first programs.
