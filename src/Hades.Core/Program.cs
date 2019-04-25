@@ -47,6 +47,7 @@ namespace Hades.Core
                     var parser = new Parser(tokens);
                     var root = parser.Parse();
                     Console.WriteLine(root);
+                    Console.WriteLine();
                 }
                 catch (Exception e)
                 {
