@@ -5,6 +5,7 @@ using Hades.Common.Extensions;
 using Hades.Core.Tools;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
+using Hades.Syntax.Lexeme;
 
 namespace Hades.Core
 {

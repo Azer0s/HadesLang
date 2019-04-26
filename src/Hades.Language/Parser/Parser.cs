@@ -671,7 +671,7 @@ namespace Hades.Language.Parser
                 //Assume it's a lambda and parse arguments
                 parameters = ParseArguments(Classifier.FatArrow, "fat arrow");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //Not a lambda
                 isLambda = false;
@@ -816,7 +816,7 @@ namespace Hades.Language.Parser
         /// <returns></returns>
         private Node ParseStatement()
         {
-            Node getOperation(Node initial = null)
+            Node GetOperation(Node initial = null)
             {
                 var ops = new OperationNode();
                 if (initial != null)
@@ -848,7 +848,7 @@ namespace Hades.Language.Parser
 
                 while (Is(Category.Operator))
                 {
-                    n = getOperation(n);
+                    n = GetOperation(n);
                 }
 
                 return n;
@@ -858,7 +858,7 @@ namespace Hades.Language.Parser
 
             if (Is(Category.Operator) && node != null)
             {
-                node = getOperation(node);
+                node = GetOperation(node);
             }
 
             if (Is(Classifier.NullCondition))
@@ -890,12 +890,7 @@ namespace Hades.Language.Parser
             {
                 return ParseRightHand(node);
             }
-
-            if (Is(Classifier.Not) || Is(Classifier.Minus))
-            {
-                return ParseLeftHand(new OperationNodeNode(Current.Kind, Current.Value));
-            }
-
+            
             return node;
         }
 
@@ -988,12 +983,13 @@ namespace Hades.Language.Parser
             {
                 return ParseArrayOrLambda();
             }
-
-            if (Is(Classifier.MultidimensionalArrayAccess))
+            
+            if (Is(Classifier.Not) || Is(Classifier.Minus))
             {
-                Advance();
-                return new MultidimensionalArrayAccessNode(Last.Value);
+                return ParseLeftHand(new OperationNodeNode(Current.Kind, Current.Value));
             }
+            
+            //TODO: Array access
 
             return null;
         }

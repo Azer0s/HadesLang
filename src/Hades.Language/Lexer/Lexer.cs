@@ -18,8 +18,6 @@ namespace Hades.Language.Lexer
         private SourceCode _sourceCode;
         private SourceLocation _tokenStart;
 
-        private bool inBracket;
-
         public Lexer()
         {
             _builder = new StringBuilder();
@@ -315,16 +313,6 @@ namespace Hades.Language.Lexer
 
         private Token ScanDec()
         {
-            if (inBracket)
-            {
-                while (Ch != ']')
-                {
-                    Consume();
-                }
-
-                return CreateToken(Classifier.MultidimensionalArrayAccess);
-            }
-
             if (Ch == '.')
             {
                 Consume();
@@ -436,12 +424,10 @@ namespace Hades.Language.Lexer
                     return CreateToken(Classifier.RightBracket);
 
                 case '[':
-                    inBracket = !inBracket;
                     Consume();
                     return CreateToken(Classifier.LeftBrace);
 
                 case ']':
-                    inBracket = !inBracket;
                     Consume();
                     return CreateToken(Classifier.RightBrace);
 
