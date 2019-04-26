@@ -18,8 +18,6 @@ namespace Hades.Language.Lexer
         private SourceCode _sourceCode;
         private SourceLocation _tokenStart;
 
-        private bool inBracket;
-
         public Lexer()
         {
             _builder = new StringBuilder();
@@ -115,6 +113,11 @@ namespace Hades.Language.Lexer
         {
             _builder.Append(Ch);
             Advance();
+        }
+
+        private void Clear()
+        {
+            _builder.Clear();
         }
 
         private Token CreateToken(Classifier kind)
@@ -315,16 +318,6 @@ namespace Hades.Language.Lexer
 
         private Token ScanDec()
         {
-            if (inBracket)
-            {
-                while (Ch != ']')
-                {
-                    Consume();
-                }
-
-                return CreateToken(Classifier.MultidimensionalArrayAccess);
-            }
-
             if (Ch == '.')
             {
                 Consume();
@@ -388,6 +381,7 @@ namespace Hades.Language.Lexer
         private Token ScanInteger()
         {
             var i = 0;
+            var idx = _index;
 
             while (IsDigit())
             {
@@ -402,7 +396,9 @@ namespace Hades.Language.Lexer
 
             if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF() && !IsNewLine())
             {
-                return ScanWord();
+                _index = idx;
+                Clear();
+                return ScanIdentifier();
             }
 
             return CreateToken(Classifier.IntLiteral);
@@ -436,12 +432,10 @@ namespace Hades.Language.Lexer
                     return CreateToken(Classifier.RightBracket);
 
                 case '[':
-                    inBracket = !inBracket;
                     Consume();
                     return CreateToken(Classifier.LeftBrace);
 
                 case ']':
-                    inBracket = !inBracket;
                     Consume();
                     return CreateToken(Classifier.RightBrace);
 

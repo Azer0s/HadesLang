@@ -92,6 +92,7 @@ namespace Hades.Testing
         [TestCase("var dec?[*] a", false)]
         [TestCase("var bool?[*] a", false)]
         [TestCase("var*[] a", false)]
+        //TODO: Create n dimensional array
         [TestCase("var object::IClient a", false)]
         [TestCase("var object::IClient? a", false)]
         [TestCase("var object::IClient?[] a", false)]

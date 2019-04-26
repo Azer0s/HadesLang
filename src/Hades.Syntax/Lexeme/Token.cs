@@ -107,7 +107,6 @@ namespace Hades.Syntax.Lexeme
                 case Classifier.Underscore:
                 case Classifier.At:
                 case Classifier.Dot:
-                case Classifier.MultidimensionalArrayAccess:
                     return Category.Punctuation;
 
                 case Classifier.Equal:

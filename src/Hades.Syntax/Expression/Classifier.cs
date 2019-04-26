@@ -9,7 +9,6 @@
         BoolLiteral,
         StringLiteral,
         DecLiteral,
-        MultidimensionalArrayAccess,
         Call,
         Identifier,
         Operation,
@@ -26,6 +25,8 @@
         LeftHand,
         RightHand,
         Misc,
-        ListLiteral
+        ListLiteral,
+        NullLiteral,
+        MultiDimensionalArrayAccess
     }
 }

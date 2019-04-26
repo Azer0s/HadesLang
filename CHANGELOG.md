@@ -1,5 +1,14 @@
 ## 4/26/19
 
+### Removed multidimensional array access #b2a09b8f55e2024277e7fbd0ad9331f20d5f013a
+
+* We moved from `.` to `,` when accessing multidimensional array
+
+  ```js
+  var int[3,3] matrix = {{1,0,0},{0,1,0},{0,0,1}}
+  var int?[2,2,2] 3dArray = {{{1,2},{3,null}},{{null,6},{7,8}}}
+  ```
+
 ### Added specific object and proto validation to lambdas, function and variables #6623878e8ccec87a20c395cdd157931dea2b403b
 
 * Variable instantiations, function arguments and lambda arguments can now name specific class-/proto names
