@@ -128,10 +128,8 @@ namespace Hades.Syntax.Lexeme
                 case Classifier.BitShiftRight:
                 case Classifier.BitwiseNegate:
                 case Classifier.Minus:
-                    return Category.Operator;
-
                 case Classifier.Not:
-                    return Category.LeftHand;
+                    return Category.Operator;
 
                 case Classifier.MinusMinus:
                 case Classifier.PlusPlus:

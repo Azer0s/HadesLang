@@ -92,7 +92,8 @@ namespace Hades.Testing
         [TestCase("var dec?[*] a", false)]
         [TestCase("var bool?[*] a", false)]
         [TestCase("var*[] a", false)]
-        //TODO: Create n dimensional array
+        [TestCase("var int[3,3] matrix = {{1,0,0},{0,1,0},{0,0,1}}", false)]
+        [TestCase("var int?[2,2,2] 3dArray = {{{1,2},{3,null}},{{null,6},{7,8}}}", false)]
         [TestCase("var object::IClient a", false)]
         [TestCase("var object::IClient? a", false)]
         [TestCase("var object::IClient?[] a", false)]
