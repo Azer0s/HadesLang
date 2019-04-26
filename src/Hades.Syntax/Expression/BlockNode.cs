@@ -19,8 +19,11 @@ namespace Hades.Syntax.Expression
                 str += string.Join('\n', child.ToString().Split('\n').Select(a => $"  {a}")) + "\n";
             }
 
-            str = str.Substring(0, str.Length - 1);
-
+            if (!string.IsNullOrEmpty(str))
+            {
+                str = str.Substring(0, str.Length - 1);
+            }
+            
             return str;
         }
     }

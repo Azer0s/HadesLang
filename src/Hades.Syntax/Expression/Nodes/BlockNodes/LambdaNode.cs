@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Hades.Common;
+using Hades.Syntax.Expression.Nodes.BlockNodes.Util;
 
 namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
@@ -9,18 +10,13 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         {
         }
 
-        public List<(Node Key, Datatype? Value)> Parameters { get; } = new List<(Node Key, Datatype? Value)>();
+        public List<(Node Key, Datatype? Value, string SpecificType)> Parameters { get; } = new List<(Node Key, Datatype? Value, string SpecificType)>();
         public bool Complex { get; set; }
 
         protected override string ToStr()
         {
-            var args = "";
-
-            foreach (var parameter in Parameters)
-            {
-                args += $"({parameter}),";
-            }
-
+            var args = ParameterWriter.PrintParameters(Parameters);
+                
             if (!string.IsNullOrEmpty(args))
             {
                 args = args.Substring(0, args.Length - 1);

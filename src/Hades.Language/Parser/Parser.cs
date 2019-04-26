@@ -76,39 +76,84 @@ namespace Hades.Language.Parser
             ExpectIdentifier();
             Advance();
         }
-        
-        private List<(Node Key, Datatype? Value)> ParseArguments(Classifier expectedClassifier, string expect)
+
+        /// <summary>
+        /// Gets the specific type of an object or proto
+        /// ```
+        /// func doStuff(object::IClient a)
+        ///    a->stuff("Hello world")
+        /// end
+        /// ```
+        /// </summary>
+        /// <returns>Specific type or null</returns>
+        private (string specificType, Datatype dt) GetSpecificType()
         {
-            var args = new List<(Node Key, Datatype? Value)>();
+            var dt = (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper());
+            string type = null;
+                    
+            if (dt == Datatype.PROTO || dt == Datatype.OBJECT)
+            {
+                Advance();
+                if (Is(Classifier.NullCondition))
+                {
+                    ExpectIdentifier();
+                    Advance();
+                    type = Current.Value;
+                    Advance();
+                }
+                else
+                {
+                    Advance(-1);
+                }
+            }
+
+            return (type, dt);
+        }
+        
+        private List<(Node Key, Datatype? Value, string SpecificType)> ParseArguments(Classifier expectedClassifier, string expect)
+        {
+            var args = new List<(Node Key, Datatype? Value, string SpecificType)>();
             do
             {
                 Advance();
                 if (IsType())
                 {
-                    ExpectIdentifier();
-                    
-                    args.Add((new IdentifierNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
-                    Advance(2);
+                    var (type, dt) = GetSpecificType();
+
+                    if (type == null)
+                    {
+                        Advance();
+                    }
+                        
+                    EnforceIdentifier();
+                    args.Add((new IdentifierNode(Current.Value), dt, type));
+                    Advance();
                 }
                 else if (Is(Keyword.Args))
                 {
                     Advance();
                     if (IsType())
                     {
-                        ExpectIdentifier();
-                        args.Add((new ArgsNode(Next.Value), (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper())));
-                        Advance();
+                        var (type, dt) = GetSpecificType();
+                        
+                        if (type == null)
+                        {
+                            Advance();
+                        }
+                        
+                        EnforceIdentifier();
+                        args.Add((new ArgsNode(Current.Value), dt, type));
                     }
                     else
                     {
                         EnforceIdentifier();
-                        args.Add((new ArgsNode(Current.Value), Datatype.NONE));
+                        args.Add((new ArgsNode(Current.Value), Datatype.NONE, null));
                     }
                     Advance();
                 }
                 else if (IsIdentifier())
                 {
-                    args.Add((new IdentifierNode(Current.Value), null));
+                    args.Add((new IdentifierNode(Current.Value), null, null));
                     Advance();
                 }
                 else
@@ -504,8 +549,15 @@ namespace Hades.Language.Parser
 
             if (IsType())
             {
-                variable.Datatype = (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper());
-                Advance();
+                var (type, dt) = GetSpecificType();
+                
+                if (type == null)
+                {
+                    Advance();
+                }
+                
+                variable.Datatype = dt;
+                variable.SpecificType = type;
             }
 
             if (Is(Classifier.Question))
@@ -609,7 +661,7 @@ namespace Hades.Language.Parser
         {
             Advance();
 
-            var parameters = new List<(Node Key, Datatype? Value)>();
+            var parameters = new List<(Node Key, Datatype? Value, string SpecificType)>();
             var isLambda = true;
             var index = _index;
 
