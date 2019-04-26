@@ -29,9 +29,12 @@ namespace Hades.Core
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
 
-                if (token.Kind == Classifier.Identifier && (tokens[i+1].Kind == Classifier.LeftParenthesis || tokens[i+1].Kind == Classifier.Colon))
+                if (i + 1 < tokens.Count)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    if (token.Kind == Classifier.Identifier && (tokens[i+1].Kind == Classifier.LeftParenthesis || tokens[i+1].Kind == Classifier.Colon))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
                 }
                 
                 if (token.Kind == Classifier.Identifier && token.Value == "super")
@@ -46,13 +49,13 @@ namespace Hades.Core
 
                 if (token.Kind == Classifier.StringLiteral)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = ConsoleColor.Red;
                     token.Value = $"\"{token.Value}\"";
                 }
 
                 if (token.Kind == Classifier.IntLiteral || token.Kind == Classifier.DecLiteral)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.ForegroundColor = ConsoleColor.Green;
                 }
 
                 if (token.Kind == Classifier.BoolLiteral)
@@ -78,6 +81,11 @@ namespace Hades.Core
                 if (token.Category == Category.Comment)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
+
+                if (token.Value == "std")
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 
                 Console.Write(token.Value);
