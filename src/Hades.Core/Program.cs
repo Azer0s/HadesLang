@@ -19,24 +19,21 @@ namespace Hades.Core
         private static void HighLight(IEnumerable<Token> tks)
         {
             Console.ForegroundColor = ConsoleColor.White;
-            var next = false;
             var tokens = tks.ToList();
             for(var i = 0; i < tokens.Count; i++)
             {
                 var token = tokens[i];
-                if (next)
+                
+                if (token.Kind == Classifier.Identifier && char.IsUpper(token.Value[0]))
                 {
-                    if (tokens.Count-1 > i + 1)
-                    {
-                        Console.ForegroundColor = tokens[i+1].Kind == Classifier.LeftParenthesis || tokens[i+1].Kind == Classifier.Colon ? ConsoleColor.DarkYellow : ConsoleColor.Magenta;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                    }
-                    next = false;
+                    Console.ForegroundColor = ConsoleColor.Green;
                 }
 
+                if (token.Kind == Classifier.Identifier && (tokens[i+1].Kind == Classifier.LeftParenthesis || tokens[i+1].Kind == Classifier.Colon))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                
                 if (token.Kind == Classifier.Identifier && token.Value == "super")
                 {
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
@@ -44,18 +41,18 @@ namespace Hades.Core
                 
                 if (token.Kind == Classifier.Keyword)
                 {
-                    Console.ForegroundColor = ConsoleColor.Blue;             
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;             
                 }
 
                 if (token.Kind == Classifier.StringLiteral)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Green;
                     token.Value = $"\"{token.Value}\"";
                 }
 
                 if (token.Kind == Classifier.IntLiteral || token.Kind == Classifier.DecLiteral)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
                 }
 
                 if (token.Kind == Classifier.BoolLiteral)
@@ -76,11 +73,6 @@ namespace Hades.Core
                 if (token.Kind == Classifier.LeftBracket || token.Kind == Classifier.RightBracket || token.Kind == Classifier.LeftBrace || token.Kind == Classifier.RightBrace)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
-                }
-                
-                if (token.Kind == Classifier.Arrow)
-                {
-                    next = true;
                 }
 
                 if (token.Category == Category.Comment)
