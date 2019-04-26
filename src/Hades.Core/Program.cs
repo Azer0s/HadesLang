@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Hades.Common;
 using Hades.Common.Extensions;
+using Hades.Common.Util;
 using Hades.Core.Tools;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
@@ -13,6 +16,76 @@ namespace Hades.Core
     {
         private const string VERSION = "0.0.1";
 
+        private static void HighLight(IEnumerable<Token> tks)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            var next = false;
+            var tokens = tks.ToList();
+            for(var i = 0; i < tokens.Count; i++)
+            {
+                var token = tokens[i];
+                if (next)
+                {
+                    Console.ForegroundColor = tokens[i+1].Kind == Classifier.LeftParenthesis ? ConsoleColor.DarkYellow : ConsoleColor.Magenta;
+                    next = false;
+                }
+
+                if (token.Kind == Classifier.Identifier && token.Value == "super")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                }
+                
+                if (token.Kind == Classifier.Keyword)
+                {
+                    Console.ForegroundColor = ConsoleColor.Blue;             
+                }
+
+                if (token.Kind == Classifier.StringLiteral)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    token.Value = $"\"{token.Value}\"";
+                }
+
+                if (token.Kind == Classifier.IntLiteral || token.Kind == Classifier.DecLiteral)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+
+                if (token.Kind == Classifier.BoolLiteral)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                }
+
+                if (token.Category == Category.Operator || token.Kind == Classifier.Question)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                }
+
+                if (Enum.TryParse<Datatype>(token.Value.ToUpper(),out _) && !token.Value.All(char.IsDigit))
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                }
+
+                if (token.Kind == Classifier.LeftBracket || token.Kind == Classifier.RightBracket || token.Kind == Classifier.LeftBrace || token.Kind == Classifier.RightBrace)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                }
+                
+                if (token.Kind == Classifier.Arrow)
+                {
+                    next = true;
+                }
+
+                if (token.Category == Category.Comment)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
+                
+                Console.Write(token.Value);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+        }
+        
         public static int Main(string[] args)
         {
             if (args.Length != 0)
@@ -43,8 +116,16 @@ namespace Hades.Core
 
                 try
                 {
-                    var tokens = lexer.LexFile(Console.ReadLine());
+                    var line = Console.ReadLine();
+                    
+                    ConsoleFunctions.ClearCurrentConsoleLine();
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("hd>");
+                    var tokens = lexer.LexFile(line);
+                    HighLight(tokens);
                     Console.WriteLine();
+
+                    tokens = lexer.LexFile(line);
                     var parser = new Parser(tokens);
                     var root = parser.Parse();
                     Console.WriteLine(root);

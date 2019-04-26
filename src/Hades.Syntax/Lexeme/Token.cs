@@ -22,7 +22,7 @@ namespace Hades.Syntax.Lexeme
 
         public Span Span { get; }
 
-        public string Value { get; }
+        public string Value { get; set; }
 
         public bool Equals(Token other)
         {
