@@ -20,10 +20,10 @@ namespace Hades.Core
         {
             Console.ForegroundColor = ConsoleColor.White;
             var tokens = tks.ToList();
-            for(var i = 0; i < tokens.Count; i++)
+            for (var i = 0; i < tokens.Count; i++)
             {
                 var token = tokens[i];
-                
+
                 if (token.Kind == Classifier.Identifier && char.IsUpper(token.Value[0]))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -31,20 +31,20 @@ namespace Hades.Core
 
                 if (i + 1 < tokens.Count)
                 {
-                    if (token.Kind == Classifier.Identifier && (tokens[i+1].Kind == Classifier.LeftParenthesis || tokens[i+1].Kind == Classifier.Colon))
+                    if (token.Kind == Classifier.Identifier && (tokens[i + 1].Kind == Classifier.LeftParenthesis || tokens[i + 1].Kind == Classifier.Colon))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                     }
                 }
-                
+
                 if (token.Kind == Classifier.Identifier && token.Value == "super")
                 {
                     Console.ForegroundColor = ConsoleColor.DarkCyan;
                 }
-                
+
                 if (token.Kind == Classifier.Keyword)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkCyan;             
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
                 }
 
                 if (token.Kind == Classifier.StringLiteral)
@@ -68,7 +68,7 @@ namespace Hades.Core
                     Console.ForegroundColor = ConsoleColor.Cyan;
                 }
 
-                if (Enum.TryParse<Datatype>(token.Value.ToUpper(),out _) && !token.Value.All(char.IsDigit))
+                if (Enum.TryParse<Datatype>(token.Value.ToUpper(), out _) && !token.Value.All(char.IsDigit))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
                 }
@@ -87,12 +87,12 @@ namespace Hades.Core
                 {
                     Console.ForegroundColor = ConsoleColor.White;
                 }
-                
+
                 Console.Write(token.Value);
                 Console.ForegroundColor = ConsoleColor.White;
             }
         }
-        
+
         public static int Main(string[] args)
         {
             if (args.Length != 0)
@@ -113,6 +113,7 @@ namespace Hades.Core
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"Hades version {VERSION}");
             Console.WriteLine($"Running {Environment.OSVersion}");
+            Console.WriteLine("Press space to enter/exit multiline mode");
 
             while (true)
             {
@@ -124,15 +125,47 @@ namespace Hades.Core
                 try
                 {
                     var line = Console.ReadLine();
-                    
-                    ConsoleFunctions.ClearCurrentConsoleLine();
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("hd>");
-                    var tokens = lexer.LexFile(line);
-                    HighLight(tokens);
-                    Console.WriteLine();
+                    IEnumerable<Token> tokens = null;
 
-                    tokens = lexer.LexFile(line);
+                    if (line == " ")
+                    {
+                        // Multiple lines
+                        var lines = new List<string> {line};
+                        do
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.Write("...");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            line = Console.ReadLine();
+
+                            ConsoleFunctions.ClearCurrentConsoleLine();
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.Write("...");
+                            tokens = lexer.LexFile(line);
+                            HighLight(tokens);
+                            Console.WriteLine();
+
+                            lines.Add(line);
+                        } while (line != " ");
+
+                        Console.WriteLine();
+
+                        lines.RemoveAt(line.Length - 1);
+                        tokens = lexer.LexFile(string.Join(" ", lines));
+                    }
+                    else
+                    {
+                        // Single line
+                        ConsoleFunctions.ClearCurrentConsoleLine();
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("hd>");
+                        tokens = lexer.LexFile(line);
+                        HighLight(tokens);
+                        Console.WriteLine();
+
+                        tokens = lexer.LexFile(line);
+                    }
+
                     var parser = new Parser(tokens);
                     var root = parser.Parse();
                     Console.WriteLine(root);

@@ -1,7 +1,6 @@
 all:
 	@$(MAKE) interpreter
-	@$(MAKE) run
-
+	
 interpreter:
 	@echo
 	@echo "\033[4m\033[1mBuilding HadesLang\033[0m"

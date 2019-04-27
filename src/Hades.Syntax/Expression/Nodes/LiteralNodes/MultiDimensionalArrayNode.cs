@@ -8,7 +8,7 @@ namespace Hades.Syntax.Expression.Nodes.LiteralNodes
         {
             Value = new List<Node>();
         }
-        
+
         public override string ToString()
         {
             return string.Join(",", Value);

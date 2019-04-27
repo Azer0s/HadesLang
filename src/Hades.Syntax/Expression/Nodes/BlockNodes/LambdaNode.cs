@@ -16,7 +16,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         protected override string ToStr()
         {
             var args = ParameterWriter.PrintParameters(Parameters);
-                
+
             if (!string.IsNullOrEmpty(args))
             {
                 args = args.Substring(0, args.Length - 1);

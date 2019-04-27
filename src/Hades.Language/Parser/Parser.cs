@@ -78,19 +78,19 @@ namespace Hades.Language.Parser
         }
 
         /// <summary>
-        /// Gets the specific type of an object or proto
-        /// ```
-        /// func doStuff(object::IClient a)
-        ///    a->stuff("Hello world")
-        /// end
-        /// ```
+        ///     Gets the specific type of an object or proto
+        ///     ```
+        ///     func doStuff(object::IClient a)
+        ///         a->stuff("Hello world")
+        ///     end
+        ///     ```
         /// </summary>
         /// <returns>Specific type or null</returns>
         private (string specificType, Datatype dt) GetSpecificType()
         {
             var dt = (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper());
             string type = null;
-                    
+
             if (dt == Datatype.PROTO || dt == Datatype.OBJECT)
             {
                 Advance();
@@ -109,7 +109,7 @@ namespace Hades.Language.Parser
 
             return (type, dt);
         }
-        
+
         private List<(Node Key, Datatype? Value, string SpecificType)> ParseArguments(Classifier expectedClassifier, string expect)
         {
             var args = new List<(Node Key, Datatype? Value, string SpecificType)>();
@@ -124,7 +124,7 @@ namespace Hades.Language.Parser
                     {
                         Advance();
                     }
-                        
+
                     EnforceIdentifier();
                     args.Add((new IdentifierNode(Current.Value), dt, type));
                     Advance();
@@ -135,12 +135,12 @@ namespace Hades.Language.Parser
                     if (IsType())
                     {
                         var (type, dt) = GetSpecificType();
-                        
+
                         if (type == null)
                         {
                             Advance();
                         }
-                        
+
                         EnforceIdentifier();
                         args.Add((new ArgsNode(Current.Value), dt, type));
                     }
@@ -149,6 +149,7 @@ namespace Hades.Language.Parser
                         EnforceIdentifier();
                         args.Add((new ArgsNode(Current.Value), Datatype.NONE, null));
                     }
+
                     Advance();
                 }
                 else if (IsIdentifier())
@@ -172,14 +173,13 @@ namespace Hades.Language.Parser
 
             if (!Is(expectedClassifier))
             {
-                Error(ErrorStrings.MESSAGE_EXPECTED_VALUE,expect);
+                Error(ErrorStrings.MESSAGE_EXPECTED_VALUE, expect);
             }
 
             Advance();
 
             return args;
         }
-
 
         #endregion
 
@@ -263,6 +263,12 @@ namespace Hades.Language.Parser
             if (Is(Classifier.Not))
             {
                 node.Override = true;
+                Advance();
+            }
+
+            if (Is(Keyword.Fixed))
+            {
+                node.Fixed = true;
                 Advance();
             }
 
@@ -380,7 +386,7 @@ namespace Hades.Language.Parser
 
             return ReadToEnd(node, true);
         }
-        
+
         //TODO: Parse if
         //TODO: Parse class
 
@@ -550,12 +556,12 @@ namespace Hades.Language.Parser
             if (IsType())
             {
                 var (type, dt) = GetSpecificType();
-                
+
                 if (type == null)
                 {
                     Advance();
                 }
-                
+
                 variable.Datatype = dt;
                 variable.SpecificType = type;
             }
@@ -689,7 +695,7 @@ namespace Hades.Language.Parser
                 //Not a lambda
                 isLambda = false;
             }
-            
+
             //Lambda
             Node n;
             if (isLambda && Was(Classifier.FatArrow))
@@ -714,9 +720,9 @@ namespace Hades.Language.Parser
             else
             {
                 _index = index;
-                
+
                 var vals = new List<Node>();
-                
+
                 //Collect array values
                 do
                 {
@@ -731,8 +737,9 @@ namespace Hades.Language.Parser
                         Advance();
                     }
                 } while (!Is(Classifier.RightBracket));
+
                 Advance();
-                var node = new ListNode{Value = vals};
+                var node = new ListNode {Value = vals};
                 n = node;
             }
 
@@ -903,7 +910,7 @@ namespace Hades.Language.Parser
             {
                 return ParseRightHand(node);
             }
-            
+
             return node;
         }
 
@@ -996,7 +1003,7 @@ namespace Hades.Language.Parser
             {
                 return ParseArrayOrLambda();
             }
-            
+
             if (Is(Classifier.Not) || Is(Classifier.Minus))
             {
                 return ParseLeftHand(new OperationNodeNode(Current.Kind, Current.Value));
@@ -1007,7 +1014,7 @@ namespace Hades.Language.Parser
                 Advance();
                 return new NullValueNode();
             }
-            
+
             //TODO: Array access
             //TODO: Rework calculations
             return null;

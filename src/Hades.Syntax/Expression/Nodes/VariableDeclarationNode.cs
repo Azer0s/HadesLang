@@ -34,7 +34,7 @@ namespace Hades.Syntax.Expression.Nodes
             {
                 datatype += $"[{SpecificType}]";
             }
-            
+
             var assignment = Assignment != null ? "(" + Assignment + ")" : "";
             var withAssignment = assignment != "" ? " with assignment " : "";
             return $"Create{nullable}{dynamic}{mutable}{datatype}{array}{arraySize} variable {Name}{withAssignment}{assignment}";

@@ -11,8 +11,9 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         }
 
         public bool Override { get; set; }
+        public bool Fixed { get; set; }
         public string Name { get; set; }
-        public List<(Node Key, Datatype? Value, string SpecificType)> Parameters { get; set;  } = new List<(Node Key, Datatype? Value, string SpecificType)>();
+        public List<(Node Key, Datatype? Value, string SpecificType)> Parameters { get; set; } = new List<(Node Key, Datatype? Value, string SpecificType)>();
         public Node Guard { get; set; }
 
         protected override string ToStr()
@@ -27,7 +28,8 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 
             var guard = Guard != null ? " with guard (" + Guard + ")" : "";
             var over = Override ? " override " : "";
-            var str = $"{Name}{over}{args}{guard}\n{base.ToStr()}";
+            var fix = Fixed ? "fixed " : "";
+            var str = $"{fix}{Name}{over}{args}{guard}\n{base.ToStr()}";
             return str;
         }
     }

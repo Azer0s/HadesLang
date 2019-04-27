@@ -6,7 +6,7 @@ namespace Hades.Syntax.Expression.Nodes.LiteralNodes
         {
             Value = identifier;
         }
-        
+
         public override string ToString()
         {
             return $"Varargs Value: {Value}";

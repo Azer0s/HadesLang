@@ -23,7 +23,7 @@ namespace Hades.Syntax.Expression
             {
                 str = str.Substring(0, str.Length - 1);
             }
-            
+
             return str;
         }
     }
