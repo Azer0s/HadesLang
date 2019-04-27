@@ -33,7 +33,7 @@ namespace Hades.Core
                 {
                     if (token.Kind == Classifier.Identifier && (tokens[i + 1].Kind == Classifier.LeftParenthesis || tokens[i + 1].Kind == Classifier.Colon))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
                     }
                 }
 
@@ -151,7 +151,7 @@ namespace Hades.Core
                         Console.WriteLine();
 
                         lines.RemoveAt(line.Length - 1);
-                        tokens = lexer.LexFile(string.Join(" ", lines));
+                        tokens = lexer.LexFile(string.Join("\n", lines));
                     }
                     else
                     {
