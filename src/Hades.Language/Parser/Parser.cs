@@ -493,11 +493,6 @@ namespace Hades.Language.Parser
                     Advance();
                 }
             }
-            else if (Is(Classifier.Colon))
-            {
-                Advance();
-                node.Parameters.Add(ParseStatement(), "");
-            }
             else
             {
                 if (parseValueCall)
@@ -890,7 +885,7 @@ namespace Hades.Language.Parser
             //Call on lambdas
             if (node is LambdaNode)
             {
-                if (Is(Classifier.Colon) || Is(Classifier.LeftParenthesis))
+                if (Is(Classifier.LeftParenthesis))
                 {
                     node = ParseCallSignature(new CallNode {Source = node, Target = new IdentifierNode("anonymous")}, false);
                 }
@@ -952,7 +947,7 @@ namespace Hades.Language.Parser
                 }
 
                 //Call on this
-                if (Expect(Classifier.Colon) || Expect(Classifier.LeftParenthesis))
+                if (Expect(Classifier.LeftParenthesis))
                 {
                     return ParseCall(new IdentifierNode("this"));
                 }

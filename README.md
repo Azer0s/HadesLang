@@ -12,7 +12,7 @@ This is the official repository for the reference implementation of the Hades Pr
 ### Hello world
 ```js
 with console from std:io
-console->out:"Hello world"
+console->out("Hello world")
 ```
 
 ### Pipelines
@@ -25,7 +25,7 @@ var fruits = list->of({"Apple", "Banana", "Mango", "Kiwi", "Avocado"})
 fruits
 |> map({x => x->toLower()}, ??)
 |> filter({x => x->startsWith("a")}, ??)
-|> forEach({x => console->out:x}, ??)
+|> forEach({x => console->out(x)}, ??)
 ```
 
 ### Function guards
@@ -33,15 +33,15 @@ fruits
 with console fixed from std:io
 
 func myFunction(int a) requires a < 10
-    console->out:"a is smaller than 10"
+    console->out("a is smaller than 10")
 end
 
 func myFunction(int a) requires a > 10
-    console->out:"a is greater than 10"
+    console->out("a is greater than 10")
 end
 
-out:myFunction(5)   // a is smaller than 10
-out:myFunction(17)  // a is greater than 10
+out(myFunction(5))   // a is smaller than 10
+out(myFunction(17))  // a is greater than 10
 ```
 
 ### Fibonacci sequence

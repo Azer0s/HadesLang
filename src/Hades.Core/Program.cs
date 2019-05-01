@@ -31,7 +31,7 @@ namespace Hades.Core
 
                 if (i + 1 < tokens.Count)
                 {
-                    if (token.Kind == Classifier.Identifier && (tokens[i + 1].Kind == Classifier.LeftParenthesis || tokens[i + 1].Kind == Classifier.Colon))
+                    if (token.Kind == Classifier.Identifier && tokens[i + 1].Kind == Classifier.LeftParenthesis)
                     {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                     }

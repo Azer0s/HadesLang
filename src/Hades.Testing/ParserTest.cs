@@ -38,10 +38,10 @@ namespace Hades.Testing
 
         [TestCase("exceptions->ArgumentNullException(\"{} is null\"->format(nameof(b)))", false)]
         [TestCase("console->print(\"Variable is of type string\")", false)]
-        [TestCase("console->out:\"Connection open!\"", false)]
+        [TestCase("console->out(\"Connection open!\")", false)]
         [TestCase("square(a)", false)]
         [TestCase("root(a)", false)]
-        [TestCase("square:a,b", true)]
+        [TestCase("square(a,b", true)]
         [TestCase("root(a", true)]
         [Test]
         public void EnsureCall(string code, bool fail)
@@ -139,11 +139,11 @@ namespace Hades.Testing
             Assert.AreEqual(withNode.NativePackage, nativepackage);
         }
 
-        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\nconsole->out:\"a is 11\"\nend", false)]
+        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\nconsole->out(\"a is 11\")\nend", false)]
         [TestCase("while(c not 10)\nconsole->out(\"c is {}\"->format(c))\nend", false)]
-        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\nskip\nend", true)]
-        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out:\"a is 11\"\na->b = {x,y=>x+y}(1,2)->toString({x=>x})\nend", false)]
-        [TestCase("for(var arg in a)\nconsole->out:arg\nskip\nend\nfor(var arg in a)\nconsole->out:arg\nskip\nend", false)]
+        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\nskip\nend", true)]
+        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\na->b = {x,y=>x+y}(1,2)->toString({x=>x})\nend", false)]
+        [TestCase("for(var arg in a)\nconsole->out(arg)\nskip\nend\nfor(var arg in a)\nconsole->out(arg)\nskip\nend", false)]
         [TestCase("func doStuff(object::IClient a)\na->stuff(\"Hello\")\nend", false)]
         [TestCase("func doStuff(object::IClient a, int b)\na->stuff(\"Hello\")\nend", false)]
         [TestCase("func doStuff(object::IClient a, c)\na->stuff(\"Hello\")\nend", false)]
