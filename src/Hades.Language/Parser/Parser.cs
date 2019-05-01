@@ -508,15 +508,15 @@ namespace Hades.Language.Parser
 
         private Node ParseDeepCall(Node node)
         {
-            Node deepcall = null;
+            Node deepCall = null;
 
             while (Is(Classifier.Arrow))
             {
                 Advance();
-                deepcall = ParseCall(deepcall ?? node);
+                deepCall = ParseCall(deepCall ?? node);
             }
 
-            return deepcall;
+            return deepCall;
         }
 
         #endregion
