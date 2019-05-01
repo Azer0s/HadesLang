@@ -891,6 +891,16 @@ namespace Hades.Language.Parser
                 }
             }
 
+            if (Is(Classifier.Question))
+            {
+                //TODO: Inline if:
+                    //Advance()
+                    //ParseStatement()
+                    //Enforce(Colon)
+                    //Advance()
+                    //ParseStatement()
+            }
+
             if (Is(Classifier.Arrow))
             {
                 node = ParseDeepCall(node);
