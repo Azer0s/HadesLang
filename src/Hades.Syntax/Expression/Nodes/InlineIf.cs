@@ -12,7 +12,7 @@ namespace Hades.Syntax.Expression.Nodes
 
         protected override string ToStr()
         {
-            return $"(if ({Condition}), ({Truthy}), otherwise ({Falsy}) )";
+            return $"(if ({Condition}), ({Truthy}), otherwise ({Falsy}))";
         }
     }
 }
