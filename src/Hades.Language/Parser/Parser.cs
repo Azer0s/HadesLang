@@ -257,19 +257,13 @@ namespace Hades.Language.Parser
 
         #region Blocks
 
-        private Node ParseFunc()
+        private Node ParseFunc(bool isFixed)
         {
             Advance();
-            var node = new FunctionNode();
+            var node = new FunctionNode {Fixed = isFixed};
             if (Is(Classifier.Not))
             {
                 node.Override = true;
-                Advance();
-            }
-
-            if (Is(Keyword.Fixed))
-            {
-                node.Fixed = true;
                 Advance();
             }
 
@@ -850,6 +844,14 @@ namespace Hades.Language.Parser
                     }
                 }
 
+                var isFixed = false;
+                if (Is(Keyword.Fixed))
+                {
+                    isFixed = true;
+                    Advance();
+                    //HACK: this is not beautiful
+                }
+                
                 switch (Current.Value)
                 {
                     case Keyword.Put:
@@ -857,7 +859,7 @@ namespace Hades.Language.Parser
                         return new PutNode {Statement = ParseStatement()};
 
                     case Keyword.Func:
-                        return ParseFunc();
+                        return ParseFunc(isFixed);
 
                     case Keyword.While:
                         return ParseWhile();
@@ -909,6 +911,8 @@ namespace Hades.Language.Parser
                 return ops;
             }
 
+            Node node;
+            
             if (Is(Classifier.LeftParenthesis))
             {
                 Advance();
@@ -926,10 +930,13 @@ namespace Hades.Language.Parser
                     n = GetOperation(n);
                 }
 
-                return n;
+                node = n;
+            }
+            else
+            {
+                node = ParseStatementWithoutOperation();
             }
 
-            var node = ParseStatementWithoutOperation();
 
             if (Is(Category.Operator) && node != null)
             {
