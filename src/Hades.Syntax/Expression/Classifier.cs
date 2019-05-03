@@ -30,6 +30,7 @@
         MultiDimensionalArrayAccess,
         InlineIf,
         Pipeline,
-        Placeholder
+        Placeholder,
+        If
     }
 }

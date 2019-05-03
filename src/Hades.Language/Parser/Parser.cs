@@ -51,9 +51,14 @@ namespace Hades.Language.Parser
             Error(string.Format(error, format));
         }
 
-        private BlockNode ReadToEnd(BlockNode node, bool allowSkipStop = false)
+        private BlockNode ReadToEnd(BlockNode node, bool allowSkipStop = false, List<string> keywords = null)
         {
-            while (!Is(Keyword.End))
+            if (keywords == null)
+            {
+                keywords = new List<string> {Keyword.End};
+            }
+            
+            while (!Is(keywords))
             {
                 node.Children.Add(ParseNext(allowSkipStop));
             }
@@ -221,9 +226,19 @@ namespace Hades.Language.Parser
             return Last == classifier;
         }
 
+        private bool Was(string token)
+        {
+            return Last == token;
+        }
+
         private bool Is(string token)
         {
             return Current == token;
+        }
+
+        private bool Is(IEnumerable<string> tokens)
+        {
+            return tokens.Any(token => token == Current);
         }
 
         private bool Is(Classifier classifier)
@@ -306,10 +321,9 @@ namespace Hades.Language.Parser
             return ReadToEnd(node);
         }
 
-        private Node ParseWhile()
+        private Node GetCondition()
         {
-            Advance();
-            var node = new WhileNode();
+            Node node;
             if (!Is(Classifier.LeftParenthesis))
             {
                 Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
@@ -317,7 +331,7 @@ namespace Hades.Language.Parser
 
             Advance();
 
-            node.Condition = ParseStatement();
+            node = ParseStatement();
 
             if (!Is(Classifier.RightParenthesis))
             {
@@ -325,8 +339,41 @@ namespace Hades.Language.Parser
             }
 
             Advance();
+            return node;
+        }
+        
+        private Node ParseWhile()
+        {
+            Advance();
+            var node = new WhileNode {Condition = GetCondition()};
 
             return ReadToEnd(node, true);
+        }
+        
+        private Node ParseIf()
+        {
+            Advance();
+            var node = new IfNode {Condition = GetCondition(), If = ReadToEnd(new GenericBlockNode(), false, new List<string> {Keyword.End, Keyword.Else})};
+
+
+            if (Was(Keyword.End))
+            {
+                return node;
+            }
+
+            while (Was(Keyword.Else) && Is(Keyword.If))
+            {
+                Advance();
+                node.ElseIfNodes.Add(new IfNode {Condition = GetCondition(), If = ReadToEnd(new GenericBlockNode(), false, new List<string> {Keyword.End, Keyword.Else})});
+            }
+            
+            if (Was(Keyword.Else))
+            {
+                Advance();
+                node.Else = ReadToEnd(new GenericBlockNode());
+            }
+            
+            return node;
         }
 
         private Node ParseFor()
@@ -382,7 +429,6 @@ namespace Hades.Language.Parser
             return ReadToEnd(node, true);
         }
 
-        //TODO: Parse if
         //TODO: Parse class
 
         #endregion
@@ -864,6 +910,9 @@ namespace Hades.Language.Parser
                     case Keyword.While:
                         return ParseWhile();
 
+                    case Keyword.If:
+                        return ParseIf();
+                    
                     case Keyword.For:
                         return ParseFor();
 
