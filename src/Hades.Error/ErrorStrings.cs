@@ -4,6 +4,7 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_UNEXPECTED_STATEMENT = "Unexpected statement!";
         public const string MESSAGE_CANT_HAVE_MULTIPLE_VARARGS = "Can't have multiple 'args' parameters in one function!";
         public const string MESSAGE_EXPECTED_IN = "Expected 'in' keyword!";
         public const string MESSAGE_UNEXPECTED_KEYWORD = "Unexpected keyword: {0}!";
@@ -13,6 +14,7 @@ namespace Hades.Error
         public const string MESSAGE_EXPECTED_VALUE = "Expected {0}!";
         public const string MESSAGE_INVALID_ARRAY_EXPECTED_COMMA = "Invalid array literal! Expected a comma!";
         public const string MESSAGE_EXPECTED_COMMA = "Expected a comma!";
+        public const string MESSAGE_EXPECTED_COLON = "Expected a colon!";
         public const string MESSAGE_EXPECTED_PARAMETERS = "Expected parameters!";
         public const string MESSAGE_IMMUTABLE_CANT_BE_NULLABLE = "An immutable variable can't be nullable!";
         public const string MESSAGE_TYPE_INFERRED_CANT_BE_NULLABLE = "A type infered variable can't be nullable!";

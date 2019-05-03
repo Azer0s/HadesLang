@@ -100,6 +100,7 @@ namespace Hades.Syntax.Lexeme
         BitShiftRightEqual, // >>=
 
         Question, //?
+        DoubleQuestion, //??
         NullCondition, //::
 
         Pipeline, //|>

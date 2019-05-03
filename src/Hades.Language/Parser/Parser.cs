@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Hades.Common;
+using Hades.Common.Extensions;
 using Hades.Error;
 using Hades.Language.Lexer;
 using Hades.Syntax.Expression;
@@ -519,6 +520,65 @@ namespace Hades.Language.Parser
             return deepCall;
         }
 
+        private Node ParseInlineIf(Node node)
+        {
+            Advance();
+            var truthy = ParseStatement();
+
+            if (!Is(Classifier.Colon))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_COLON);
+            }
+            
+            Advance();
+            var falsy = ParseStatement();
+            return new InlineIf {Condition = node, Falsy = falsy, Truthy = truthy};
+        }
+
+        private Node ParsePipeline(Node node)
+        {
+            var root = node;
+            do
+            {
+                Advance();
+                var child = ParseStatement(true);
+
+                if (child is ValueCallNode vcn)
+                {
+                    var callNode = new CallNode {Source = vcn.Source, Target = vcn.Target};
+                    callNode.Parameters.Add(root, "");
+                    root = callNode;
+                }
+                else if (child is IdentifierNode id)
+                {
+                    var callNode = new CallNode {Source = new IdentifierNode("this"), Target = id};
+                    callNode.Parameters.Add(root, "");
+                    root = callNode;
+                }
+                else if (child is CallNode cn)
+                {
+                    var placeHolders = cn.Parameters.Where(a => a.Key is PlaceHolderNode).Select(a => a).ToList();
+                    
+                    placeHolders.ForEach(a =>
+                    {
+                        cn.Parameters.Remove(a.Key);
+                    });
+                
+                    placeHolders.ForEach(a =>
+                    {
+                        cn.Parameters.Add(root, a.Value);
+                    });
+
+                    root = cn;
+                }
+                else
+                {
+                    Error(ErrorStrings.MESSAGE_UNEXPECTED_STATEMENT);
+                }
+            } while (Is(Classifier.Pipeline));
+            return root;
+        }
+
         #endregion
 
         #region Variables
@@ -815,7 +875,7 @@ namespace Hades.Language.Parser
                 }
             }
 
-            if (IsIdentifier() || Is(Category.Literal) && Expect(Classifier.Arrow) || Is(Category.Literal) && Expect(Category.Operator) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket) || Is(Classifier.Not) || Is(Classifier.Minus))
+            if (IsIdentifier() || Is(Category.Literal) && (Expect(Classifier.Arrow) || Expect(Classifier.Question))|| Is(Category.Literal) && Expect(Category.Operator) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket) || Is(Classifier.Not) || Is(Classifier.Minus))
             {
                 return ParseStatement();
             }
@@ -829,7 +889,7 @@ namespace Hades.Language.Parser
         ///     For statements that can have more complex nodes within the statement
         /// </summary>
         /// <returns></returns>
-        private Node ParseStatement()
+        private Node ParseStatement(bool pipeline = false)
         {
             Node GetOperation(Node initial = null)
             {
@@ -893,12 +953,12 @@ namespace Hades.Language.Parser
 
             if (Is(Classifier.Question))
             {
-                //TODO: Inline if:
-                    //Advance()
-                    //ParseStatement()
-                    //Enforce(Colon)
-                    //Advance()
-                    //ParseStatement()
+                node = ParseInlineIf(node);
+            }
+
+            if (Is(Classifier.Pipeline) && !pipeline)
+            {
+                node = ParsePipeline(node);
             }
 
             if (Is(Classifier.Arrow))
@@ -966,6 +1026,12 @@ namespace Hades.Language.Parser
                 return new IdentifierNode(Last.Value);
             }
 
+            if (Is(Classifier.DoubleQuestion))
+            {
+                Advance();
+                return new PlaceHolderNode();
+            }
+            
             if (Is(Category.Literal))
             {
                 Node node = null;
