@@ -154,5 +154,14 @@ namespace Hades.Testing
         {
             FailTest(code, fail);
         }
+        
+        [TestCase("fib(10) |> doStuff |> console->out", false)]
+        [TestCase("fib(10) |> console->out", false)]
+        [TestCase("fruits |> map({x => x->toLower()}, ??) |> filter({x => x->startsWith(\"a\")}, ??) |> forEach({x => console->out(x)}, ??)", false)]
+        [Test]
+        public void PipelineTes(string code, bool fail)
+        {
+            FailTest(code, fail);
+        }
     }
 }

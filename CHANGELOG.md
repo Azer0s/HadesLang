@@ -1,3 +1,18 @@
+## 5/3/19
+
+### Added pipelines #f3129f23a2f7c7103a3dc8a89b19f846a84585a5
+
+This: 
+
+```js
+fruits
+|> map({x => x->toLower()}, ??)
+|> filter({x => x->startsWith("a")}, ??)
+|> forEach({x => console->out(x)}, ??)
+```
+
+is now a thing.
+
 ## 4/26/19
 
 ### Removed multidimensional array access #b2a09b8f55e2024277e7fbd0ad9331f20d5f013a

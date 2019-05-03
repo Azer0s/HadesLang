@@ -27,6 +27,9 @@
         Misc,
         ListLiteral,
         NullLiteral,
-        MultiDimensionalArrayAccess
+        MultiDimensionalArrayAccess,
+        InlineIf,
+        Pipeline,
+        Placeholder
     }
 }

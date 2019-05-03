@@ -609,7 +609,9 @@ namespace Hades.Language.Lexer
 
                 case '?':
                     Consume();
-                    return CreateToken(Classifier.Question);
+                    if (Ch != '?') return CreateToken(Classifier.Question);
+                    Consume();
+                    return CreateToken(Classifier.DoubleQuestion);
 
                 case '.':
                     Consume();
