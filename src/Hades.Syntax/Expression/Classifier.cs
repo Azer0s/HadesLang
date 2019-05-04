@@ -31,6 +31,7 @@
         InlineIf,
         Pipeline,
         Placeholder,
-        If
+        If,
+        TryCatch
     }
 }

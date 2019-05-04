@@ -428,8 +428,51 @@ namespace Hades.Language.Parser
             return ReadToEnd(node, true);
         }
 
+        private Node ParseTryCatchElse()
+        {
+            Advance();
+            var node = new TryCatchElseNode {Try = ReadToEnd(new GenericBlockNode(), keywords: new List<string> {Keyword.Catch, Keyword.Else})};
+
+
+            while (Was(Keyword.Catch))
+            {
+                var catchNode = new TryCatchElseNode.CatchBlock();
+                
+                if (!Is(Classifier.LeftParenthesis))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
+                }
+                
+                Advance();
+
+                if (IsType())
+                {
+                    (catchNode.SpecificType, catchNode.Datatype) = GetSpecificType();
+                }
+                
+                EnforceIdentifier();
+                catchNode.Name = Current.Value;
+                Advance();
+                
+                if (!Is(Classifier.RightParenthesis))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+                }
+                Advance();
+
+                catchNode.Block = ReadToEnd(new GenericBlockNode(), keywords: new List<string> {Keyword.Catch, Keyword.End, Keyword.Else});
+                node.Catch.Add(catchNode);
+            }
+
+            if (Was(Keyword.Else))
+            {
+                node.Else = ReadToEnd(new GenericBlockNode());
+            }
+
+            return node;
+        }
+
         //TODO: Parse class
-        //TODO: Parse try catch
 
         #endregion
 
@@ -910,6 +953,9 @@ namespace Hades.Language.Parser
 
                     case Keyword.For:
                         return ParseFor();
+                    
+                    case Keyword.Try:
+                        return ParseTryCatchElse();
 
                     case Keyword.Skip:
                     case Keyword.Stop:

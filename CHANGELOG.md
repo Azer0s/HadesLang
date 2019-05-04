@@ -1,3 +1,79 @@
+## 5/4/19
+
+### Added try-catch-else block
+
+```js
+try
+    connection->open()
+    console->out("Connection open!")
+    connection->close()
+catch(object::SqlException e)
+    console->out("SqlException was caught!")
+catch(e)
+    console->out("An unknown exception was caught!")
+end
+```
+
+```js
+try
+    connection->open()
+    console->out("Connection open!")
+    connection->close()
+catch(object::SqlException e)
+    console->out("SqlException was caught!")
+catch(e)
+    console->out("An unknown exception was caught!")
+else
+	console->out("No exception thrown!")
+end
+```
+
+```js
+try
+    connection->open()
+    console->out("Connection open!")
+    connection->close()
+else //Exception is not handled; if there was no exception, else block is called
+	console->out("No exception thrown!")
+end
+```
+
+### Added if block, code beautification #8b3d4d6b35167b37a0efdb96e9ad2fc964719e1e
+
+```js
+if(a < 10)
+    console->out("a is smaller than 10")
+else if(a is 11)
+    console->out("a is 11")
+else if(a > 11 and a < 21)
+    console->out("a is greater than 11 and smaller than 21")
+else
+    console->out("a is " + a)
+end
+```
+
+```javascript
+if(a < 10)
+    console->out("a is smaller than 10")
+else
+    console->out("a is " + a)
+end
+```
+
+```javascript
+if(a < 10)
+    console->out("a is smaller than 10")
+end
+```
+
+```js
+if(a < 10)
+    console->out("a is smaller than 10")
+else if(a is 11)
+    console->out("a is 11")
+end
+```
+
 ## 5/3/19
 
 ### Added fixed prefix #5aca4880462c36dc87643e614bd7e38602f7e334
