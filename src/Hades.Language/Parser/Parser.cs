@@ -20,7 +20,7 @@ namespace Hades.Language.Parser
 
         public Parser(IEnumerable<Token> tokens)
         {
-            _tokens = tokens.ToList().Where(a => a.Kind != Classifier.WhiteSpace && a.Category != Category.Comment);
+            _tokens = tokens.ToList().Where(a => a.Kind != Classifier.WhiteSpace && a.Category != Category.Comment && a.Kind != Classifier.NewLine);
             _index = 0;
         }
 
@@ -59,6 +59,11 @@ namespace Hades.Language.Parser
 
             while (!Is(keywords))
             {
+                if (IsEof())
+                {
+                    Error(ErrorStrings.MESSAGE_UNEXPECTED_EOF);
+                }
+                
                 node.Children.Add(ParseNext(allowSkipStop));
             }
 
@@ -292,6 +297,7 @@ namespace Hades.Language.Parser
 
                 Advance();
                 node.Name = Current.Value;
+                Advance();
             }
             else
             {
@@ -368,7 +374,6 @@ namespace Hades.Language.Parser
 
             if (Was(Keyword.Else))
             {
-                Advance();
                 node.Else = ReadToEnd(new GenericBlockNode());
             }
 
@@ -1101,6 +1106,14 @@ namespace Hades.Language.Parser
                     case Keyword.Raise:
                         Advance();
                         return new RaiseNode {Exception = ParseStatement()};
+                    
+                    case Keyword.Null:
+                        Advance();
+                        return new NullValueNode();
+                    
+                    default:
+                        Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Current.Value);
+                        break;
                 }
             }
 
@@ -1175,12 +1188,6 @@ namespace Hades.Language.Parser
             if (Is(Classifier.Not) || Is(Classifier.Minus))
             {
                 return ParseLeftHand(new OperationNodeNode(Current.Kind, Current.Value));
-            }
-
-            if (Is(Keyword.Null))
-            {
-                Advance();
-                return new NullValueNode();
             }
 
             //TODO: Array access

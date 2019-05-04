@@ -29,7 +29,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             var guard = Guard != null ? " with guard (" + Guard + ")" : "";
             var over = Override ? " override " : "";
             var fix = Fixed ? "fixed " : "";
-            var str = $"{fix}{Name}{over}{args}{guard}\n{base.ToStr()}";
+            var str = $"{fix}{over}{Name}{args}{guard}\n{base.ToStr()}";
             return str;
         }
     }
