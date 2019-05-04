@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Hades.Common;
-using Hades.Common.Extensions;
 using Hades.Error;
 using Hades.Language.Lexer;
 using Hades.Syntax.Expression;
@@ -57,7 +56,7 @@ namespace Hades.Language.Parser
             {
                 keywords = new List<string> {Keyword.End};
             }
-            
+
             while (!Is(keywords))
             {
                 node.Children.Add(ParseNext(allowSkipStop));
@@ -87,7 +86,7 @@ namespace Hades.Language.Parser
         ///     Gets the specific type of an object or proto
         ///     ```
         ///     func doStuff(object::IClient a)
-        ///         a->stuff("Hello world")
+        ///     a->stuff("Hello world")
         ///     end
         ///     ```
         /// </summary>
@@ -341,7 +340,7 @@ namespace Hades.Language.Parser
             Advance();
             return node;
         }
-        
+
         private Node ParseWhile()
         {
             Advance();
@@ -349,7 +348,7 @@ namespace Hades.Language.Parser
 
             return ReadToEnd(node, true);
         }
-        
+
         private Node ParseIf()
         {
             Advance();
@@ -366,13 +365,13 @@ namespace Hades.Language.Parser
                 Advance();
                 node.ElseIfNodes.Add(new IfNode {Condition = GetCondition(), If = ReadToEnd(new GenericBlockNode(), false, new List<string> {Keyword.End, Keyword.Else})});
             }
-            
+
             if (Was(Keyword.Else))
             {
                 Advance();
                 node.Else = ReadToEnd(new GenericBlockNode());
             }
-            
+
             return node;
         }
 
@@ -430,6 +429,7 @@ namespace Hades.Language.Parser
         }
 
         //TODO: Parse class
+        //TODO: Parse try catch
 
         #endregion
 
@@ -569,7 +569,7 @@ namespace Hades.Language.Parser
             {
                 Error(ErrorStrings.MESSAGE_EXPECTED_COLON);
             }
-            
+
             Advance();
             var falsy = ParseStatement();
             return new InlineIf {Condition = node, Falsy = falsy, Truthy = truthy};
@@ -598,16 +598,10 @@ namespace Hades.Language.Parser
                 else if (child is CallNode cn)
                 {
                     var placeHolders = cn.Parameters.Where(a => a.Key is PlaceHolderNode).Select(a => a).ToList();
-                    
-                    placeHolders.ForEach(a =>
-                    {
-                        cn.Parameters.Remove(a.Key);
-                    });
-                
-                    placeHolders.ForEach(a =>
-                    {
-                        cn.Parameters.Add(root, a.Value);
-                    });
+
+                    placeHolders.ForEach(a => { cn.Parameters.Remove(a.Key); });
+
+                    placeHolders.ForEach(a => { cn.Parameters.Add(root, a.Value); });
 
                     root = cn;
                 }
@@ -616,6 +610,7 @@ namespace Hades.Language.Parser
                     Error(ErrorStrings.MESSAGE_UNEXPECTED_STATEMENT);
                 }
             } while (Is(Classifier.Pipeline));
+
             return root;
         }
 
@@ -897,7 +892,7 @@ namespace Hades.Language.Parser
                     Advance();
                     //HACK: this is not beautiful
                 }
-                
+
                 switch (Current.Value)
                 {
                     case Keyword.Put:
@@ -912,7 +907,7 @@ namespace Hades.Language.Parser
 
                     case Keyword.If:
                         return ParseIf();
-                    
+
                     case Keyword.For:
                         return ParseFor();
 
@@ -926,7 +921,7 @@ namespace Hades.Language.Parser
                 }
             }
 
-            if (IsIdentifier() || Is(Category.Literal) && (Expect(Classifier.Arrow) || Expect(Classifier.Question))|| Is(Category.Literal) && Expect(Category.Operator) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket) || Is(Classifier.Not) || Is(Classifier.Minus))
+            if (IsIdentifier() || Is(Category.Literal) && (Expect(Classifier.Arrow) || Expect(Classifier.Question)) || Is(Category.Literal) && Expect(Category.Operator) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket) || Is(Classifier.Not) || Is(Classifier.Minus))
             {
                 return ParseStatement();
             }
@@ -961,7 +956,7 @@ namespace Hades.Language.Parser
             }
 
             Node node;
-            
+
             if (Is(Classifier.LeftParenthesis))
             {
                 Advance();
@@ -1087,7 +1082,7 @@ namespace Hades.Language.Parser
                 Advance();
                 return new PlaceHolderNode();
             }
-            
+
             if (Is(Category.Literal))
             {
                 Node node = null;

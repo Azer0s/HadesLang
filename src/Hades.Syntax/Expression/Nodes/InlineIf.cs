@@ -3,8 +3,8 @@ namespace Hades.Syntax.Expression.Nodes
     public class InlineIf : Node
     {
         public Node Condition;
-        public Node Truthy;
         public Node Falsy;
+        public Node Truthy;
 
         public InlineIf() : base(Classifier.InlineIf)
         {

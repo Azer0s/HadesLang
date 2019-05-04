@@ -139,6 +139,15 @@ namespace Hades.Testing
             Assert.AreEqual(withNode.NativePackage, nativepackage);
         }
 
+        [TestCase("fib(10) |> doStuff |> console->out", false)]
+        [TestCase("fib(10) |> console->out", false)]
+        [TestCase("fruits |> map({x => x->toLower()}, ??) |> filter({x => x->startsWith(\"a\")}, ??) |> forEach({x => console->out(x)}, ??)", false)]
+        [Test]
+        public void PipelineTes(string code, bool fail)
+        {
+            FailTest(code, fail);
+        }
+
         [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\nconsole->out(\"a is 11\")\nend", false)]
         [TestCase("while(c not 10)\nconsole->out(\"c is {}\"->format(c))\nend", false)]
         [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\nskip\nend", true)]
@@ -151,15 +160,6 @@ namespace Hades.Testing
         [TestCase("func doStuff(args object::IClient a, c)\na->stuff(\"Hello\")\nend", false)]
         [Test]
         public void ProgramTest(string code, bool fail)
-        {
-            FailTest(code, fail);
-        }
-        
-        [TestCase("fib(10) |> doStuff |> console->out", false)]
-        [TestCase("fib(10) |> console->out", false)]
-        [TestCase("fruits |> map({x => x->toLower()}, ??) |> filter({x => x->startsWith(\"a\")}, ??) |> forEach({x => console->out(x)}, ??)", false)]
-        [Test]
-        public void PipelineTes(string code, bool fail)
         {
             FailTest(code, fail);
         }

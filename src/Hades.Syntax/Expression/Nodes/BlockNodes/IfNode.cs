@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
@@ -29,7 +28,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             }
 
             var elseIfStr = string.Empty;
-            
+
             foreach (var elseIfNode in ElseIfNodes)
             {
                 elseIfStr += $"\nElse {elseIfNode}";
@@ -49,7 +48,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             {
                 elseStr = $"\nElse => \n{elseStr.Substring(0, elseStr.Length - 1)}";
             }
-            
+
             return $"Condition: ({Condition})\n{str}{elseIfStr}{elseStr}";
         }
     }
