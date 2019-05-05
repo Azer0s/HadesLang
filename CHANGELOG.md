@@ -1,3 +1,13 @@
+## 5/5/19
+
+### Fixed call on return #3dca537b60026e55dd33233da8ef11039da6980d
+
+```js
+{x => x}(19)
+({x => x}(19))(1)
+(({x => x}(19))(1))(19)
+```
+
 ## 5/4/19
 
 ### Added try-catch-else block #5d514e61ea4189601e8ca8bfbc99e8916394c9a9
