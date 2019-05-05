@@ -355,10 +355,10 @@ namespace Hades.Language.Parser
             return ReadToEnd(node, true);
         }
 
-        private Node ParseIf()
+        private Node ParseIf(bool allowSkipStop)
         {
             Advance();
-            var node = new IfNode {Condition = GetCondition(), If = ReadToEnd(new GenericBlockNode(), false, new List<string> {Keyword.End, Keyword.Else})};
+            var node = new IfNode {Condition = GetCondition(), If = ReadToEnd(new GenericBlockNode(), allowSkipStop, new List<string> {Keyword.End, Keyword.Else})};
 
 
             if (Was(Keyword.End))
@@ -369,12 +369,12 @@ namespace Hades.Language.Parser
             while (Was(Keyword.Else) && Is(Keyword.If))
             {
                 Advance();
-                node.ElseIfNodes.Add(new IfNode {Condition = GetCondition(), If = ReadToEnd(new GenericBlockNode(), false, new List<string> {Keyword.End, Keyword.Else})});
+                node.ElseIfNodes.Add(new IfNode {Condition = GetCondition(), If = ReadToEnd(new GenericBlockNode(), allowSkipStop, new List<string> {Keyword.End, Keyword.Else})});
             }
 
             if (Was(Keyword.Else))
             {
-                node.Else = ReadToEnd(new GenericBlockNode());
+                node.Else = ReadToEnd(new GenericBlockNode(),allowSkipStop);
             }
 
             return node;
@@ -433,10 +433,10 @@ namespace Hades.Language.Parser
             return ReadToEnd(node, true);
         }
 
-        private Node ParseTryCatchElse()
+        private Node ParseTryCatchElse(bool allowSkipStop)
         {
             Advance();
-            var node = new TryCatchElseNode {Try = ReadToEnd(new GenericBlockNode(), keywords: new List<string> {Keyword.Catch, Keyword.Else})};
+            var node = new TryCatchElseNode {Try = ReadToEnd(new GenericBlockNode(), allowSkipStop, new List<string> {Keyword.Catch, Keyword.Else})};
 
 
             while (Was(Keyword.Catch))
@@ -453,6 +453,11 @@ namespace Hades.Language.Parser
                 if (IsType())
                 {
                     (catchNode.SpecificType, catchNode.Datatype) = GetSpecificType();
+
+                    if (catchNode.SpecificType == null)
+                    {
+                        Advance();
+                    }
                 }
                 
                 EnforceIdentifier();
@@ -465,13 +470,13 @@ namespace Hades.Language.Parser
                 }
                 Advance();
 
-                catchNode.Block = ReadToEnd(new GenericBlockNode(), keywords: new List<string> {Keyword.Catch, Keyword.End, Keyword.Else});
+                catchNode.Block = ReadToEnd(new GenericBlockNode(), allowSkipStop, new List<string> {Keyword.Catch, Keyword.End, Keyword.Else});
                 node.Catch.Add(catchNode);
             }
 
             if (Was(Keyword.Else))
             {
-                node.Else = ReadToEnd(new GenericBlockNode());
+                node.Else = ReadToEnd(new GenericBlockNode(), allowSkipStop);
             }
 
             return node;
@@ -954,13 +959,13 @@ namespace Hades.Language.Parser
                         return ParseWhile();
 
                     case Keyword.If:
-                        return ParseIf();
+                        return ParseIf(allowSkipStop);
 
                     case Keyword.For:
                         return ParseFor();
                     
                     case Keyword.Try:
-                        return ParseTryCatchElse();
+                        return ParseTryCatchElse(allowSkipStop);
 
                     case Keyword.Skip:
                     case Keyword.Stop:

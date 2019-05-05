@@ -148,16 +148,137 @@ namespace Hades.Testing
             FailTest(code, fail);
         }
 
-        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\nconsole->out(\"a is 11\")\nend", false)]
-        [TestCase("while(c not 10)\nconsole->out(\"c is {}\"->format(c))\nend", false)]
-        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\nskip\nend", true)]
-        [TestCase("with console from std:io\nfunc myFunction(int a) requires a is 11\nconsole->out(\"a is 11\")\na->b = {x,y=>x+y}(1,2)->toString({x=>x})\nend", false)]
-        [TestCase("for(var arg in a)\nconsole->out(arg)\nskip\nend\nfor(var arg in a)\nconsole->out(arg)\nskip\nend", false)]
-        [TestCase("func doStuff(object::IClient a)\na->stuff(\"Hello\")\nend", false)]
-        [TestCase("func doStuff(object::IClient a, int b)\na->stuff(\"Hello\")\nend", false)]
-        [TestCase("func doStuff(object::IClient a, c)\na->stuff(\"Hello\")\nend", false)]
-        [TestCase("func doStuff(object::IClient a, c, int d)\na->stuff(\"Hello\")\nend", false)]
-        [TestCase("func doStuff(args object::IClient a, c)\na->stuff(\"Hello\")\nend", false)]
+        [TestCase(
+        "with console from std:io\n" + 
+        "func myFunction(int a) requires a is 11\n" + 
+            "console->out(\"a is 11\")\n" + 
+            "console->out(\"a is 11\")\n" + 
+        "end", false)]
+        
+        [TestCase(
+        "while(c not 10)\n" + 
+            "console->out(\"c is {}\"->format(c))\n" + 
+        "end", false)]
+        
+        [TestCase(
+        "with console from std:io\n" + 
+        "func myFunction(int a) requires a is 11\n" + 
+            "console->out(\"a is 11\")\n" + 
+            "skip\n" + 
+        "end", true)]
+        
+        [TestCase(
+        "with console from std:io\n" + 
+        "func myFunction(int a) requires a is 11\n" + 
+            "console->out(\"a is 11\")\n" + 
+            "a->b = {x,y=>x+y}(1,2)->toString({x=>x})\n" + 
+        "end", false)]
+        
+        [TestCase(
+        "for(var arg in a)\n" +
+            "console->out(arg)\n" +
+            "skip\n" +
+        "end\n" +
+        "for(var arg in a)\n" +
+            "console->out(arg)\n" +
+            "skip\n" +
+        "end", false)]
+        
+        [TestCase(
+        "func doStuff(object::IClient a)\n" +
+            "a->stuff(\"Hello\")\n" +
+        "end", false)]
+        
+        [TestCase(
+        "func doStuff(object::IClient a, int b)\n" +
+            "a->stuff(\"Hello\")\n" +
+        "end", false)]
+        
+        [TestCase(
+        "func doStuff(object::IClient a, c)\n" +
+            "a->stuff(\"Hello\")\n" +
+        "end", false)]
+        
+        [TestCase(
+        "func doStuff(object::IClient a, c, int d)\n" +
+            "a->stuff(\"Hello\")\n" +
+        "end", false)]
+        
+        [TestCase(
+        "func doStuff(args object::IClient a, c)\n" +
+            "a->stuff(\"Hello\")\n" +
+        "end", false)]
+        
+        [TestCase(
+        "with console from std:io\n" +
+        "if(a < 10)\n" +
+            "console->out(\"a is smaller than 10\")\n" +
+        "else if(a is 11)\n" +
+            "console->out(\"a is 11\")\n" +
+        "else if(a > 11 and a < 21)\n" +
+            "console->out(\"a is greater than 11 and smaller than 21\")\n" +
+        "else\n" +
+            "console->out(\"a is \" + a)\n" +
+        "end", false)]
+        
+        [TestCase(
+        "with math as m from std:math\n" +
+        "func doMath(int a)\n" +
+            "func root(int b)\n" +
+                "put m->sqrt(b)\n" +
+            "end\n" +
+            "func square(b)\n" +
+                "put b * b\n" +
+            "end\n" +
+            "put square(a) + root(a)\n" +
+        "end", false)]
+        
+        [TestCase(
+        "srv->get(\"/:path\", {req, res => \n" +
+            "let path = req->param\n" +
+            "try\n" +
+                "if (file->exists(path))\n" +
+                    "let f = file->open(path)\n" +
+                    "res->send(f->read())\n" +
+                "else\n" +
+                    "raise 404\n" +
+                "end\n" +
+            "catch(int status)\n" +
+                "res->status(status)\n" +
+            "else\n" +
+                "res->status(200)\n" +
+            "end\n" +
+        "})", false)]
+        
+        [TestCase(
+        "var fruits = list->of({\"Apple\", \"Banana\", \"Mango\", \"Kiwi\", \"Avocado\"})\n" +
+        "fruits\n" +
+        "|> map({x => x->toLower()}, ??)\n" +
+        "|> filter({x => x->startsWith(\"a\")}, ??)\n" +
+        "|> forEach({x => console->out(x)}, ??)", false)]
+        
+        [TestCase(
+        "let string[] fruits = {\"Apple\", \"Banana\", \"Mango\", \"Kiwi\"}\n" +
+        "for(var fruit in fruits)\n" +
+            "console->out(\"{} is very healthy\"->format(fruit))\n" +
+        "end\n" +
+        "var a = params->get(0)\n" +
+        "var b = params->get(1)\n" +
+        "a :: raise exceptions->ArgumentNullException(\"{} is null\"->format(nameof(a)))\n" +
+        "b :: raise exceptions->ArgumentNullException(\"{} is null\"->format(nameof(b)))", false)]
+        
+        [TestCase(
+        "try\n" +
+            "connection->open()\n" +
+            "console->out(\"Connection open!\")\n" +
+            "connection->close()\n" +
+        "catch(object::SqlException e)\n" +
+            "console->out(\"SqlException was caught!\")\n" +
+        "catch(e)\n" +
+            "console->out(\"An unknown exception was caught!\")\n" +
+        "else\n" +
+            "console->out(\"No exception thrown!\")\n" +
+        "end", false)]
         [Test]
         public void ProgramTest(string code, bool fail)
         {
