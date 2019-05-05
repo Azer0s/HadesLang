@@ -1030,7 +1030,15 @@ namespace Hades.Language.Parser
                     n = GetOperation(n);
                 }
 
-                node = n;
+                if (n is OperationNode)
+                {
+                    //I wanted to manually differentiate between a calculation and a calculation in ()
+                    node = new ParenthesesNode{Node = n};
+                }
+                else
+                {
+                    node = n;
+                }
             }
             else
             {
