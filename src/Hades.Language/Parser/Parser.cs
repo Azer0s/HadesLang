@@ -1045,7 +1045,7 @@ namespace Hades.Language.Parser
             }
 
             //Call on lambdas
-            if (node is LambdaNode)
+            if (node is LambdaNode || node is CallNode /*TODO: Or node is ArrayAccessNode*/)
             {
                 if (Is(Classifier.LeftParenthesis))
                 {
