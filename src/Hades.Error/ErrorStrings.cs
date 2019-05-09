@@ -4,6 +4,8 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_UNEXPECTED_NODE = "Unexpected node: {0}!";
+        public const string MESSAGE_UNEXPECTED_ACCESS_MODIFIER = "Unexpected access modifier!";
         public const string MESSAGE_UNEXPECTED_STATEMENT = "Unexpected statement!";
         public const string MESSAGE_CANT_HAVE_MULTIPLE_VARARGS = "Can't have multiple 'args' parameters in one function!";
         public const string MESSAGE_EXPECTED_IN = "Expected 'in' keyword!";

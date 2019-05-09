@@ -15,6 +15,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         public string Name { get; set; }
         public List<(Node Key, Datatype? Value, string SpecificType)> Parameters { get; set; } = new List<(Node Key, Datatype? Value, string SpecificType)>();
         public Node Guard { get; set; }
+        public AccessModifier AccessModifier { get; set; }
 
         protected override string ToStr()
         {
@@ -26,10 +27,11 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
                 args = $" with parameters {args}";
             }
 
+            var accessModifier = AccessModifier.ToString().ToLower();
             var guard = Guard != null ? " with guard (" + Guard + ")" : "";
             var over = Override ? " override " : "";
-            var fix = Fixed ? "fixed " : "";
-            var str = $"{fix}{over}{Name}{args}{guard}\n{base.ToStr()}";
+            var fix = Fixed ? " fixed " : " ";
+            var str = $"{accessModifier}{fix}{over}{Name}{args}{guard}\n{base.ToStr()}";
             return str;
         }
     }

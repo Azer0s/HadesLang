@@ -32,6 +32,7 @@
         Pipeline,
         Placeholder,
         If,
-        TryCatch
+        TryCatch,
+        Class
     }
 }

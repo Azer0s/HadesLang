@@ -250,6 +250,11 @@ namespace Hades.Language.Parser
             return Current == classifier;
         }
 
+        private bool IsAccessModifier()
+        {
+            return Is(Keyword.Private) || Is(Keyword.Public) || Is(Keyword.Protected);
+        }
+
         private bool Is(Category category)
         {
             return Current.Category == category;
@@ -276,10 +281,85 @@ namespace Hades.Language.Parser
 
         #region Blocks
 
-        private Node ParseFunc(bool isFixed)
+        private Node ParseClass(bool isFixed, AccessModifier accessModifier)
         {
             Advance();
-            var node = new FunctionNode {Fixed = isFixed};
+            EnforceIdentifier();
+
+            var node = new ClassNode {Name = Current.Value, Fixed = isFixed, AccessModifier = accessModifier};
+
+            Advance();
+            
+            if (Is(Classifier.LessThan))
+            {
+                do
+                {
+                    Advance();
+                    EnforceIdentifier();
+                    node.Parents.Add(Current.Value);
+                    Advance();
+                } while (Is(Classifier.Comma));
+                
+                Advance(-1);
+            }
+            
+            while (!Is(Keyword.End))
+            {
+                if (IsAccessModifier())
+                {
+                    if (Expect(Keyword.Var) || Expect(Keyword.Let))
+                    {
+                        switch (Enum.Parse<AccessModifier>(Current.Value))
+                        {
+                            case AccessModifier.Protected:
+                                node.ProtectedVariables.Add(ParseNext() as VariableDeclarationNode);
+                                break;
+                            case AccessModifier.Public:
+                                node.PublicVariables.Add(ParseNext() as VariableDeclarationNode);
+                                break;
+                            default:
+                                node.PrivateVariables.Add(ParseNext() as VariableDeclarationNode);
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    var childNode = ParseNext();
+
+                    if (childNode is VariableDeclarationNode vn)
+                    {
+                        node.PrivateVariables.Add(vn);
+                    }
+                    else if (childNode is FunctionNode fn)
+                    {
+                        if (fn.Name == node.Name)
+                        {
+                            node.Constructors.Add(fn);
+                        }
+                        else
+                        {
+                            node.Functions.Add(fn);
+                        }
+                    }
+                    else if (childNode is ClassNode cn)
+                    {
+                        node.Classes.Add(cn);
+                    }
+                    else
+                    {
+                        Error(ErrorStrings.MESSAGE_UNEXPECTED_NODE, childNode.GetType().Name.Replace("Node", ""));
+                    }
+                }
+            }
+            
+            return node;
+        }
+        
+        private Node ParseFunc(bool isFixed, AccessModifier accessModifier)
+        {
+            Advance();
+            var node = new FunctionNode {Fixed = isFixed, AccessModifier = accessModifier};
             if (Is(Classifier.Not))
             {
                 node.Override = true;
@@ -938,6 +1018,12 @@ namespace Hades.Language.Parser
                     }
                 }
 
+                AccessModifier? accessModifier = null;
+                if (IsAccessModifier())
+                {
+                    accessModifier = Enum.Parse<AccessModifier>(Current.Value.First().ToString().ToUpper() + Current.Value.Substring(1));
+                }
+
                 var isFixed = false;
                 if (Is(Keyword.Fixed))
                 {
@@ -949,26 +1035,47 @@ namespace Hades.Language.Parser
                 switch (Current.Value)
                 {
                     case Keyword.Put:
+                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
+                        
                         Advance();
                         return new PutNode {Statement = ParseStatement()};
 
+                    case Keyword.Class:             
+                        return ParseClass(isFixed, accessModifier.GetValueOrDefault());
+                    
                     case Keyword.Func:
-                        return ParseFunc(isFixed);
+                        return ParseFunc(isFixed, accessModifier.GetValueOrDefault());
 
                     case Keyword.While:
+                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
+                        
                         return ParseWhile();
 
                     case Keyword.If:
+                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
+                        
                         return ParseIf(allowSkipStop);
 
                     case Keyword.For:
+                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
+                        
                         return ParseFor();
                     
                     case Keyword.Try:
+                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
+                        
                         return ParseTryCatchElse(allowSkipStop);
 
                     case Keyword.Skip:
                     case Keyword.Stop:
+                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
+                        
                         Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Current.Value);
                         break;
 

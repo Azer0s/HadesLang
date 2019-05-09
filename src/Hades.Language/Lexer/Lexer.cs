@@ -62,7 +62,7 @@ namespace Hades.Language.Lexer
 
         private static readonly string[] AccessModifierKeywords =
         {
-            Keyword.Global,
+            Keyword.Protected,
             Keyword.Public,
             Keyword.Private
         };

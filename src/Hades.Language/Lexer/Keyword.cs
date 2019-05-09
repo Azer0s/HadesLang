@@ -21,7 +21,7 @@ namespace Hades.Language.Lexer
         public const string Let = "let";
         public const string Null = "null";
         public const string Undefined = "undefined";
-        public const string Global = "global";
+        public const string Protected = "protected";
         public const string Public = "public";
         public const string Private = "private";
         public const string With = "with";
