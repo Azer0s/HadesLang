@@ -353,6 +353,7 @@ namespace Hades.Language.Parser
                 }
             }
             
+            Advance();
             return node;
         }
         

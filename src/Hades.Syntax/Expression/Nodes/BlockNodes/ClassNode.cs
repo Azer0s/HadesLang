@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
@@ -19,6 +20,33 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         {
         }
         
+        protected override string ToStr()
+        {
+            var str = string.Empty;
+
+            var privateVars = string.Join("\n    ", PrivateVariables);
+
+            if (privateVars != string.Empty)
+            {
+                privateVars = "\n  Private variables:\n    " + privateVars;
+            }
+            
+            var protectedVars = string.Join("\n", ProtectedVariables);
+
+            if (protectedVars != string.Empty)
+            {
+                protectedVars = "\n  Protected variables:\n    " + protectedVars;
+            }
+            
+            var publicVars = string.Join("\n", PublicVariables);
+
+            if (publicVars != string.Empty)
+            {
+                publicVars = "\n  Public variables:\n    " + publicVars;
+            }
+            
+            return privateVars + protectedVars;
+        }
         //TODO: ToString
     }
 }
