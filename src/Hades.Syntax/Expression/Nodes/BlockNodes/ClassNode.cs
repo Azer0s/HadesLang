@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
+using System.Linq;
+using Hades.Common.Extensions;
 
 namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
@@ -22,31 +23,50 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         
         protected override string ToStr()
         {
-            var str = string.Empty;
-
             var privateVars = string.Join("\n    ", PrivateVariables);
 
             if (privateVars != string.Empty)
             {
-                privateVars = "\n  Private variables:\n    " + privateVars;
+                privateVars = $"\n  Private variables:\n    {privateVars}";
             }
             
-            var protectedVars = string.Join("\n", ProtectedVariables);
+            var protectedVars = string.Join("\n    ", ProtectedVariables);
 
             if (protectedVars != string.Empty)
             {
-                protectedVars = "\n  Protected variables:\n    " + protectedVars;
+                protectedVars = $"\n  Protected variables:\n    {protectedVars}";
             }
             
-            var publicVars = string.Join("\n", PublicVariables);
+            var publicVars = string.Join("\n    ", PublicVariables);
 
             if (publicVars != string.Empty)
             {
-                publicVars = "\n  Public variables:\n    " + publicVars;
+                publicVars = $"\n  Public variables:\n    {publicVars}";
+            }
+
+            var functions = Functions.Map(a => a.ToString().Replace("\n", "\n    ")).ToList();
+            var fn = string.Empty;
+
+            if (functions.Count != 0)
+            {
+                fn = $"\n  Functions:\n    {string.Join("\n    ",functions)}";
+            }
+
+            var constructors = Constructors.Map(a => a.ToString().Replace("\n", "\n    ")).ToList();
+            var ctor = string.Empty;
+
+            if (constructors.Count != 0)
+            {
+                ctor = $"\n  Constructors:\n    {string.Join("\n    ", constructors)}";
+            }
+
+            var inherits = string.Empty;
+            if (Parents.Count != 0)
+            {
+                inherits = $" inherits from {string.Join(", ", Parents)}";
             }
             
-            return privateVars + protectedVars;
+            return $"{Name}{inherits}{privateVars}{protectedVars}{publicVars}{ctor}{fn}";
         }
-        //TODO: ToString
     }
 }
