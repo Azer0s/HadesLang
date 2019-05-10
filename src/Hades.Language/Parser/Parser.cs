@@ -409,7 +409,6 @@ namespace Hades.Language.Parser
 
         private Node GetCondition()
         {
-            Node node;
             if (!Is(Classifier.LeftParenthesis))
             {
                 Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
@@ -417,7 +416,7 @@ namespace Hades.Language.Parser
 
             Advance();
 
-            node = ParseStatement();
+            var node = ParseStatement();
 
             if (!Is(Classifier.RightParenthesis))
             {
@@ -428,6 +427,63 @@ namespace Hades.Language.Parser
             return node;
         }
 
+        private Node ParseMatch(bool allowSkipStop)
+        {
+            Advance();
+            var node = new MatchNode {First = Is("first")};
+
+            if (Is("first"))
+            {
+                Advance();
+            }
+            
+            if (!Is(Classifier.LeftParenthesis))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
+            }
+            Advance();
+
+            node.Match = Is(Classifier.Underscore /*No statement*/) ? new NoVariableNode() : ParseStatement();
+            
+            if (!Is(Classifier.RightParenthesis))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+            }
+            Advance();
+            
+            while (!Is(Keyword.End))
+            {
+                var cond = ParseStatement();
+
+                if (!Is(Classifier.FatArrow))
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_TOKEN,"=>");
+                }
+                Advance();
+
+                var action = ParseStatement(allowSkipStop);
+
+                if (action is LambdaNode ln)
+                {
+                    if (ln.Complex)
+                    {
+                        Error(ErrorStrings.MESSAGE_CANT_USE_COMPLEX_LAMBDA_IN_MATCH_BLOCK);
+                    }
+                }
+                
+                //Actually...mostly anything can be an action if you think about it.
+                //We could have something like "Hello" => a->getAction(10)
+                //So here, the action would be a call which would return a lambda
+                //The only thing we *really* can't have is a complex lambda
+
+                node.Statements.Add(cond, action);
+            }
+            
+            Advance();
+
+            return node;
+        }
+        
         private Node ParseWhile()
         {
             Advance();
@@ -562,8 +618,6 @@ namespace Hades.Language.Parser
 
             return node;
         }
-
-        //TODO: Parse class
 
         #endregion
 
@@ -894,6 +948,21 @@ namespace Hades.Language.Parser
             return new SideNode(node, new OperationNodeNode(Last.Kind, Last.Value), Side.RIGHT);
         }
 
+        private Node ParseArrayAccess(Node node)
+        {
+            Advance();
+            var index = ParseStatement();
+
+            if (!Is(Classifier.RightBrace))
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_TOKEN, "]");
+            }
+            
+            Advance();
+            
+            return new ArrayAccessNode {BaseNode = node, Index = index};
+        }
+
         private Node ParseLeftHand(OperationNodeNode node)
         {
             Advance();
@@ -1033,15 +1102,23 @@ namespace Hades.Language.Parser
                     //HACK: this is not beautiful
                 }
 
+                void NoAccessModifierOrFixed()
+                {
+                    if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                    if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
+                }
+
                 switch (Current.Value)
                 {
                     case Keyword.Put:
-                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
-                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
-                        
+                        NoAccessModifierOrFixed();
                         Advance();
                         return new PutNode {Statement = ParseStatement()};
 
+                    case Keyword.Match:
+                        NoAccessModifierOrFixed();
+                        return ParseMatch(allowSkipStop);
+                    
                     case Keyword.Class:             
                         return ParseClass(isFixed, accessModifier.GetValueOrDefault());
                     
@@ -1049,34 +1126,24 @@ namespace Hades.Language.Parser
                         return ParseFunc(isFixed, accessModifier.GetValueOrDefault());
 
                     case Keyword.While:
-                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
-                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
-                        
+                        NoAccessModifierOrFixed();                        
                         return ParseWhile();
 
                     case Keyword.If:
-                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
-                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
-                        
+                        NoAccessModifierOrFixed();
                         return ParseIf(allowSkipStop);
 
                     case Keyword.For:
-                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
-                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
-                        
+                        NoAccessModifierOrFixed(); 
                         return ParseFor();
                     
                     case Keyword.Try:
-                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
-                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
-                        
+                        NoAccessModifierOrFixed();
                         return ParseTryCatchElse(allowSkipStop);
 
                     case Keyword.Skip:
                     case Keyword.Stop:
-                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
-                        if (accessModifier != null) Error(ErrorStrings.MESSAGE_UNEXPECTED_ACCESS_MODIFIER);
-                        
+                        NoAccessModifierOrFixed();
                         Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Current.Value);
                         break;
 
@@ -1138,15 +1205,8 @@ namespace Hades.Language.Parser
                     n = GetOperation(n);
                 }
 
-                if (n is OperationNode)
-                {
-                    //I wanted to manually differentiate between a calculation and a calculation in ()
-                    node = new ParenthesesNode{Node = n};
-                }
-                else
-                {
-                    node = n;
-                }
+                //I wanted to manually differentiate between a calculation and a calculation in ()
+                node = n is OperationNode ? new ParenthesesNode{Node = n} : n;
             }
             else
             {
@@ -1198,7 +1258,12 @@ namespace Hades.Language.Parser
             {
                 return ParseRightHand(node);
             }
-
+            
+            if (Is(Classifier.LeftBrace))
+            {
+                return ParseArrayAccess(node);
+            }
+            
             return node;
         }
 
@@ -1311,7 +1376,6 @@ namespace Hades.Language.Parser
                 return ParseLeftHand(new OperationNodeNode(Current.Kind, Current.Value));
             }
 
-            //TODO: Array access
             //TODO: Rework calculations
             return null;
         }

@@ -49,6 +49,7 @@ namespace Hades.Language.Lexer
             Keyword.Try,
             Keyword.Catch,
             Keyword.Default,
+            Keyword.Match,
             Keyword.End
         };
 
@@ -333,7 +334,7 @@ namespace Hades.Language.Lexer
                 Consume();
             }
 
-            if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF())
+            if (!IsWhiteSpace() && !IsPunctuation() && !IsEOF() && !IsNewLine())
             {
                 if (IsLetter())
                 {
@@ -382,7 +383,9 @@ namespace Hades.Language.Lexer
         {
             var i = 0;
             var idx = _index;
-
+            
+            //TODO: Support for hex and binary digits
+            
             while (IsDigit())
             {
                 Consume();

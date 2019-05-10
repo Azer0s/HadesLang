@@ -4,7 +4,7 @@ using Hades.Common.Extensions;
 
 namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
-    public class ClassNode : BlockNode
+    public class ClassNode : Node
     {
         public AccessModifier AccessModifier { get; set; }
         public bool Fixed { get; set; }

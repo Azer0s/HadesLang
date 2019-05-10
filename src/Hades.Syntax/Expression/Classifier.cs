@@ -33,6 +33,8 @@
         Placeholder,
         If,
         TryCatch,
-        Class
+        Class,
+        Match,
+        ArrayAccess
     }
 }
