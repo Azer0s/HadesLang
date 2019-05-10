@@ -6,6 +6,10 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
     public class ClassNode : Node
     {
+        public ClassNode() : base(Classifier.Class)
+        {
+        }
+
         public AccessModifier AccessModifier { get; set; }
         public bool Fixed { get; set; }
         public List<string> Parents { get; set; } = new List<string>();
@@ -17,10 +21,6 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         public List<ClassNode> Classes { get; set; } = new List<ClassNode>();
         public List<FunctionNode> Constructors { get; set; } = new List<FunctionNode>();
 
-        public ClassNode() : base(Classifier.Class)
-        {
-        }
-        
         protected override string ToStr()
         {
             var privateVars = string.Join("\n    ", PrivateVariables);
@@ -29,14 +29,14 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             {
                 privateVars = $"\n  Private variables:\n    {privateVars}";
             }
-            
+
             var protectedVars = string.Join("\n    ", ProtectedVariables);
 
             if (protectedVars != string.Empty)
             {
                 protectedVars = $"\n  Protected variables:\n    {protectedVars}";
             }
-            
+
             var publicVars = string.Join("\n    ", PublicVariables);
 
             if (publicVars != string.Empty)
@@ -49,7 +49,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 
             if (functions.Count != 0)
             {
-                fn = $"\n  Functions:\n    {string.Join("\n    ",functions)}";
+                fn = $"\n  Functions:\n    {string.Join("\n    ", functions)}";
             }
 
             var constructors = Constructors.Map(a => a.ToString().Replace("\n", "\n    ")).ToList();
@@ -65,7 +65,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             {
                 inherits = $" inherits from {string.Join(", ", Parents)}";
             }
-            
+
             return $"{Name}{inherits}{privateVars}{protectedVars}{publicVars}{ctor}{fn}";
         }
     }

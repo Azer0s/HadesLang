@@ -63,7 +63,7 @@ namespace Hades.Language.Parser
                 {
                     Error(ErrorStrings.MESSAGE_UNEXPECTED_EOF);
                 }
-                
+
                 node.Children.Add(ParseNext(allowSkipStop));
             }
 
@@ -289,7 +289,7 @@ namespace Hades.Language.Parser
             var node = new ClassNode {Name = Current.Value, Fixed = isFixed, AccessModifier = accessModifier};
 
             Advance();
-            
+
             if (Is(Classifier.LessThan))
             {
                 do
@@ -299,10 +299,10 @@ namespace Hades.Language.Parser
                     node.Parents.Add(Current.Value);
                     Advance();
                 } while (Is(Classifier.Comma));
-                
+
                 Advance(-1);
             }
-            
+
             while (!Is(Keyword.End))
             {
                 if (IsAccessModifier())
@@ -352,11 +352,11 @@ namespace Hades.Language.Parser
                     }
                 }
             }
-            
+
             Advance();
             return node;
         }
-        
+
         private Node ParseFunc(bool isFixed, AccessModifier accessModifier)
         {
             Advance();
@@ -436,29 +436,32 @@ namespace Hades.Language.Parser
             {
                 Advance();
             }
-            
+
             if (!Is(Classifier.LeftParenthesis))
             {
                 Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
             }
+
             Advance();
 
             node.Match = Is(Classifier.Underscore /*No statement*/) ? new NoVariableNode() : ParseStatement();
-            
+
             if (!Is(Classifier.RightParenthesis))
             {
                 Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
             }
+
             Advance();
-            
+
             while (!Is(Keyword.End))
             {
                 var cond = ParseStatement();
 
                 if (!Is(Classifier.FatArrow))
                 {
-                    Error(ErrorStrings.MESSAGE_EXPECTED_TOKEN,"=>");
+                    Error(ErrorStrings.MESSAGE_EXPECTED_TOKEN, "=>");
                 }
+
                 Advance();
 
                 var action = ParseStatement(allowSkipStop);
@@ -470,7 +473,7 @@ namespace Hades.Language.Parser
                         Error(ErrorStrings.MESSAGE_CANT_USE_COMPLEX_LAMBDA_IN_MATCH_BLOCK);
                     }
                 }
-                
+
                 //Actually...mostly anything can be an action if you think about it.
                 //We could have something like "Hello" => a->getAction(10)
                 //So here, the action would be a call which would return a lambda
@@ -478,12 +481,12 @@ namespace Hades.Language.Parser
 
                 node.Statements.Add(cond, action);
             }
-            
+
             Advance();
 
             return node;
         }
-        
+
         private Node ParseWhile()
         {
             Advance();
@@ -511,7 +514,7 @@ namespace Hades.Language.Parser
 
             if (Was(Keyword.Else))
             {
-                node.Else = ReadToEnd(new GenericBlockNode(),allowSkipStop);
+                node.Else = ReadToEnd(new GenericBlockNode(), allowSkipStop);
             }
 
             return node;
@@ -579,12 +582,12 @@ namespace Hades.Language.Parser
             while (Was(Keyword.Catch))
             {
                 var catchNode = new TryCatchElseNode.CatchBlock();
-                
+
                 if (!Is(Classifier.LeftParenthesis))
                 {
                     Error(ErrorStrings.MESSAGE_EXPECTED_LEFT_PARENTHESIS);
                 }
-                
+
                 Advance();
 
                 if (IsType())
@@ -596,15 +599,16 @@ namespace Hades.Language.Parser
                         Advance();
                     }
                 }
-                
+
                 EnforceIdentifier();
                 catchNode.Name = Current.Value;
                 Advance();
-                
+
                 if (!Is(Classifier.RightParenthesis))
                 {
                     Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
                 }
+
                 Advance();
 
                 catchNode.Block = ReadToEnd(new GenericBlockNode(), allowSkipStop, new List<string> {Keyword.Catch, Keyword.End, Keyword.Else});
@@ -957,9 +961,9 @@ namespace Hades.Language.Parser
             {
                 Error(ErrorStrings.MESSAGE_EXPECTED_TOKEN, "]");
             }
-            
+
             Advance();
-            
+
             return new ArrayAccessNode {BaseNode = node, Index = index};
         }
 
@@ -1118,15 +1122,15 @@ namespace Hades.Language.Parser
                     case Keyword.Match:
                         NoAccessModifierOrFixed();
                         return ParseMatch(allowSkipStop);
-                    
-                    case Keyword.Class:             
+
+                    case Keyword.Class:
                         return ParseClass(isFixed, accessModifier.GetValueOrDefault());
-                    
+
                     case Keyword.Func:
                         return ParseFunc(isFixed, accessModifier.GetValueOrDefault());
 
                     case Keyword.While:
-                        NoAccessModifierOrFixed();                        
+                        NoAccessModifierOrFixed();
                         return ParseWhile();
 
                     case Keyword.If:
@@ -1134,9 +1138,9 @@ namespace Hades.Language.Parser
                         return ParseIf(allowSkipStop);
 
                     case Keyword.For:
-                        NoAccessModifierOrFixed(); 
+                        NoAccessModifierOrFixed();
                         return ParseFor();
-                    
+
                     case Keyword.Try:
                         NoAccessModifierOrFixed();
                         return ParseTryCatchElse(allowSkipStop);
@@ -1206,7 +1210,7 @@ namespace Hades.Language.Parser
                 }
 
                 //I wanted to manually differentiate between a calculation and a calculation in ()
-                node = n is OperationNode ? new ParenthesesNode{Node = n} : n;
+                node = n is OperationNode ? new ParenthesesNode {Node = n} : n;
             }
             else
             {
@@ -1258,12 +1262,12 @@ namespace Hades.Language.Parser
             {
                 return ParseRightHand(node);
             }
-            
+
             if (Is(Classifier.LeftBrace))
             {
                 return ParseArrayAccess(node);
             }
-            
+
             return node;
         }
 
@@ -1292,11 +1296,11 @@ namespace Hades.Language.Parser
                     case Keyword.Raise:
                         Advance();
                         return new RaiseNode {Exception = ParseStatement()};
-                    
+
                     case Keyword.Null:
                         Advance();
                         return new NullValueNode();
-                    
+
                     default:
                         Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Current.Value);
                         break;

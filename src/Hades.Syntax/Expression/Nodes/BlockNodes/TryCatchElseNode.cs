@@ -6,21 +6,13 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 {
     public class TryCatchElseNode : Node
     {
-        public struct CatchBlock
-        {
-            public BlockNode Block;
-            public string SpecificType;
-            public Datatype Datatype;
-            public string Name;
-        }
-        
-        public BlockNode Try { get; set; }
-        public BlockNode Else { get; set; }
-        public List<CatchBlock> Catch { get; } = new List<CatchBlock>();
-        
         public TryCatchElseNode() : base(Classifier.TryCatch)
         {
         }
+
+        public BlockNode Try { get; set; }
+        public BlockNode Else { get; set; }
+        public List<CatchBlock> Catch { get; } = new List<CatchBlock>();
 
         protected override string ToStr()
         {
@@ -34,25 +26,25 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             {
                 tryStr = $"\n Try:\n{tryStr.Substring(0, tryStr.Length - 1)}";
             }
-            
+
             var catchString = string.Empty;
 
             foreach (var catchNode in Catch)
             {
                 var specificType = catchNode.Name;
-                
+
                 if (catchNode.Datatype != Datatype.NONE)
                 {
                     specificType = $"{catchNode.Datatype.ToString().ToLower()} {catchNode.Name}";
                 }
-                
+
                 if (!string.IsNullOrEmpty(catchNode.SpecificType))
                 {
                     specificType = $"{catchNode.Datatype.ToString().ToLower()}({catchNode.SpecificType}) {catchNode.Name}";
                 }
-                
+
                 catchString += $"\n Catch {specificType}\n";
-                
+
                 foreach (var blockChild in catchNode.Block.Children)
                 {
                     catchString += string.Join('\n', blockChild.ToString().Split('\n').Select(a => $"  {a}")) + "\n";
@@ -60,7 +52,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 
                 catchString = catchString.TrimEnd('\n');
             }
-            
+
             var elseStr = "";
             foreach (var child in Else.Children)
             {
@@ -71,8 +63,16 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             {
                 elseStr = $"\n Else:\n{elseStr.Substring(0, elseStr.Length - 1)}";
             }
-            
+
             return $"{tryStr}{catchString}{elseStr}";
+        }
+
+        public struct CatchBlock
+        {
+            public BlockNode Block;
+            public string SpecificType;
+            public Datatype Datatype;
+            public string Name;
         }
     }
 }
