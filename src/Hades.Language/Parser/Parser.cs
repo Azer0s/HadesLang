@@ -305,22 +305,20 @@ namespace Hades.Language.Parser
 
             while (!Is(Keyword.End))
             {
-                if (IsAccessModifier())
+                if (IsAccessModifier() && (Expect(Keyword.Var) || Expect(Keyword.Let)))
                 {
-                    if (Expect(Keyword.Var) || Expect(Keyword.Let))
+                    Advance();
+                    switch (Enum.Parse<AccessModifier>(Last.Value.First().ToString().ToUpper() + Last.Value.Substring(1)))
                     {
-                        switch (Enum.Parse<AccessModifier>(Current.Value))
-                        {
-                            case AccessModifier.Protected:
-                                node.ProtectedVariables.Add(ParseNext() as VariableDeclarationNode);
-                                break;
-                            case AccessModifier.Public:
-                                node.PublicVariables.Add(ParseNext() as VariableDeclarationNode);
-                                break;
-                            default:
-                                node.PrivateVariables.Add(ParseNext() as VariableDeclarationNode);
-                                break;
-                        }
+                        case AccessModifier.Protected:
+                            node.ProtectedVariables.Add(ParseNext() as VariableDeclarationNode);
+                            break;
+                        case AccessModifier.Public:
+                            node.PublicVariables.Add(ParseNext() as VariableDeclarationNode);
+                            break;
+                        default:
+                            node.PrivateVariables.Add(ParseNext() as VariableDeclarationNode);
+                            break;
                     }
                 }
                 else
@@ -1096,6 +1094,7 @@ namespace Hades.Language.Parser
                 if (IsAccessModifier())
                 {
                     accessModifier = Enum.Parse<AccessModifier>(Current.Value.First().ToString().ToUpper() + Current.Value.Substring(1));
+                    Advance();
                 }
 
                 var isFixed = false;
