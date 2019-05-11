@@ -58,7 +58,7 @@ namespace Hades.Core
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
 
-                
+
                 if (i - 1 >= 0)
                 {
                     if (token.Kind == Classifier.Identifier && tokens[i - 1].Kind == Classifier.Tag)
@@ -179,7 +179,7 @@ namespace Hades.Core
                     var root = parser.Parse();
                     Console.WriteLine(root);
                     Console.WriteLine();
-                    
+
                     //TODO: We should probably smooth this entire process out. And also use IEnumerable (?)
                     //Are IEnumerable even faster here?
                     //Anyway...I'm thinking of a callback solution. I know, I know...we all hate callbacks...but I think they would be a good fit for this use-case

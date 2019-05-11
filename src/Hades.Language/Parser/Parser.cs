@@ -1080,9 +1080,9 @@ namespace Hades.Language.Parser
                 var annotation = Current.Value;
 
                 Advance();
-                
+
                 Node annotationValue = new NoVariableNode();
-                
+
                 if (Is(Classifier.LeftParenthesis))
                 {
                     Advance();
@@ -1097,6 +1097,7 @@ namespace Hades.Language.Parser
                     {
                         Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
                     }
+
                     Advance();
                 }
 
