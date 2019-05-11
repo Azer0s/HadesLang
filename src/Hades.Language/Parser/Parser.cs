@@ -1073,6 +1073,38 @@ namespace Hades.Language.Parser
                 return null;
             }
 
+            if (Is(Classifier.Tag))
+            {
+                ExpectIdentifier();
+                Advance();
+                var annotation = Current.Value;
+
+                Advance();
+                
+                Node annotationValue = new NoVariableNode();
+                
+                if (Is(Classifier.LeftParenthesis))
+                {
+                    Advance();
+                    var val = ParseStatement();
+
+                    if (val is BoolLiteralNode || val is DecLiteralNode || val is IntLiteralNode || val is StringLiteralNode || val is IdentifierNode)
+                    {
+                        annotationValue = val;
+                    }
+
+                    if (!Is(Classifier.RightParenthesis))
+                    {
+                        Error(ErrorStrings.MESSAGE_EXPECTED_RIGHT_PARENTHESIS);
+                    }
+                    Advance();
+                }
+
+                var n = ParseNext();
+                n.Annotations.Add(annotation, annotationValue);
+                return n;
+            }
+
             if (IsKeyword())
             {
                 if (allowSkipStop)

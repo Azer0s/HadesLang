@@ -58,6 +58,15 @@ namespace Hades.Core
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
 
+                
+                if (i - 1 >= 0)
+                {
+                    if (token.Kind == Classifier.Identifier && tokens[i - 1].Kind == Classifier.Tag)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                }
+
                 if (token.Kind == Classifier.BoolLiteral)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
