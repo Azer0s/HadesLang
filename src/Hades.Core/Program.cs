@@ -179,6 +179,10 @@ namespace Hades.Core
                     var root = parser.Parse();
                     Console.WriteLine(root);
                     Console.WriteLine();
+                    
+                    //TODO: We should probably smooth this entire process out. And also use IEnumerable (?)
+                    //Are IEnumerable even faster here?
+                    //Anyway...I'm thinking of a callback solution. I know, I know...we all hate callbacks...but I think they would be a good fit for this use-case
                 }
                 catch (Exception e)
                 {
