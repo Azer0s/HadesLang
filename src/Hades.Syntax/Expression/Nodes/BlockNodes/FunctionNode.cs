@@ -29,7 +29,7 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 
             var accessModifier = AccessModifier.ToString().ToLower();
             var guard = Guard != null ? " with guard (" + Guard + ")" : "";
-            var over = Override ? " override " : "";
+            var over = Override ? "override " : "";
             var fix = Fixed ? " fixed " : " ";
             var str = $"{accessModifier}{fix}{over}{Name}{args}{guard}\n{base.ToStr()}";
             return str;

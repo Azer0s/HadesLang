@@ -15,7 +15,6 @@ namespace Hades.Language.Lexer
         public const string Skip = "skip";
         public const string Try = "try";
         public const string Catch = "catch";
-        public const string Default = "default";
         public const string End = "end";
         public const string Var = "var";
         public const string Let = "let";
@@ -32,5 +31,6 @@ namespace Hades.Language.Lexer
         public const string Raise = "raise";
         public const string Fixed = "fixed";
         public const string Match = "match";
+        public const string Struct = "struct";
     }
 }

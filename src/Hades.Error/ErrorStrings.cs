@@ -4,6 +4,8 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_EXPECTED_ACCESS_MODIFIER = "Expected an access modifier!";
+        public const string MESSAGE_ILLEGAL_PROTECTED_IN_STRUCT = "A struct cannot contain a protected variable!";
         public const string MESSAGE_UNEXPECTED_CALL_OR_INLINE_IF = "Unexpected call or inline if!";
         public const string MESSAGE_CANT_USE_COMPLEX_LAMBDA_IN_MATCH_BLOCK = "Can't use a complex lambda in a match block!";
         public const string MESSAGE_UNEXPECTED_NODE = "Unexpected node: {0}!";

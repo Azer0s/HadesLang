@@ -35,6 +35,7 @@
         TryCatch,
         Class,
         Match,
-        ArrayAccess
+        ArrayAccess,
+        Struct
     }
 }

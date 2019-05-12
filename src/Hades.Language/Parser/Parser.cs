@@ -10,6 +10,7 @@ using Hades.Syntax.Expression.Nodes.BlockNodes;
 using Hades.Syntax.Expression.Nodes.LiteralNodes;
 using Hades.Syntax.Lexeme;
 using Classifier = Hades.Syntax.Lexeme.Classifier;
+// ReSharper disable AccessToModifiedClosure
 
 namespace Hades.Language.Parser
 {
@@ -281,6 +282,66 @@ namespace Hades.Language.Parser
 
         #region Blocks
 
+        private Node ParseStruct(AccessModifier accessModifier)
+        {
+            Advance();
+            EnforceIdentifier();
+
+            var node = new StructNode{Name = Current.Value, AccessModifier = accessModifier};
+            Advance();
+
+            while (!Is(Keyword.End))
+            {
+                if (IsAccessModifier() && (Expect(Keyword.Var) || Expect(Keyword.Let)))
+                {
+                    Advance();
+                    switch (Enum.Parse<AccessModifier>(Last.Value.First().ToString().ToUpper() + Last.Value.Substring(1)))
+                    {
+                        case AccessModifier.Protected:
+                            Error(ErrorStrings.MESSAGE_ILLEGAL_PROTECTED_IN_STRUCT);
+                            break;
+                        case AccessModifier.Public:
+                            node.PublicVariables.Add(ParseNext() as VariableDeclarationNode);
+                            break;
+                        default:
+                            node.PrivateVariables.Add(ParseNext() as VariableDeclarationNode);
+                            break;
+                    }
+                }
+                else
+                {
+                    var childNode = ParseNext();
+
+                    if (childNode is VariableDeclarationNode vn)
+                    {
+                        node.PrivateVariables.Add(vn);
+                    }
+                    else if (childNode is VarBlockNode vbn)
+                    {
+                        switch (vbn.AccessModifier)
+                        {
+                            case AccessModifier.Protected:
+                                Error(ErrorStrings.MESSAGE_ILLEGAL_PROTECTED_IN_STRUCT);
+                                break;
+                            case AccessModifier.Public:
+                                node.PublicVariables.AddRange(vbn.VariableDeclarationNodes);
+                                break;
+                            default:
+                                node.PrivateVariables.AddRange(vbn.VariableDeclarationNodes);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Error(ErrorStrings.MESSAGE_UNEXPECTED_NODE, childNode.GetType().Name.Replace("Node", ""));
+                    }
+                }
+            }
+            
+            Advance();
+            return node;
+        }
+        
         private Node ParseClass(bool isFixed, AccessModifier accessModifier)
         {
             Advance();
@@ -344,7 +405,25 @@ namespace Hades.Language.Parser
                     {
                         node.Classes.Add(cn);
                     }
-                    //TODO: Struct
+                    else if (childNode is StructNode sn)
+                    {
+                        node.Structs.Add(sn);
+                    }
+                    else if (childNode is VarBlockNode vbn)
+                    {
+                        switch (vbn.AccessModifier)
+                        {
+                            case AccessModifier.Protected:
+                                node.ProtectedVariables.AddRange(vbn.VariableDeclarationNodes);
+                                break;
+                            case AccessModifier.Public:
+                                node.PublicVariables.AddRange(vbn.VariableDeclarationNodes);
+                                break;
+                            default:
+                                node.PrivateVariables.AddRange(vbn.VariableDeclarationNodes);
+                                break;
+                        }
+                    }
                     else
                     {
                         Error(ErrorStrings.MESSAGE_UNEXPECTED_NODE, childNode.GetType().Name.Replace("Node", ""));
@@ -426,6 +505,30 @@ namespace Hades.Language.Parser
             return node;
         }
 
+        private Node ParseVariableGroup()
+        {
+            var node = new VarBlockNode();
+            Advance();
+            if (!IsAccessModifier())
+            {
+                Error(ErrorStrings.MESSAGE_EXPECTED_ACCESS_MODIFIER);
+            }
+            
+            node.AccessModifier = Enum.Parse<AccessModifier>(Current.Value.First().ToString().ToUpper() + Current.Value.Substring(1));
+            Advance();
+
+            while (!Is(Keyword.End))
+            {
+                if (Is(Keyword.Var) || Is(Keyword.Let))
+                {
+                    node.VariableDeclarationNodes.Add(ParseNext() as VariableDeclarationNode);
+                }
+            }
+            
+            Advance();
+            return node;
+        }
+        
         private Node ParseMatch(bool allowSkipStop)
         {
             Advance();
@@ -729,7 +832,7 @@ namespace Hades.Language.Parser
             {
                 if (parseValueCall)
                 {
-                    return new ValueCallNode {Source = node.Source, Target = node};
+                    return new ValueCallNode {Source = node.Source, Target = node.Target};
                 }
 
                 Error(ErrorStrings.MESSAGE_EXPECTED_PARAMETERS);
@@ -1080,6 +1183,11 @@ namespace Hades.Language.Parser
                 return null;
             }
 
+            if (Is(Classifier.At))
+            {
+                return ParseVariableGroup();
+            }
+
             if (Is(Classifier.Tag))
             {
                 ExpectIdentifier();
@@ -1164,6 +1272,10 @@ namespace Hades.Language.Parser
 
                     case Keyword.Class:
                         return ParseClass(isFixed, accessModifier.GetValueOrDefault());
+                    
+                    case Keyword.Struct:
+                        if (isFixed) Error(ErrorStrings.MESSAGE_UNEXPECTED_KEYWORD, Keyword.Fixed);
+                        return ParseStruct(accessModifier.GetValueOrDefault());
 
                     case Keyword.Func:
                         return ParseFunc(isFixed, accessModifier.GetValueOrDefault());
@@ -1329,6 +1441,11 @@ namespace Hades.Language.Parser
                 }
                 
                 return ParseRightHand(node);
+            }
+            
+            while (Is(Category.Operator))
+            {
+                node = GetOperation(node);
             }
 
             return node;

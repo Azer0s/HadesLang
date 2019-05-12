@@ -12,14 +12,15 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
 
         public AccessModifier AccessModifier { get; set; }
         public bool Fixed { get; set; }
-        public List<string> Parents { get; set; } = new List<string>();
+        public List<string> Parents { get; } = new List<string>();
         public string Name { get; set; }
-        public List<VariableDeclarationNode> PublicVariables { get; set; } = new List<VariableDeclarationNode>();
-        public List<VariableDeclarationNode> PrivateVariables { get; set; } = new List<VariableDeclarationNode>();
-        public List<VariableDeclarationNode> ProtectedVariables { get; set; } = new List<VariableDeclarationNode>();
-        public List<FunctionNode> Functions { get; set; } = new List<FunctionNode>();
-        public List<ClassNode> Classes { get; set; } = new List<ClassNode>();
-        public List<FunctionNode> Constructors { get; set; } = new List<FunctionNode>();
+        public List<VariableDeclarationNode> PublicVariables { get; } = new List<VariableDeclarationNode>();
+        public List<VariableDeclarationNode> PrivateVariables { get; } = new List<VariableDeclarationNode>();
+        public List<VariableDeclarationNode> ProtectedVariables { get; } = new List<VariableDeclarationNode>();
+        public List<FunctionNode> Functions { get; } = new List<FunctionNode>();
+        public List<ClassNode> Classes { get; } = new List<ClassNode>();
+        public List<FunctionNode> Constructors { get; } = new List<FunctionNode>();
+        public List<StructNode> Structs { get; } = new List<StructNode>();
 
         protected override string ToStr()
         {
@@ -59,14 +60,24 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             {
                 ctor = $"\n  Constructors:\n    {string.Join("\n    ", constructors)}";
             }
+            
+            var structs = Structs.Map(a => a.ToString().Replace("\n", "\n    ")).ToList();
+            var stcts = string.Empty;
+
+            if (constructors.Count != 0)
+            {
+                stcts = $"\n  Structs:\n    {string.Join("\n    ", structs)}";
+            }
 
             var inherits = string.Empty;
             if (Parents.Count != 0)
             {
                 inherits = $" inherits from {string.Join(", ", Parents)}";
             }
+            
+            var fix = Fixed ? " fixed" : "";
 
-            return $"{Name}{inherits}{privateVars}{protectedVars}{publicVars}{ctor}{fn}";
+            return $"{Name}{fix}{inherits}{privateVars}{protectedVars}{publicVars}{ctor}{fn}{stcts}";
         }
     }
 }

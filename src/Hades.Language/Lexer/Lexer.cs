@@ -48,7 +48,7 @@ namespace Hades.Language.Lexer
             Keyword.Raise,
             Keyword.Try,
             Keyword.Catch,
-            Keyword.Default,
+            Keyword.Struct,
             Keyword.Match,
             Keyword.End
         };
@@ -192,7 +192,7 @@ namespace Hades.Language.Lexer
 
         private bool IsPunctuation()
         {
-            return "<>{}()[]!%^&*+-=/,?:|~#.".Contains(Ch);
+            return "<>{}()[]!%^&*+-=/,?:|~#@.".Contains(Ch);
         }
 
         private bool IsWhiteSpace()
@@ -258,7 +258,7 @@ namespace Hades.Language.Lexer
                 return ScanComment();
             }
 
-            if (IsLetter() || Ch == '_')
+            if (IsLetter() || Ch == '_' && Ch != '@')
             {
                 return ScanIdentifier();
             }
