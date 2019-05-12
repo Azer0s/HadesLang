@@ -8,7 +8,9 @@ using Hades.Common.Util;
 using Hades.Core.Tools;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
+using Hades.Syntax.Expression;
 using Hades.Syntax.Lexeme;
+using Classifier = Hades.Syntax.Lexeme.Classifier;
 
 namespace Hades.Core
 {
@@ -102,6 +104,66 @@ namespace Hades.Core
             }
         }
 
+        private static void PrintStart()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"Hades (Hades Interactive Console). Built {Assembly.GetExecutingAssembly().GetBuildDate():M/d/yy h:mm:ss tt}");
+            Console.ResetColor();
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($"Hades version {VERSION}");
+            Console.WriteLine($"Running {Environment.OSVersion}");
+            Console.WriteLine("Press space to enter/exit multiline mode");
+        }
+
+        private static IEnumerable<Token> GetTokens()
+        {
+            var lexer = new Lexer();
+            var line = Console.ReadLine();
+            IEnumerable<Token> tokens;
+
+            if (line == " ")
+            {
+                // Multiple lines
+                var lines = new List<string> {line};
+                do
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("...");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    line = Console.ReadLine();
+
+                    ConsoleFunctions.ClearCurrentConsoleLine();
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("...");
+                    tokens = lexer.LexFile(line);
+                    HighLight(tokens);
+                    Console.WriteLine();
+
+                    lines.Add(line);
+                } while (line != " ");
+
+                Console.WriteLine();
+
+                lines.RemoveAt(line.Length - 1);
+                tokens = lexer.LexFile(string.Join("\n", lines));
+            }
+            else
+            {
+                // Single line
+                ConsoleFunctions.ClearCurrentConsoleLine();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("hd>");
+                tokens = lexer.LexFile(line);
+                HighLight(tokens);
+                Console.WriteLine();
+
+                tokens = lexer.LexFile(line);
+            }
+
+            return tokens;
+        }
+
         public static int Main(string[] args)
         {
             if (args.Length != 0)
@@ -115,69 +177,23 @@ namespace Hades.Core
                 }
             }
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"Hades (Hades Interactive Console). Built {Assembly.GetExecutingAssembly().GetBuildDate():M/d/yy h:mm:ss tt}");
-            Console.ResetColor();
+            PrintStart();
 
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine($"Hades version {VERSION}");
-            Console.WriteLine($"Running {Environment.OSVersion}");
-            Console.WriteLine("Press space to enter/exit multiline mode");
-
+            var runtime = new {Run = new Func<RootNode, string>(a => a.ToString())};
+            
             while (true)
             {
-                var lexer = new Lexer();
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write("hd>");
                 Console.ResetColor();
 
                 try
                 {
-                    var line = Console.ReadLine();
-                    IEnumerable<Token> tokens = null;
-
-                    if (line == " ")
-                    {
-                        // Multiple lines
-                        var lines = new List<string> {line};
-                        do
-                        {
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write("...");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            line = Console.ReadLine();
-
-                            ConsoleFunctions.ClearCurrentConsoleLine();
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                            Console.Write("...");
-                            tokens = lexer.LexFile(line);
-                            HighLight(tokens);
-                            Console.WriteLine();
-
-                            lines.Add(line);
-                        } while (line != " ");
-
-                        Console.WriteLine();
-
-                        lines.RemoveAt(line.Length - 1);
-                        tokens = lexer.LexFile(string.Join("\n", lines));
-                    }
-                    else
-                    {
-                        // Single line
-                        ConsoleFunctions.ClearCurrentConsoleLine();
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        Console.Write("hd>");
-                        tokens = lexer.LexFile(line);
-                        HighLight(tokens);
-                        Console.WriteLine();
-
-                        tokens = lexer.LexFile(line);
-                    }
-
+                    var tokens = GetTokens();
                     var parser = new Parser(tokens);
                     var root = parser.Parse();
-                    Console.WriteLine(root);
+                    var result = runtime.Run(root);
+                    Console.WriteLine(result);
                     Console.WriteLine();
 
                     //TODO: We should probably smooth this entire process out. And also use IEnumerable (?)

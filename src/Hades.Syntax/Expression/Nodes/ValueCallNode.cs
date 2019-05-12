@@ -1,5 +1,3 @@
-using Hades.Syntax.Expression.Nodes.LiteralNodes;
-
 namespace Hades.Syntax.Expression.Nodes
 {
     public class ValueCallNode : Node
@@ -9,7 +7,7 @@ namespace Hades.Syntax.Expression.Nodes
         }
 
         public Node Source { get; set; }
-        public IdentifierNode Target { get; set; }
+        public Node Target { get; set; }
 
         protected override string ToStr()
         {

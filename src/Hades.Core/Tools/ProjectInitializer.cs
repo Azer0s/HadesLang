@@ -44,20 +44,21 @@ namespace Hades.Core.Tools
                 return 1;
             }
 
-            var mainhd = src + Path.DirectorySeparatorChar + "main.hd";
-            File.WriteAllText(mainhd, "with console from std:io\nconsole->out:\"Hello\"");
+            var mainHd = src + Path.DirectorySeparatorChar + "main.hd";
+            File.WriteAllText(mainHd, "with console from std:io\nconsole->out(\"Hello\")");
 
-            var projectjson = dir + Path.DirectorySeparatorChar + "project.json";
-            File.WriteAllText(projectjson, ""); //TODO: Fill project.json
+            var projectJson = dir + Path.DirectorySeparatorChar + "project.json";
+            File.WriteAllText(projectJson, "");
+            //TODO: Fill project.json
 
             Directory.CreateDirectory(dir + "libs");
 
             using (var repo = new Repository(dir))
             {
-                repo.Index.Add(projectjson.Substring(dir.Length + 1, projectjson.Length - dir.Length - 1));
-                repo.Index.Add(mainhd.Substring(dir.Length, mainhd.Length - dir.Length).Replace($"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}", $"{Path.DirectorySeparatorChar}"));
+                repo.Index.Add(projectJson.Substring(dir.Length + 1, projectJson.Length - dir.Length - 1));
+                repo.Index.Add(mainHd.Substring(dir.Length, mainHd.Length - dir.Length).Replace($"{Path.DirectorySeparatorChar}{Path.DirectorySeparatorChar}", $"{Path.DirectorySeparatorChar}"));
 
-                // Create the committer's signature and commit
+                // Create the commiters signature and commit
                 var author = new Signature("HadesProjectInitializer", "@hpi", DateTime.Now);
                 var committer = author;
 

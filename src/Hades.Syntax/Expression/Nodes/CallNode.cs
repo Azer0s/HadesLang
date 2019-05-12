@@ -10,7 +10,7 @@ namespace Hades.Syntax.Expression.Nodes
         }
 
         public Node Source { get; set; }
-        public IdentifierNode Target { get; set; }
+        public Node Target { get; set; }
         public Dictionary<Node, string> Parameters { get; } = new Dictionary<Node, string>();
 
         protected override string ToStr()
@@ -37,7 +37,7 @@ namespace Hades.Syntax.Expression.Nodes
                 str = $" with parameters {str}";
             }
 
-            return $"{Target.Value} on ({Source}){str}";
+            return $"({Target}) on ({Source}){str}";
         }
     }
 }

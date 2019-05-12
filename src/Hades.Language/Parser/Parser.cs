@@ -344,6 +344,7 @@ namespace Hades.Language.Parser
                     {
                         node.Classes.Add(cn);
                     }
+                    //TODO: Struct
                     else
                     {
                         Error(ErrorStrings.MESSAGE_UNEXPECTED_NODE, childNode.GetType().Name.Replace("Node", ""));
@@ -728,7 +729,7 @@ namespace Hades.Language.Parser
             {
                 if (parseValueCall)
                 {
-                    return new ValueCallNode {Source = node.Source, Target = node.Target};
+                    return new ValueCallNode {Source = node.Source, Target = node};
                 }
 
                 Error(ErrorStrings.MESSAGE_EXPECTED_PARAMETERS);
@@ -782,6 +783,12 @@ namespace Hades.Language.Parser
                 else if (child is IdentifierNode id)
                 {
                     var callNode = new CallNode {Source = new IdentifierNode("this"), Target = id};
+                    callNode.Parameters.Add(root, "");
+                    root = callNode;
+                }
+                else if (child is ArrayAccessNode an)
+                {
+                    var callNode = new CallNode {Source = new IdentifierNode("this"), Target = an};
                     callNode.Parameters.Add(root, "");
                     root = callNode;
                 }
@@ -1222,6 +1229,21 @@ namespace Hades.Language.Parser
                 return ops;
             }
 
+            (Node, bool) GetAnonymousCall(Node init)
+            {
+                var ret = false;
+                if (init is LambdaNode || init is CallNode || init is ArrayAccessNode)
+                {
+                    if (Is(Classifier.LeftParenthesis))
+                    {
+                        init = ParseCallSignature(new CallNode {Source = init, Target = new IdentifierNode("anonymous")}, false);
+                        ret = true;
+                    }
+                }
+
+                return (init, ret);
+            }
+
             Node node;
 
             if (Is(Classifier.LeftParenthesis))
@@ -1249,7 +1271,6 @@ namespace Hades.Language.Parser
                 node = ParseStatementWithoutOperation();
             }
 
-
             if (Is(Category.Operator) && node != null)
             {
                 node = GetOperation(node);
@@ -1261,43 +1282,53 @@ namespace Hades.Language.Parser
                 return new NullConditionNode {Condition = node, Operation = ParseStatement()};
             }
 
-            //Call on lambdas
-            if (node is LambdaNode || node is CallNode /*TODO: Or node is ArrayAccessNode*/)
+            var isRet = false;
+
+            do
             {
-                if (Is(Classifier.LeftParenthesis))
+                if (Is(Classifier.Question))
                 {
-                    node = ParseCallSignature(new CallNode {Source = node, Target = new IdentifierNode("anonymous")}, false);
+                    node = ParseInlineIf(node);
                 }
-            }
 
-            if (Is(Classifier.Question))
+                if (Is(Classifier.Pipeline) && !pipeline)
+                {
+                    node = ParsePipeline(node);
+                }
+
+                if (Is(Classifier.Arrow))
+                {
+                    node = ParseDeepCall(node);
+                }
+
+                if (Is(Classifier.LeftBrace))
+                {
+                    node = ParseArrayAccess(node);
+                }
+            } while (new Func<bool>(() =>
             {
-                node = ParseInlineIf(node);
-            }
-
-            if (Is(Classifier.Pipeline) && !pipeline)
-            {
-                node = ParsePipeline(node);
-            }
-
-            if (Is(Classifier.Arrow))
-            {
-                node = ParseDeepCall(node);
-            }
-
+                (node, isRet) = GetAnonymousCall(node);
+                return isRet || Is(Classifier.Question) || (Is(Classifier.Pipeline) && !pipeline) || Is(Classifier.Arrow) || Is(Classifier.LeftBrace);
+            })());
+            
             if (Is(Category.Assignment))
             {
+                if (node is CallNode || node is InlineIf)
+                {
+                    Error(ErrorStrings.MESSAGE_UNEXPECTED_CALL_OR_INLINE_IF);
+                }
+                
                 return ParseAssignment(node);
             }
 
             if (Is(Category.RightHand))
             {
+                if (node is CallNode || node is InlineIf)
+                {
+                    Error(ErrorStrings.MESSAGE_UNEXPECTED_CALL_OR_INLINE_IF);
+                }
+                
                 return ParseRightHand(node);
-            }
-
-            if (Is(Classifier.LeftBrace))
-            {
-                return ParseArrayAccess(node);
             }
 
             return node;

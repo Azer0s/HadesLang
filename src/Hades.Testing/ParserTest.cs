@@ -17,11 +17,11 @@ namespace Hades.Testing
 
             if (fail)
             {
-                Assert.Throws<Exception>(() => parser.Parse());
+                Assert.Throws<Exception>(() => Console.WriteLine(parser.Parse()));
             }
             else
             {
-                Assert.DoesNotThrow(() => parser.Parse());
+                Assert.DoesNotThrow(() => Console.WriteLine(parser.Parse()));
             }
         }
 
@@ -123,7 +123,7 @@ namespace Hades.Testing
         [TestCase("with console fixed from std:io", "io", "console", "console", true, "std")]
         [TestCase("with math fixed as m from std:math", "math", "math", "m", true, "std")]
         [Test]
-        public void EnsureWith(string code, string source, string target, string name, bool native, string nativepackage)
+        public void EnsureWith(string code, string source, string target, string name, bool native, string nativePackage)
         {
             var lexer = new Lexer();
             var parser = new Parser(lexer.LexFile(code));
@@ -136,7 +136,7 @@ namespace Hades.Testing
             Assert.AreEqual(withNode.Target, target);
             Assert.AreEqual(withNode.Name, name);
             Assert.AreEqual(withNode.Native, native);
-            Assert.AreEqual(withNode.NativePackage, nativepackage);
+            Assert.AreEqual(withNode.NativePackage, nativePackage);
         }
 
         [TestCase("fib(10) |> doStuff |> console->out", false)]
