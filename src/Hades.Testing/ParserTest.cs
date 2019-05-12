@@ -279,6 +279,86 @@ namespace Hades.Testing
         "else\n" +
             "console->out(\"No exception thrown!\")\n" +
         "end", false)]
+        
+        [TestCase(
+        "struct employee\n"+
+            "public let string firstname = \"John\"\n"+
+            "public let lastname = \"Doe\"\n"+
+            "private var int age = 18\n"+
+            "var string[] attributes //When no access modifier is given, the variable will have private access\n"+
+        "end\n"+
+        "class Person\n"+
+            "var int id\n"+
+            "@public\n"+
+                "var string firstname\n"+
+                "var string lastname\n"+
+            "end\n"+
+        "end\n"+
+        "struct Person\n"+
+            "@public\n"+
+            "var string firstname\n"+
+            "var string lastname\n"+
+            "end\n"+
+            "@private\n"+
+            "var int id\n"+
+            "end\n"+
+        "end", false)]
+        
+        [TestCase(
+        "with console from std:io\n" + 
+        "func myFunction(int a) requires a is 11\n" + 
+            "console->out(\"a is 11\")\n" + 
+            "a->b = {x,y=>x+y}(1,2)->toString({x=>x})\n" + 
+        "end\n" + 
+        "a[0]()->t() |> console\n" + 
+        "struct Person\n" + 
+            "let string firstname\n" + 
+            "var string lastname\n" + 
+            "let birthday\n" + 
+            "var nationality\n" + 
+        "end", false)]
+        
+        [TestCase(
+        "#route(\"/\")\n" +
+        "func handleMain()\n" +
+            "put 200\n" +
+        "end\n" +
+        "#service\n" +
+        "#constructor(true)\n" +
+        "class UserService\n" +
+            "#injected(UserRepository)\n" +
+            "let userRepository\n" +
+            "func getById(id)\n" +
+                "put userRepository->findById(id)->orElse(null)\n" +
+            "end\n" +
+        "end", false)]
+        
+        [TestCase(
+        "let dec[*] points = \n" +
+        "{\n" +
+            "{245, 1400},\n" +
+            "{312, 1600},\n" +
+            "{279, 1700},\n" +
+            "{308, 1875},\n" +
+            "{199, 1100},\n" +
+            "{219, 1550},\n" +
+            "{405, 2350},\n" +
+            "{324, 2450},\n" +
+            "{319, 1425},\n" +
+            "{255, 1700}\n" +
+        "}\n" +
+        "var weight = 10.0\n" +
+        "var bias = 100.0\n" +
+        "var lr = 0.000001\n" +
+        "for(_ in range(1000000))\n" +
+            "for(var point in points)\n" +
+                "var prediction = point[0] * weight + bias\n" +
+                "var error = point[1] - prediction\n" +
+                "var gradient = point[0] * error * lr\n" +
+                "bias += gradient\n" +
+                "weight += weight * gradient\n" +
+            "end\n" +
+        "end", false)]
         [Test]
         public void ProgramTest(string code, bool fail)
         {
