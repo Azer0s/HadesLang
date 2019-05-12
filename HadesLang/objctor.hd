@@ -1,3 +1,0 @@
-﻿requires object a;num t
-
-out:[$a->fib:[$t]]

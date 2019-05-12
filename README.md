@@ -1,146 +1,94 @@
-<img src="https://raw.githubusercontent.com/Azer0s/HadesLang/master/HadesLang/IconLong.png" /> 
+<img src="assets/IconShort.png" alt="logo" width="200" align="left"/>
 
-***
+## Hades Programming Language
 
 [![Build Status](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)](https://travis-ci.org/Azer0s/HadesLang)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Azer0s/HadesLang/blob/master/LICENSE)
 
+## Welcome!
 
-*Hades is a embedded scripting language built from scratch!*
-<br>
-Here are a few examples of the language in action:
+This is the official repository for the reference implementation of the Hades Programming Language (standard library & interpreter).
 
-## Register a custom function in C#
-```csharp
-var interpreter = new Interpreter(new ConsoleOutput(),new ConsoleOutput());
-interpreter.RegisterFunction(new Function("print", a =>
-{
-    a.ToList().ForEach(Console.WriteLine);
-    return string.Empty;
-}));
+### Hello world
+```js
+with console from std:io
+console->out("Hello world")
 ```
 
-## Register an alias in C#
-```csharp
-Evaluator.AliasManager.Add("clear","cls");
+### Pipelines
+```js
+with list fixed from std:collections
+with console from std:io
+
+var fruits = list->of({"Apple", "Banana", "Mango", "Kiwi", "Avocado"})
+
+fruits
+|> map({x => x->toLower()}, ??)
+|> filter({x => x->startsWith("a")}, ??)
+|> forEach({x => console->out(x)}, ??)
 ```
 
-## Hello world
-```vb
-out:'Hello world'
+### Function guards
+```swift
+with console fixed from std:io
+
+func myFunction(int a) requires a < 10
+    console->out("a is smaller than 10")
+end
+
+func myFunction(int a) requires a > 10
+    console->out("a is greater than 10")
+end
+
+out(myFunction(5))   // a is smaller than 10
+out(myFunction(17))  // a is greater than 10
 ```
 
-## Fibonacci Numbers
-### fibonacci.hd
-```vb
-func fib[num n]
-    if[($n is 0) or ($n is 1)]
+### Fibonacci sequence
+```js
+with console from std:io
+
+func fib(n)
+    if((n is 0) or (n is 1))
         put n
     end
-
-    put fib:[$n-1] + fib:[$n-2]
-end
-```
-### main.hd
-```vb
-with 'fibonacci' as a
-b as num reachable = $a->fib:[7]
-out:b
-```
-## Force value through interpreter 
-
-```vb
-a as word = 'out:b'
-b as word = 'Hello world'
-#a
-```
-Output will be Hello world
-
-## Overarching variables
-### foo.hd
-```vb
-a as num global = 18
-with 'bar' as b
-$b->printA:[]
-```
-### bar.hd
-```vb
-func printA[]
-    out:a
-end
-```
-
-## Method guards
-```vb
-func t1[num a] requires $a smaller 10
-  out:'a is smaller 10'
+    
+    put fib(n-1) + fib(n-2)
 end
 
-func t1[num a] requires $a is 11
-  out:'a is 11'
-end
+fib(10) |> console->out
 ```
 
-| Call       |           Output           |
-| ---------- | :------------------------: |
-| `t1:[11]`  |          a is 11           |
-| `t1:[9]`   |      a is smaller 10       |
-| `t1:[100]` | *No method will be called* |
+## Getting Started
 
-## Reflection
-```vb
-foo as word = 'Hello world'
-bar as bit = false
-foobar as num = 22
+Learning Hades and writing your first programs.
 
-arr as word[*] = getfields:[]
-out:#arr[0]
-```
+### [Installing Hades](https://hadeslang.gitbook.io/doc/getting-started/installing-hades)
 
-## Pipeline
+Instructions for downloading HadesLang and/or embedding it into your programs.
 
-*Syntactic sugar for nested method calls*
-```vb
-with 'fibrec' as a
-$a->fib:[9] |> out:[??]
-```
-## Conditions
-```vb
-if[sqrt(9) smallerIs 3]
-    out:'The squareroot of 9 is smaller/equals 3'
-end
-```
+### [Basic Syntax](https://hadeslang.gitbook.io/doc/getting-started/basic-syntax)
 
-## Unloading
-```vb
-a as num reachable = 18
-uload:a
-```
+Hades basics and quick introduction into the language.
 
-# And it even works in the web!
+### [Coding Conventions](https://hadeslang.gitbook.io/doc/getting-started/coding-conventions)
 
-### index.hd
+Current coding style for HadesLang.
 
-```vb
-title as word = 'Hades in the web is super cool!'
+## References
 
-put 200 //Status code for the response
-```
+### [Language Spec](https://hadeslang.gitbook.io/doc/language-spec)
 
-### index.hdhtml
+The official HadesLang specification.
 
-```html
-%import wwwroot/view/head.html%
+### [Package Documentation](https://hadeslang.gitbook.io/doc/core-libraries/standard-library)
 
-<div class="jumbotron">
-    <h1>${title}</h1>
-    <p class="lead">HadesWeb is a powerful framework to build web apps in Hades.</p>
-    <p><a class="btn btn-lg btn-success" href="#">Learn more</a></p>
-</div>
-	  
-%import wwwroot/view/bottom.html%
-```
+Documentation and definition of the Hades standard library.
 
-## Credits
+### [Tool Documentation](https://hadeslang.gitbook.io/doc/other/tools)
 
-[mXparser](https://github.com/mariuszgromada/MathParser.org-mXparser) by Mariusz Gromada
+Documentation for HadesLang tools.
+
+### [Examples](https://hadeslang.gitbook.io/doc/other/examples)
+
+Examples of Hades in use.

@@ -1,3 +1,0 @@
-with fib as a
-b as num reachable = $a->fib:[1]
-put b

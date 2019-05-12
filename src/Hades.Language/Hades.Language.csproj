@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Hades.Common\Hades.Common.csproj" />
+    <ProjectReference Include="..\Hades.Error\Hades.Error.csproj" />
+    <ProjectReference Include="..\Hades.Syntax\Hades.Syntax.csproj" />
+  </ItemGroup>
+</Project>
