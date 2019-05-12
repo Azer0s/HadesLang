@@ -102,7 +102,7 @@ namespace Hades.Language.Parser
             var dt = (Datatype) Enum.Parse(typeof(Datatype), Current.Value.ToUpper());
             string type = null;
 
-            if (dt == Datatype.PROTO || dt == Datatype.OBJECT)
+            if (dt == Datatype.PROTO || dt == Datatype.OBJECT || dt == Datatype.STRUCT)
             {
                 Advance();
                 if (Is(Classifier.NullCondition))
