@@ -14,7 +14,10 @@ namespace Hades.Runtime
         public List<Scope> PublicVariables { get; set; } = new List<Scope>();
         
         //A scope needs to have a datatype, the exec scope has the datatype "NONE"
-        public Datatype Datatype { get; set; }
+        public Datatype? Datatype { get; set; }
+        
+        //Classes, structs, variables and protos have names
+        public string Name { get; set; }
         
         //A scope can be an object, struct or proto, these three can have a specific type
         public string SpecificType { get; set; }

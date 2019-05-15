@@ -1242,6 +1242,7 @@ namespace Hades.Language.Parser
                 if (IsAccessModifier())
                 {
                     accessModifier = Enum.Parse<AccessModifier>(Current.Value.First().ToString().ToUpper() + Current.Value.Substring(1));
+                    //TODO: Disallow protected?
                     Advance();
                 }
 
@@ -1303,6 +1304,7 @@ namespace Hades.Language.Parser
                         break;
 
                     default:
+                        NoAccessModifierOrFixed();
                         return ParseStatement();
                 }
             }

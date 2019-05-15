@@ -4,6 +4,8 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_DUPLICATE_VARIABLE_DECLARATION = "Duplicate decleration of variable {0}!";
+        
         public const string MESSAGE_EXPECTED_ACCESS_MODIFIER = "Expected an access modifier!";
         public const string MESSAGE_ILLEGAL_PROTECTED_IN_STRUCT = "A struct cannot contain a protected variable!";
         public const string MESSAGE_UNEXPECTED_CALL_OR_INLINE_IF = "Unexpected call or inline if!";

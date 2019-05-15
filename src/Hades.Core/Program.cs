@@ -8,8 +8,9 @@ using Hades.Common.Util;
 using Hades.Core.Tools;
 using Hades.Language.Lexer;
 using Hades.Language.Parser;
-using Hades.Syntax.Expression;
+using Hades.Runtime;
 using Hades.Syntax.Lexeme;
+using Newtonsoft.Json;
 using Classifier = Hades.Syntax.Lexeme.Classifier;
 
 namespace Hades.Core
@@ -17,6 +18,7 @@ namespace Hades.Core
     public static class Program
     {
         private const string VERSION = "0.0.1";
+        private static Scope scope = new Scope();
 
         private static void HighLight(IEnumerable<Token> tks)
         {
@@ -178,8 +180,6 @@ namespace Hades.Core
             }
 
             PrintStart();
-
-            var runtime = new {Run = new Func<RootNode, string>(a => a.ToString())};
             
             while (true)
             {
@@ -192,8 +192,8 @@ namespace Hades.Core
                     var tokens = GetTokens();
                     var parser = new Parser(tokens);
                     var root = parser.Parse();
-                    var result = runtime.Run(root);
-                    Console.WriteLine(result);
+                    scope = HadesRuntime.Run(root, scope);
+                    Console.WriteLine(JsonConvert.SerializeObject(scope));
                     Console.WriteLine();
 
                     //TODO: We should probably smooth this entire process out. And also use IEnumerable (?)
@@ -203,6 +203,7 @@ namespace Hades.Core
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
+                    Console.WriteLine();
                 }
             }
         }

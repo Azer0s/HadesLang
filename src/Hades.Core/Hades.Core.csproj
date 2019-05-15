@@ -11,6 +11,7 @@
 	
     <ItemGroup>
       <ProjectReference Include="..\Hades.Language\Hades.Language.csproj" />
+      <ProjectReference Include="..\Hades.Runtime\Hades.Runtime.csproj" />
     </ItemGroup>
 
     <ItemGroup>
