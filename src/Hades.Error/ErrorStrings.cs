@@ -4,6 +4,7 @@ namespace Hades.Error
 {
     public static class ErrorStrings
     {
+        public const string MESSAGE_UNKNOWN_RUNTIME_EXCEPTION = "Unknown runtime exception! Please check the AST! \n{0}";
         public const string MESSAGE_DUPLICATE_VARIABLE_DECLARATION = "Duplicate decleration of variable {0}!";
         
         public const string MESSAGE_EXPECTED_ACCESS_MODIFIER = "Expected an access modifier!";

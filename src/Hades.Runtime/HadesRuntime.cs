@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Hades.Error;
 using Hades.Runtime.Values;
 using Hades.Syntax.Expression;
 using Hades.Syntax.Expression.Nodes;
+using Hades.Syntax.Expression.Nodes.LiteralNodes;
+using Hades.Syntax.Lexeme;
 
 namespace Hades.Runtime
 {
@@ -31,12 +34,12 @@ namespace Hades.Runtime
                 {
                     var child = RunStatement(node, scope);
 
-                    if (scope.PrivateVariables.Any(a => a.Name == child.Name))
+                    if (scope.Variables.Any(a => a.Key == child.Name))
                     {
                         Error(ErrorStrings.MESSAGE_DUPLICATE_VARIABLE_DECLARATION, child.Name);
                     }
                     
-                    scope.PrivateVariables.Add(child);
+                    scope.Variables.Add(child.Name, (child, AccessModifier.Private));
                 }
             }
 
@@ -46,6 +49,34 @@ namespace Hades.Runtime
         private static Scope RunStatement(Node node, Scope parent)
         {
             Scope scope = null;
+            
+            //Here are the literal values. These return a literal scope + all the built-ins the literal values have
+            if (node is BoolLiteralNode boolLiteral)
+            {
+                // ReSharper disable once UseObjectOrCollectionInitializer
+                scope = new Scope();
+                scope.Value = new BoolValue{Value = boolLiteral.Value};
+                scope.Functions = new Dictionary<string, List<Scope>>
+                {
+                    //TODO: REFACTOR ALL BUILT-IN METHODS TO A SEPARATE CLASS
+                    //TODO: JUST DO scope.Functions = BuiltIns.BOOL_BUILT_INS;
+                    {"toString", new List<Scope> { new Scope {IsNativeFunction = true, NativeFunction =
+                        (scopes, thisScope) =>
+                        {
+                            /*
+                             * Okay...let's unroll what happens here. toString returns a string.
+                             * As we all know, a string has built-ins.
+                             * So does the string that toString returns (obviously)
+                             * So to get all of these built-ins, we have to run a literal node through the runtime
+                             */ 
+                            // ReSharper disable once ConvertToLambdaExpression
+                            return RunStatement(new StringLiteralNode(new Token((thisScope.Value as BoolValue).Value.ToString().ToLower())), parent);
+                        }}}}
+                };
+                return new Scope();
+            }
+
+            //NOTE/TODO: Btw.: Annotations become important when dealing with var declarations, functions, classes and structs
             
             if (node is VariableDeclarationNode variableDeclaration)
             {
@@ -66,6 +97,12 @@ namespace Hades.Runtime
                     {
                         //TODO: Multidimensional  array
                         var result = RunStatement(variableDeclaration.ArraySize, parent);
+
+                        if (result == null)
+                        {
+                            Error(ErrorStrings.MESSAGE_UNKNOWN_RUNTIME_EXCEPTION, variableDeclaration.ToString());
+                        }
+                        
                         if (!(result.Value is IntValue))
                         {
                             throw new Exception();
@@ -74,7 +111,7 @@ namespace Hades.Runtime
                     scope.Value = new ListValue {Size = size};
                 }
             }
-
+            
             return scope;
         }
     }

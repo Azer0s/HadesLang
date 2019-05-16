@@ -7,6 +7,11 @@ namespace Hades.Syntax.Lexeme
     {
         private readonly Lazy<Category> _category;
 
+        public Token(string value)
+        {
+            Value = value;
+        }
+        
         public Token(Classifier kind, string contents, SourceLocation start, SourceLocation end)
         {
             Kind = kind;
