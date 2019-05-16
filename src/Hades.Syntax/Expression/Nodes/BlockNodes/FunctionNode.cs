@@ -16,6 +16,8 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
         public List<(Node Key, Datatype? Value, string SpecificType)> Parameters { get; set; } = new List<(Node Key, Datatype? Value, string SpecificType)>();
         public Node Guard { get; set; }
         public AccessModifier AccessModifier { get; set; }
+        public bool Extension { get; set; }
+        public (string specificType, Datatype dt) ExtensionType { get; set; }
 
         protected override string ToStr()
         {
@@ -31,7 +33,10 @@ namespace Hades.Syntax.Expression.Nodes.BlockNodes
             var guard = Guard != null ? " with guard (" + Guard + ")" : "";
             var over = Override ? "override " : "";
             var fix = Fixed ? " fixed " : " ";
-            var str = $"{accessModifier}{fix}{over}{Name}{args}{guard}\n{base.ToStr()}";
+
+            var extends = Extension ? (string.IsNullOrEmpty(ExtensionType.specificType) ? $" extends {ExtensionType.dt.ToString().ToLower()}" : $" extends {ExtensionType.dt.ToString().ToLower()}::{ExtensionType.specificType}") : " <";
+            
+            var str = $"{accessModifier}{fix}{over}{Name}{extends}{args}{guard}\n{base.ToStr()}";
             return str;
         }
     }

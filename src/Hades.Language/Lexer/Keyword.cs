@@ -32,5 +32,6 @@ namespace Hades.Language.Lexer
         public const string Fixed = "fixed";
         public const string Match = "match";
         public const string Struct = "struct";
+        public const string Extends = "extends";
     }
 }

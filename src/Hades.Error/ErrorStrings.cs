@@ -7,6 +7,7 @@ namespace Hades.Error
         public const string MESSAGE_UNKNOWN_RUNTIME_EXCEPTION = "Unknown runtime exception! Please check the AST! \n{0}";
         public const string MESSAGE_DUPLICATE_VARIABLE_DECLARATION = "Duplicate decleration of variable {0}!";
         
+        public const string MESSAGE_EXPECTED_TYPE = "Expected a type!";
         public const string MESSAGE_EXPECTED_ACCESS_MODIFIER = "Expected an access modifier!";
         public const string MESSAGE_ILLEGAL_PROTECTED_IN_STRUCT = "A struct cannot contain a protected variable!";
         public const string MESSAGE_UNEXPECTED_CALL_OR_INLINE_IF = "Unexpected call or inline if!";

@@ -445,6 +445,27 @@ namespace Hades.Language.Parser
                 Advance();
             }
 
+            if (Is(Keyword.Extends))
+            {
+                //TODO: Test this lol
+                node.Extension = true;
+                Advance();
+
+                if (!IsType())
+                {
+                    Error(ErrorStrings.MESSAGE_EXPECTED_TYPE);
+                }
+
+                var specificType = GetSpecificType();
+
+                if (string.IsNullOrEmpty(specificType.specificType))
+                {
+                    Advance();
+                }
+                
+                node.ExtensionType = specificType;
+            }
+
             EnforceIdentifier();
 
             if (Expect(Category.Operator))

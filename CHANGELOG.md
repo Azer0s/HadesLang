@@ -1,3 +1,36 @@
+## 5/16/19
+
+### Introduced extension methods
+
+This allows for cool things like behavior based programming where one could have a bunch of group classes ("interfaces"), extend functions based on group and import these extensions based on usage.
+
+```swift
+class IDomainObject
+end
+
+class Person < IDomainObject
+    @public
+        var string firstname
+        var string lastname
+		var object birthday
+    end
+end
+
+[..]
+
+func extends object::IDomainObject persist(object::IConnection connection)
+	[..]
+end
+
+[..]
+
+func extends object::IDomainObject toJson()
+	put [..] //Default impl. of index on object returns all the members
+end
+```
+
+So based on need, one could import `persist` or `toJson` as extensions. In the controller, for instance, `persist` is absolutely useless, so is `toJson` in a service.
+
 ## 5/5/19
 
 ### Fixed call on return #3dca537b60026e55dd33233da8ef11039da6980d

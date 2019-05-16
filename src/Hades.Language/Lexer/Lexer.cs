@@ -50,6 +50,7 @@ namespace Hades.Language.Lexer
             Keyword.Catch,
             Keyword.Struct,
             Keyword.Match,
+            Keyword.Extends,
             Keyword.End
         };
 
