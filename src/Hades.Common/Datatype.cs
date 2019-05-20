@@ -2,6 +2,7 @@ namespace Hades.Common
 {
     public enum Datatype
     {
+        NONE = 0,
         BOOL,
         STRING,
         INT,
@@ -9,7 +10,6 @@ namespace Hades.Common
         OBJECT,
         PROTO,
         STRUCT,
-        LAMBDA,
-        NONE = 0
+        LAMBDA
     }
 }

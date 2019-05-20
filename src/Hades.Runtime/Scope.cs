@@ -13,8 +13,8 @@ namespace Hades.Runtime
         //A variable has an access modifier (in every scope - even in scopes where you can't set an access modifier -> then it's private)
         public Dictionary<string, (Scope Value, AccessModifier AccessModifier)> Variables { get; set; } = new Dictionary<string, (Scope Value, AccessModifier AccessModifier)>();
         
-        //A scope needs to have a datatype, the exec scope has the datatype "NONE"
-        public Datatype? Datatype { get; set; }
+        //A scope needs to have a datatype, the exec scope has the datatype "NONE", 
+        public Datatype Datatype { get; set; }
         
         //Classes, structs, variables and protos have names
         //Lambdas and functions also have names
@@ -59,9 +59,10 @@ namespace Hades.Runtime
         //Also polymorphism sux and makes everything slower. Only reason I used it in the parser is because there are *too fucking many* attributes to keep track of
         public bool IsNativeFunction { get; set; }
         
-        //TODO: Native function signature; I need to, somehow, expose the function signature so I can check if the user is not being a stupid asshat
-        //TODO: The goal of this is preventing stupid asshatery
-
+        //This exposes the function signature so I can check if the user is not being a stupid asshat
+        //The goal of this is preventing stupid asshatery
+        public Dictionary<string, Datatype> NativeFunctionSignature { get; set; }
+        
         //Honestly...this is actually not a bad solution
         //No CLR reflection, no weird casting shit
         //Just plain old func

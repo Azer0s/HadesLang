@@ -18,11 +18,13 @@ namespace Hades.Language.Parser
     {
         private readonly IEnumerable<Token> _tokens;
         private int _index;
+        private bool _repl;
 
-        public Parser(IEnumerable<Token> tokens)
+        public Parser(IEnumerable<Token> tokens, bool repl)
         {
             _tokens = tokens.ToList().Where(a => a.Kind != Classifier.WhiteSpace && a.Category != Category.Comment && a.Kind != Classifier.NewLine);
             _index = 0;
+            _repl = repl;
         }
 
         private Token Current => _tokens.ElementAtOrDefault(_index) ?? _tokens.Last();
@@ -1330,9 +1332,18 @@ namespace Hades.Language.Parser
                 }
             }
 
+            //TODO: Do some cleanup, many of these conditions are in because of testing
             if (IsIdentifier() || Is(Category.Literal) && (Expect(Classifier.Arrow) || Expect(Classifier.Question)) || Is(Category.Literal) && Expect(Category.Operator) || Is(Classifier.LeftParenthesis) || Is(Classifier.LeftBracket) || Is(Classifier.Not) || Is(Classifier.Minus))
             {
                 return ParseStatement();
+            }
+
+            if (_repl)
+            {
+                if (Is(Category.Literal))
+                {
+                    return ParseStatement();
+                }
             }
 
             Error(ErrorStrings.MESSAGE_UNEXPECTED_TOKEN, Current.Value);
