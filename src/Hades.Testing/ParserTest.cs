@@ -13,7 +13,7 @@ namespace Hades.Testing
         private void FailTest(string code, bool fail)
         {
             var lexer = new Lexer();
-            var parser = new Parser(lexer.LexFile(code));
+            var parser = new Parser(lexer.LexFile(code), false);
 
             if (fail)
             {
@@ -126,7 +126,7 @@ namespace Hades.Testing
         public void EnsureWith(string code, string source, string target, string name, bool native, string nativePackage)
         {
             var lexer = new Lexer();
-            var parser = new Parser(lexer.LexFile(code));
+            var parser = new Parser(lexer.LexFile(code), false);
             var root = parser.Parse();
             var node = root.Children.First();
             Assert.IsTrue(node is WithNode);
