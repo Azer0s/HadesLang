@@ -44,6 +44,33 @@ out(myFunction(5))   // a is smaller than 10
 out(myFunction(17))  // a is greater than 10
 ```
 
+### Actors
+```swift
+with msg from std:io
+with sleep from std:time
+
+func ping()
+    receive(m)
+        msg{status: :ping} => send(m.data, :pong)
+        sleep.seconds(1)
+    end
+    ping()
+end
+
+func pong()
+    receive(m)
+        msg{status: :pong, data := data} => send(data, :ping)
+        sleep.seconds(1)
+    end
+    pong()
+end
+
+var pingPid = spawn({_ => ping()}
+var pongPid = spawn({_ => pong()}
+
+send(pingPid, msg(:ping, pongPid)
+```
+
 ### Fibonacci sequence
 ```js
 with console from std:io
