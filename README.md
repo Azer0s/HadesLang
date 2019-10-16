@@ -12,7 +12,7 @@ This is the official repository for the reference implementation of the Hades Pr
 ### Hello world
 ```js
 with console from std:io
-console->out("Hello world")
+console.out("Hello world")
 ```
 
 ### Pipelines
@@ -20,12 +20,13 @@ console->out("Hello world")
 with list fixed from std:collections
 with console from std:io
 
-var fruits = list->of({"Apple", "Banana", "Mango", "Kiwi", "Avocado"})
+var fruits = list.of({"Apple", "Banana", "Mango", "Kiwi", "Avocado"})
 
 fruits
-|> map({x => x->toLower()}, ??)
-|> filter({x => x->startsWith("a")}, ??)
-|> forEach({x => console->out(x)}, ??)
+|> map(??, {x => x.toLower()})
+|> filter({x => x.startsWith("a")})
+//if ?? is not in the parameters, the method is inserted as the first parameter
+|> forEach(??, {x => console.out(x)})
 ```
 
 ### Function guards
@@ -33,11 +34,11 @@ fruits
 with console fixed from std:io
 
 func myFunction(int a) requires a < 10
-    console->out("a is smaller than 10")
+    console.out("a is smaller than 10")
 end
 
 func myFunction(int a) requires a > 10
-    console->out("a is greater than 10")
+    console.out("a is greater than 10")
 end
 
 out(myFunction(5))   // a is smaller than 10
@@ -51,16 +52,20 @@ with sleep from std:time
 
 func ping()
     receive(m)
-        msg{status: :ping} => send(m.data, :pong)
-        sleep.seconds(1)
+        {:ping, data} => {_ =>
+            sleep.seconds(1)
+            send(data, :pong)
+        }
     end
     ping()
 end
 
 func pong()
     receive(m)
-        msg{status: :pong, data := data} => send(data, :ping)
-        sleep.seconds(1)
+        {:pong, data} => {_ =>
+            sleep.seconds(1)
+            send(data, :ping)
+        }
     end
     pong()
 end
@@ -68,7 +73,7 @@ end
 var pingPid = spawn({_ => ping()}
 var pongPid = spawn({_ => pong()}
 
-send(pingPid, msg(:ping, pongPid)
+send(pingPid, {:ping, pongPid})
 ```
 
 ### Fibonacci sequence
@@ -83,7 +88,7 @@ func fib(n)
     put fib(n-1) + fib(n-2)
 end
 
-fib(10) |> console->out
+fib(10) |> console.out
 ```
 
 ## Getting Started
