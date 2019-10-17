@@ -1,6 +1,6 @@
 <img src="assets/IconShort.png" alt="logo" width="200" align="left"/>
 
-## Hades Programming Language
+## [WIP] Hades Programming Language
 
 [![Build Status](https://travis-ci.org/Azer0s/HadesLang.svg?branch=master)](https://travis-ci.org/Azer0s/HadesLang)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Azer0s/HadesLang/blob/master/LICENSE)
