@@ -129,6 +129,13 @@ namespace Hades.Language.Lexer
 			return CreateToken(Type.Identifier);
 		}
 
+		private Token LexString()
+		{
+			//TODO: Escape \', \", \t, \n
+			//TODO: Unicode support
+			return new Token();
+		}
+
 		private Token LexAtom()
 		{
 			if (!Next.IsEof && char.IsLetter(Next.Value))
@@ -230,6 +237,10 @@ namespace Hades.Language.Lexer
 						break;
 					case char c when char.IsDigit(c):
 						tokens.Add(LexNumber());
+						break;
+					case '"':
+					case '\'':
+						tokens.Add(LexString());
 						break;
 					case ':':
 						if (!Next.IsEof && Next.Value == '=')

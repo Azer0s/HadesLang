@@ -21,7 +21,7 @@ namespace Hades.Testing
         [TestCase("2 > 1", Type.Integer, Type.Bigger, Type.Integer)]
         [TestCase("i++", Type.Identifier, Type.Increment)]
         [TestCase("i--", Type.Identifier, Type.Decrement)]
-        [TestCase("i += 1", Type.Identifier, Type.CompoundIncrement, Type.Integer)]
+        [TestCase("i += 1.123", Type.Identifier, Type.CompoundIncrement, Type.Float)]
         [TestCase("i -= 1", Type.Identifier, Type.CompoundDecrement, Type.Integer)]
         [TestCase("i *= 2", Type.Identifier, Type.CompoundMultiplication, Type.Integer)]
         [TestCase("i /= 2", Type.Identifier, Type.CompoundDivision, Type.Integer)]
