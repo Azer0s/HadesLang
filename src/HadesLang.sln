@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hades.Core", "Hades.Core\Hades.Core.csproj", "{88527C14-7059-4070-9A0B-011ADB70D86C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hades.Language", "Hades.Language\Hades.Language.csproj", "{500562FD-27FB-42D1-B9EC-0E003ED67FA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hades.Testing", "Hades.Testing\Hades.Testing.csproj", "{8C3435DB-2302-4154-AD4A-23FA209DE3F8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88527C14-7059-4070-9A0B-011ADB70D86C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88527C14-7059-4070-9A0B-011ADB70D86C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88527C14-7059-4070-9A0B-011ADB70D86C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88527C14-7059-4070-9A0B-011ADB70D86C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{500562FD-27FB-42D1-B9EC-0E003ED67FA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{500562FD-27FB-42D1-B9EC-0E003ED67FA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{500562FD-27FB-42D1-B9EC-0E003ED67FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{500562FD-27FB-42D1-B9EC-0E003ED67FA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C3435DB-2302-4154-AD4A-23FA209DE3F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C3435DB-2302-4154-AD4A-23FA209DE3F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C3435DB-2302-4154-AD4A-23FA209DE3F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C3435DB-2302-4154-AD4A-23FA209DE3F8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
