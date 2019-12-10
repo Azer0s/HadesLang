@@ -15,6 +15,27 @@ namespace Hades.Core
 			Lexer.Lex("{:ok, val}").ForEach(x => Console.WriteLine(x));
 			Lexer.Lex("hasType?()").ForEach(x => Console.WriteLine(x));
 			Lexer.Lex("send!()").ForEach(x => Console.WriteLine(x));
+
+			Lexer.Lex(@"""Hello world""").ForEach(x => Console.WriteLine(x));
+			Lexer.Lex(@"""\n \t \"" \'""").ForEach(x => Console.WriteLine(x));
+
+			Lexer.Lex(@"
+with list fixed from std:collections
+with console from std:io
+
+var fruits = list.of({""Apple"", ""Banana"", ""Mango"", ""Kiwi"", ""Avocado""})
+
+fruits
+|> map(??, {x => x.toLower()})
+|> filter({x => x.startsWith(""a"")})
+//if ?? is not in the parameters, the method is inserted as the first parameter
+
+/*
+* Test
+* Comment
+*/
+
+|> forEach(??, {x => console.out(x)})").ForEach(x => Console.WriteLine(x));
 		}
 	}
 }

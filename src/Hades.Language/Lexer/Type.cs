@@ -10,6 +10,7 @@ namespace Hades.Language.Lexer
         Float,
         Bool,
         Atom,
+        String,
 
         #endregion
 
@@ -105,7 +106,12 @@ namespace Hades.Language.Lexer
         MatchAssign,
         Assign,
         
+        FatArrow,
+        
         ExclamationMark,
+        Nullable,
+        Pipeline,
+        PipelinePlaceholder
 
         #endregion
     }

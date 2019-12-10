@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Type = Hades.Language.Lexer.Type;
 using System.Text;
 
 namespace Hades.Language.Lexer
@@ -9,10 +7,9 @@ namespace Hades.Language.Lexer
 	public class Lexer
 	{
 		private readonly string _source;
-		private int _index = 0;
+		private int _index;
 		private StringBuilder _buffer = new StringBuilder();
-		
-		private char Last => Peek(-1).Value;
+
 		private Character Ch => Peek(0);
 		private Character Next => Peek(1);
 		
@@ -30,9 +27,9 @@ namespace Hades.Language.Lexer
 			}
 		}
 
-		private void Advance()
+		private void Advance(int amount = 1)
 		{
-			_index++;
+			_index += amount;
 		}
 
 		private Token CreateToken(Type type)
@@ -129,11 +126,49 @@ namespace Hades.Language.Lexer
 			return CreateToken(Type.Identifier);
 		}
 
-		private Token LexString()
+		private Token LexString(char endChar)
 		{
-			//TODO: Escape \', \", \t, \n
-			//TODO: Unicode support
-			return new Token();
+			Advance();
+
+			var escape = false;
+
+			while (!Ch.IsEof)
+			{
+				if (escape)
+				{
+					_buffer.Append(Ch.Value switch
+					{
+						'n' => '\n',
+						't' => '\t',
+						'\'' => '\'',
+						'"' => '"',
+						_ => throw new Exception($"Unexpected escape character \\{Ch.Value}!")
+					});
+					Advance();
+					escape = false;
+				}
+				else
+				{
+					if (Ch.Value == endChar)
+					{
+						Advance();
+						return CreateToken(Type.String);
+					}
+					
+					switch (Ch.Value)
+					{
+						case '\\':
+							Advance();
+							escape = true;
+							break;
+						default:
+							Consume();
+							break;
+					}
+				}
+			}
+			
+			throw new Exception("Unexpected EOF!");
 		}
 
 		private Token LexAtom()
@@ -188,7 +223,7 @@ namespace Hades.Language.Lexer
 			return CreateToken(normalType);
 		}
 		
-		private Token LexOperatorWithCompound(char ch, Type compoundType, Type doubleType, Type normalType)
+		private Token LexOperatorWithDoubleAndCompound(char ch, Type compoundType, Type doubleType, Type normalType)
 		{
 			if (!Next.IsEof && Next.Value == ch)
 			{
@@ -206,7 +241,7 @@ namespace Hades.Language.Lexer
 			return CreateToken(normalType);
 		}
 
-		private Token LexOperatorWithDoubleAndCompound(char ch, Type compoundDoubleType, Type doubleType, Type normalType)
+		private Token LexOperatorWithDoubleAndDoubleCompound(char ch, Type compoundDoubleType, Type doubleType, Type normalType)
 		{
 			if (!Next.IsEof && Next.Value == ch)
 			{
@@ -240,7 +275,7 @@ namespace Hades.Language.Lexer
 						break;
 					case '"':
 					case '\'':
-						tokens.Add(LexString());
+						tokens.Add(LexString(Ch.Value));
 						break;
 					case ':':
 						if (!Next.IsEof && Next.Value == '=')
@@ -258,71 +293,70 @@ namespace Hades.Language.Lexer
 						tokens.Add(CreateToken(Type.Dot));
 						break;
 					case '+':
-						if (!Next.IsEof && Next.Value == '+')
-						{
-							Consume(2);
-							tokens.Add(CreateToken(Type.Increment));
-						}
-						else if (!Next.IsEof && Next.Value == '=')
-						{
-							Consume(2);
-							tokens.Add(CreateToken(Type.CompoundIncrement));
-						}
-						else
-						{
-							Consume();
-							tokens.Add(CreateToken(Type.Plus));
-						}
+						tokens.Add(LexOperatorWithDoubleAndCompound('+', Type.CompoundIncrement, Type.Increment, Type.Plus));
 						break;
 					case '-':
-						if (!Next.IsEof && Next.Value == '-')
-						{
-							Consume(2);
-							tokens.Add(CreateToken(Type.Decrement));
-						}
-						else if (!Next.IsEof && Next.Value == '=')
-						{
-							Consume(2);
-							tokens.Add(CreateToken(Type.CompoundDecrement));
-						}
-						else
-						{
-							Consume();
-							tokens.Add(CreateToken(Type.Minus));
-						}
+						tokens.Add(LexOperatorWithDoubleAndCompound('-', Type.CompoundDecrement, Type.Decrement, Type.Minus));
 						break;
 					case '*':
 						tokens.Add(LexOperatorWithCompound(Type.CompoundMultiplication, Type.Multiplication));
 						break;
 					case '/':
-						tokens.Add(LexOperatorWithCompound(Type.CompoundDivision, Type.Division));
+						if (!Next.IsEof && Next.Value == '/')
+						{
+							Advance(2);
+							while (!Ch.IsEof && Ch.Value != '\n')
+							{
+								Advance();
+							}
+						}
+						else if(!Next.IsEof && Next.Value == '*')
+						{
+							Advance(2);
+
+							while (!Ch.IsEof && !Next.IsEof && !(Ch.Value == '*' && Next.Value == '/'))
+							{
+								Advance();
+							}
+
+							if (Ch.Value != '*' && Next.Value != '/')
+							{
+								throw new Exception("Unexpected EOF!");
+							}
+
+							Advance(2);
+						}
+						else
+						{
+							tokens.Add(LexOperatorWithCompound(Type.CompoundDivision, Type.Division));
+						}
 						break;
 					case '%':
 						tokens.Add(LexOperatorWithCompound(Type.CompoundMod, Type.Mod));
 						break;
 					case '<':
-						tokens.Add(LexOperatorWithDoubleAndCompound('<', Type.CompoundLeftShift, Type.LeftShift, Type.Smaller));
+						tokens.Add(LexOperatorWithDoubleAndDoubleCompound('<', Type.CompoundLeftShift, Type.LeftShift, Type.Smaller));
 						break;
 					case '>':
-						tokens.Add(LexOperatorWithDoubleAndCompound('>', Type.CompoundRightShift, Type.RightShift, Type.Bigger));
+						tokens.Add(LexOperatorWithDoubleAndDoubleCompound('>', Type.CompoundRightShift, Type.RightShift, Type.Bigger));
 						break;
 					case '!':
-						if (!Next.IsEof && Next.Value == '=')
-						{
-							Consume(2);
-							tokens.Add(CreateToken(Type.NotEquals));
-						}
-						else
-						{
-							Consume();
-							tokens.Add(CreateToken(Type.ExclamationMark));
-						}
+						tokens.Add(LexOperatorWithCompound(Type.NotEquals, Type.ExclamationMark));
 						break;
 					case '&':
-						tokens.Add(LexOperatorWithCompound('&', Type.CompoundBitwiseAnd, Type.LogicalAnd, Type.BitwiseAnd));
+						tokens.Add(LexOperatorWithDoubleAndCompound('&', Type.CompoundBitwiseAnd, Type.LogicalAnd, Type.BitwiseAnd));
 						break;
 					case '|':
-						tokens.Add(LexOperatorWithCompound('|', Type.CompoundBitwiseOr, Type.LogicalOr, Type.BitwiseOr));
+						var tokenA = LexOperatorWithDoubleAndCompound('|', Type.CompoundBitwiseOr, Type.LogicalOr, Type.BitwiseOr);
+
+						if (!Ch.IsEof && Ch.Value == '>')
+						{
+							tokenA.Type = Type.Pipeline;
+							tokenA.Value = "|>";
+							Advance();
+						}
+						
+						tokens.Add(tokenA);
 						break;
 					case '^':
 						tokens.Add(LexOperatorWithCompound(Type.CompoundBitwiseXor, Type.BitwiseXor));
@@ -332,16 +366,16 @@ namespace Hades.Language.Lexer
 						tokens.Add(CreateToken(Type.BitwiseNegate));
 						break;
 					case '=':
-						if (!Next.IsEof && Next.Value == '=')
+						var tokenB = LexOperatorWithCompound(Type.Equals, Type.Assign);
+
+						if (!Ch.IsEof && Ch.Value == '>')
 						{
-							Consume(2);
-							tokens.Add(CreateToken(Type.Equals));
+							tokenB.Type = Type.FatArrow;
+							tokenB.Value = "=>";
+							Advance();
 						}
-						else
-						{
-							Consume();
-							tokens.Add(CreateToken(Type.Assign));
-						}
+						
+						tokens.Add(tokenB);
 						break;
 					case '(':
 						Consume();
@@ -375,8 +409,20 @@ namespace Hades.Language.Lexer
 						Consume();
 						tokens.Add(CreateToken(Type.Semicolon));
 						break;
-					case char c when IsWhiteSpace():
+					case char _ when IsWhiteSpace():
 						Advance();
+						break;
+					case '?':
+						if (!Next.IsEof && Next.Value == '?')
+						{
+							Consume(2);
+							tokens.Add(CreateToken(Type.PipelinePlaceholder));
+						}
+						else
+						{
+							Consume();
+							tokens.Add(CreateToken(Type.Nullable));
+						}
 						break;
 					default:
 						throw new Exception($"Unexpected character {Ch.Value}");
