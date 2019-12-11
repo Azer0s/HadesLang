@@ -6,7 +6,7 @@ namespace Hades.Core
 {
 	class Program
 	{
-		static void Main(string[] args)
+		static void Main()
 		{
 			Lexer.Lex("123.2").ForEach(x => Console.WriteLine(x));
 			Lexer.Lex("123.toString()").ForEach(x => Console.WriteLine(x));
