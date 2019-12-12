@@ -1,6 +1,7 @@
 ﻿using System;
 using Hades.Language;
 using Hades.Language.Lexer;
+using Hades.Language.Parser;
 
 namespace Hades.Core
 {
@@ -36,6 +37,15 @@ fruits
 */
 
 |> forEach(??, {x => console.out(x)})").ForEach(x => Console.WriteLine(x));
+
+			Parser.Parse(Lexer.Lex("var a"));
+			Parser.Parse(Lexer.Lex("var int a"));
+			Parser.Parse(Lexer.Lex("var int? a"));
+			Parser.Parse(Lexer.Lex("var [10] a"));
+			Parser.Parse(Lexer.Lex("var int[*] a"));
+			Parser.Parse(Lexer.Lex("var int?[2,2] a"));
+			Parser.Parse(Lexer.Lex("let a"));
+			Parser.Parse(Lexer.Lex("let int a"));
 		}
 	}
 }

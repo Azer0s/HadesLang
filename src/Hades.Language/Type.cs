@@ -1,4 +1,4 @@
-namespace Hades.Language.Lexer
+namespace Hades.Language
 {
     public enum Type
     {
@@ -111,7 +111,23 @@ namespace Hades.Language.Lexer
         ExclamationMark,
         Nullable,
         Pipeline,
-        PipelinePlaceholder
+        PipelinePlaceholder,
+
+        #endregion
+
+        #region Ast
+
+        AstRoot,
+        AstDatatype,
+        AstVariableDeclaration,
+        AstArraySize,
+        AstIdentifier,
+
+        #endregion
+
+        #region Parser Symbols
+
+        PARSER_DONE
 
         #endregion
     }

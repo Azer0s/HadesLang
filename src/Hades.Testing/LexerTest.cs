@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Hades.Language;
 using Hades.Language.Lexer;
 using NUnit.Framework;
 // ReSharper disable NUnit.IncorrectArgumentType
