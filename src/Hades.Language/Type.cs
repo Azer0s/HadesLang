@@ -123,6 +123,7 @@ namespace Hades.Language
         AstArraySize,
         AstIdentifier,
         AstUnmatched,
+        AstStatement,
         
         #endregion
 

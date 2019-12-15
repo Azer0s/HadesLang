@@ -52,8 +52,23 @@ namespace Hades.Language.Parser
         /// | ArraySize
         /// </summary>
         /// <returns></returns>
-        private AstNode ParseArraySizes()
+        private AstNode ArraySize()
         {
+            (bool matches, bool isDone) MultipleSizes()
+            {
+                return Match(
+                    Matches(Type.Comma, () =>
+                    {
+                        return Match(
+                            Matches(Type.AstArraySize, End));
+                    }),
+                    Matches(Type.PARSER_DONE));
+            }
+            
+            Match(
+                Matches(Type.Integer, MultipleSizes),
+                Matches(Type.AstStatement, MultipleSizes),
+                Matches(Type.Multiplication, End));
             return null;
         }
 
