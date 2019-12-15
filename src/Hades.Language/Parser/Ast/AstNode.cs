@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Hades.Language.Lexer;
+using Hades.Language.Parser.Nodes;
 
 namespace Hades.Language.Parser.Ast
 {
@@ -7,6 +9,7 @@ namespace Hades.Language.Parser.Ast
     {
         public virtual Type Type { get; }
         public List<Token> Tokens;
+        public bool Matches = true;
 
         protected AstNode(Type type)
         {
@@ -18,6 +21,17 @@ namespace Hades.Language.Parser.Ast
         public override string ToString()
         {
             return $"[{Type.ToString().ToUpper()}] {DoToString()}";
+        }
+
+        public static AstNode Parse(Func<AstNode> statement)
+        {
+            var result = statement();
+            return result ?? new UnmatchedNode();
+        }
+
+        public AstNode Or(Func<AstNode> statement)
+        {
+            return Matches ? this : statement();
         }
     }
 }

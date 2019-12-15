@@ -122,7 +122,8 @@ namespace Hades.Language
         AstVariableDeclaration,
         AstArraySize,
         AstIdentifier,
-
+        AstUnmatched,
+        
         #endregion
 
         #region Parser Symbols

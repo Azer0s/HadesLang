@@ -3,21 +3,21 @@ using Hades.Language.Parser.Ast;
 
 namespace Hades.Language.Parser
 {
-    public class MatchPair<T> where T : AstNode
+    public class MatchPair
     {
         public Type Type;
-        public Func<AstNode, MatchResult<T>> Action;
-        public Action OnSuccess;
+        public Func<(bool matches, bool isDone)> Action;
+        public Action<AstNode> OnSuccess;
         
         private MatchPair(){}
 
-        public static MatchPair<T> Matches<T>(Type type, Func<AstNode, MatchResult<T>> action = null, Action onSuccess = null) where T : AstNode
+        public static MatchPair Matches(Type type, Func<(bool matches, bool isDone)> action = null, Action<AstNode> onSuccess = null)
         {
-            return new MatchPair<T>
+            return new MatchPair
             {
                 Type = type,
-                Action = action ?? (node => MatchResult<T>.Of(false, null)),
-                OnSuccess = onSuccess ?? (() => { })
+                Action = action ?? (() => (false, true)),
+                OnSuccess = onSuccess ?? ((node) => { })
             };
         }
     }

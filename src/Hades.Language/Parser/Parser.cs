@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Hades.Language.Lexer;
 using Hades.Language.Parser.Ast;
 using Hades.Language.Parser.Nodes;
-using static Hades.Language.Parser.MatchPair<Hades.Language.Parser.Ast.AstNode>;
+using static Hades.Language.Parser.MatchPair;
+// ReSharper disable ConvertToLambdaExpression
 
 namespace Hades.Language.Parser
 {
@@ -16,6 +16,8 @@ namespace Hades.Language.Parser
 
         private MaybeToken Current => Peek(0);
         private MaybeToken Next => Peek(1);
+
+        private readonly Func<(bool matches, bool isDone)> End;
         
         private MaybeToken Peek(int by)
         {
@@ -27,71 +29,12 @@ namespace Hades.Language.Parser
         private Parser(List<Token> tokens)
         {
             _tokens = tokens;
+            End = () => Match(Matches(Type.PARSER_DONE));
         }
 
-        private MatchResult<T> Match<T>(T obj, params MatchPair<T>[] matchPairs) where T : AstNode, new()
+        private (bool matches, bool isDone) Match(params MatchPair[] matchPairs)
         {
-            var backupIndex = _index;
-            var pairs = matchPairs.ToList();
-
-            (MatchResult<T> result, bool shouldReturn) doMatch(MatchPair<T> pair, MatchResult<AstNode> value)
-            {
-                if (value.Matches)
-                {
-                    _index++;
-                    pair.Action(value.Value);
-                    pair.OnSuccess();
-                    return (MatchResult<T>.Of(true, obj), true);
-                }
-
-                _index = backupIndex;
-
-                return (null, false);
-            }
-
-            foreach (var matchPair in pairs)
-            {
-                switch (matchPair.Type)
-                {
-                    case Type.AstDatatype:
-                        var dtMatchVal = doMatch(matchPair, Datatype());
-                        if (dtMatchVal.shouldReturn)
-                        {
-                            return dtMatchVal.result;
-                        }
-                        break;
-
-                    case Type.PARSER_DONE:
-                        return MatchResult<T>.Of(true, obj);
-                    
-                    default:
-                        if (!Current.IsEof && Current.Value.Type == matchPair.Type)
-                        {
-                            switch (Current.Value.Type)
-                            {
-                                case Type.Identifier:
-                                    var identifierNode = new IdentifierNode(Current.Value);
-                                    _index++;
-                                    matchPair.Action(identifierNode);
-                                    break; 
-                                default:
-                                    _index++;
-                                    matchPair.Action(null);
-                                    break;
-                            }
-                            matchPair.OnSuccess();
-                            return MatchResult<T>.Of(true, obj);
-                        }
-                        break;
-                }
-            }
-            
-            return MatchResult<T>.Of(false, null);
-        }
-
-        private static MatchResult<T> Parse<T>(Func<MatchResult<T>> initialMatch) where T : AstNode
-        {
-            return initialMatch();
+            return (false, true);
         }
 
         /// <summary>
@@ -136,84 +79,84 @@ namespace Hades.Language.Parser
         /// </summary>
         /// <returns></returns>
         [SuppressMessage("ReSharper", "VariableHidesOuterVariable")]
-        private MatchResult<VariableDeclarationNode> VariableDeclaration()
+        private AstNode VariableDeclaration()
         {
             var node = new VariableDeclarationNode();
-            MatchPair<VariableDeclarationNode> ParseIdentifier()
+
+            (bool matches, bool isDone) EndOrAssign() => Match(ParseAssign(), Matches(Type.PARSER_DONE));
+            void SetName(AstNode identifier) => node.Name = (IdentifierNode) identifier;
+
+            MatchPair ParseArrayDeclaration()
             {
-                return Matches(Type.Identifier, identifier =>
+                return Matches(Type.OpenBracket, () =>
                 {
-                    node.Name = (IdentifierNode) identifier;
-                    return Match(node,
-
-                        #region ----------------Array----------------
-
-                        //----------------Array Open----------------//
-                        Matches(Type.OpenBracket, _ => Match(node,
-
-                            //----------------Array Size----------------//
-                            Matches(Type.AstArraySize, size => Match(node,
-
-                                //----------------Array Closed----------------//
-                                Matches(Type.ClosedBracket, _ => Match(node,
-
-                                    //----------------Done----------------//
-                                    Matches<VariableDeclarationNode>(Type.PARSER_DONE, null, () =>
-                                    {
-                                        node.IsArray = true;
-                                        node.ArraySize = size;
-                                    })
-                                ))
-                            ))
-                        )),
-
-                        #endregion
-
-                        //----------------Done----------------//
-                        Matches<VariableDeclarationNode>(Type.PARSER_DONE));
+                    return Match(
+                        Matches(Type.AstArraySize, () =>
+                        {
+                            return Match(
+                                Matches(Type.ClosedBracket, () =>
+                                {
+                                    return Match(
+                                        Matches(Type.Identifier, EndOrAssign, SetName));
+                                }));
+                        }, arraySize => { node.IsArray = true; node.ArraySize = arraySize; }));
                 });
             }
 
-            return Match(node,
+            MatchPair ParseDeconstructAssign()
+            {
+                //TODO
+                return null;
+            }
 
-                #region ----------------VAR----------------
-
-                Matches(Type.Var, _ => Match(node,
-
-                    #region Mutable variable with datatype
-                    
-                    Matches(Type.AstDatatype, datatype => Match(node,
-                        ParseIdentifier(),
-                        Matches(Type.Nullable, _ => Match(node, ParseIdentifier()), () =>
-                        {
-                            node.Nullable = true;
-                        }))),
-                    
-                    #endregion
-
-                    #region Mutable variable without datatype
-
-                    ParseIdentifier()),
-                    () => { 
-                        node.IsConstant = false;
-                    }),
-                
-                    #endregion
-
-                #endregion
-
-                #region ----------------LET----------------
-                
-                Matches<VariableDeclarationNode>(Type.Let, _ => Match<VariableDeclarationNode>(node,
-                    //TODO: Datatype
-                    ParseIdentifier()
-                ),
-                () =>
-                {
-                    node.IsConstant = true;
-                }));
+            MatchPair ParseAssign()
+            {
+                //TODO
+                return Matches(Type.PARSER_DONE);
+            }
             
-                #endregion
+            var result = Match(
+                Matches(Type.Var, () =>
+                {
+                    return Match(
+                        Matches(Type.AstDatatype, () =>
+                        {
+                            return Match(
+                                Matches(Type.Nullable, () =>
+                                {
+                                    return Match(
+                                        ParseArrayDeclaration(),
+                                        Matches(Type.Identifier, EndOrAssign, SetName));
+                                }),
+                                ParseArrayDeclaration(),
+                                Matches(Type.Identifier, EndOrAssign, SetName));
+                        }),
+                        Matches(Type.Multiplication, () =>
+                        {
+                            return Match(
+                                ParseArrayDeclaration(),
+                                Matches(Type.Identifier, EndOrAssign, SetName));
+                        }),
+                        Matches(Type.Identifier, EndOrAssign, SetName));
+                }),
+                Matches(Type.Let, () =>
+                {
+                    return Match(
+                        Matches(Type.AstDatatype, () =>
+                        {
+                            return Match(
+                                ParseArrayDeclaration(),
+                                Matches(Type.Identifier, EndOrAssign, SetName));
+                        }),
+                        Matches(Type.Identifier, EndOrAssign, SetName));
+                }));
+
+            if (result.matches && result.isDone)
+            {
+                return node;
+            }
+
+            return new UnmatchedNode();
         }
         
         #endregion
@@ -244,9 +187,9 @@ namespace Hades.Language.Parser
         /// | MULTIPLICATION
         /// </summary>
         /// <returns></returns>
-        private MatchResult<AstNode> /*TODO: Refactor to IdentifierNode*/ Datatype()
+        private AstNode Datatype()
         {
-            return MatchResult<AstNode>.Of(false, null);
+            return null;
         }
 
         /// <summary>
@@ -340,9 +283,8 @@ namespace Hades.Language.Parser
             while (!Current.IsEof)
             {
                 ast.Add(
-                    Parse(VariableDeclaration)
-                        .Or<AstNode>(() => throw new Exception($"Unexpected token {Current.Value}"))
-                        .Value
+                    AstNode.Parse(VariableDeclaration)
+                        .Or(() => throw new Exception($"Unexpected token {Current.Value}"))
                     );
             }
             return ast;
