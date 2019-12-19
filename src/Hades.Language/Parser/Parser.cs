@@ -34,25 +34,63 @@ namespace Hades.Language.Parser
 
         private (bool matches, bool isDone) Match(params MatchPair[] matchPairs)
         {
+            foreach (var matchPair in matchPairs)
+            {
+                if (matchPair.Type == Type.PARSER_DONE)
+                {
+                    return (true, true);
+                }
+
+                if (Current.Value.Type == matchPair.Type)
+                {
+                    var node = matchPair.Type switch
+                    {
+                        Type.Identifier => (AstNode) new IdentifierNode(Current.Value),
+                        _ => new GenericNode(Current.Value)
+                    };
+
+                    _index++;
+                    var (matches, isDone) = matchPair.Action();
+
+                    if (matches && isDone)
+                    {
+                        matchPair.OnSuccess(node);
+                        return (true, true);
+                    }
+                    _index--;
+                }
+
+                //Parse Ast* Tokens
+                var complexNode = matchPair.Type switch
+                {
+                    Type.AstArraySize => ParseArraySize(),
+                    _ => (matches: false, isDone: false, node: new UnmatchedNode())
+                };
+
+                if (complexNode.matches && complexNode.isDone)
+                {
+                    _index++;
+                    var (matches, isDone) = matchPair.Action();
+
+                    if (matches && isDone)
+                    {
+                        matchPair.OnSuccess(complexNode.node);
+                        return (true, true);
+                    }
+                    _index--;
+                }
+            }
+
             return (false, true);
         }
 
         /// <summary>
-        /// NUMBER
+        /// ArraySize COMMA ArraySize
+        /// | NUMBER
         /// | Statement
         /// </summary>
         /// <returns></returns>
-        private AstNode ParseArraySize()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// ArraySize COMMA ArraySize
-        /// | ArraySize
-        /// </summary>
-        /// <returns></returns>
-        private AstNode ArraySize()
+        private (bool matches, bool isDone, AstNode node) ParseArraySize()
         {
             (bool matches, bool isDone) MultipleSizes()
             {
@@ -69,7 +107,7 @@ namespace Hades.Language.Parser
                 Matches(Type.Integer, MultipleSizes),
                 Matches(Type.AstStatement, MultipleSizes),
                 Matches(Type.Multiplication, End));
-            return null;
+            return (false, false, null);
         }
 
         #region VariableDeclaration

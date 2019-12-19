@@ -17,7 +17,7 @@ namespace Hades.Language.Parser
             {
                 Type = type,
                 Action = action ?? (() => (false, true)),
-                OnSuccess = onSuccess ?? ((node) => { })
+                OnSuccess = onSuccess ?? (node => { })
             };
         }
     }

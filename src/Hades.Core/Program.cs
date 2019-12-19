@@ -9,7 +9,7 @@ namespace Hades.Core
 	{
 		static void Main()
 		{
-			Lexer.Lex("123.2").ForEach(x => Console.WriteLine(x));
+			/*Lexer.Lex("123.2").ForEach(x => Console.WriteLine(x));
 			Lexer.Lex("123.toString()").ForEach(x => Console.WriteLine(x));
 			Lexer.Lex("123.2.toString()").ForEach(x => Console.WriteLine(x));
 			Lexer.Lex("true false").ForEach(x => Console.WriteLine(x));
@@ -34,9 +34,9 @@ fruits
 /*
 * Test
 * Comment
-*/
 
-|> forEach(??, {x => console.out(x)})").ForEach(x => Console.WriteLine(x));
+
+|> forEach(??, {x => console.out(x)})").ForEach(x => Console.WriteLine(x));*/
 
 			Parser.Parse(Lexer.Lex("var a"));
 			Parser.Parse(Lexer.Lex("var int a"));
