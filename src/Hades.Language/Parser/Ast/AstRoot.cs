@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Hades.Language.Parser.Ast
 {
@@ -13,7 +14,7 @@ namespace Hades.Language.Parser.Ast
 
         protected override string DoToString()
         {
-            throw new System.NotImplementedException();
+            return string.Join("", _astNodes.Select(a => $"\n  {a}"));
         }
 
         public IEnumerator<AstNode> GetEnumerator()

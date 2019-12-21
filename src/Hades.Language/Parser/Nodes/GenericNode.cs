@@ -14,7 +14,7 @@ namespace Hades.Language.Parser.Nodes
 
         protected override string DoToString()
         {
-            throw new System.NotImplementedException();
+            return Value.Value;
         }
     }
 }

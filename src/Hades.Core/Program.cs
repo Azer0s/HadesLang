@@ -38,14 +38,17 @@ fruits
 
 |> forEach(??, {x => console.out(x)})").ForEach(x => Console.WriteLine(x));*/
 
-			Parser.Parse(Lexer.Lex("var a"));
-			Parser.Parse(Lexer.Lex("var int a"));
-			Parser.Parse(Lexer.Lex("var int? a"));
-			Parser.Parse(Lexer.Lex("var [10] a"));
-			Parser.Parse(Lexer.Lex("var int[*] a"));
-			Parser.Parse(Lexer.Lex("var int?[2,2] a"));
-			Parser.Parse(Lexer.Lex("let a"));
-			Parser.Parse(Lexer.Lex("let int a"));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var int a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var int? a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var [10] a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var int[*] a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var[*] a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var[2,2] a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var[2] a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("var int?[2,2] a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("let a")));
+			Console.WriteLine(Parser.Parse(Lexer.Lex("let int a")));
 		}
 	}
 }

@@ -7,8 +7,7 @@ namespace Hades.Language.Parser.Ast
 {
     public abstract class AstNode
     {
-        public virtual Type Type { get; }
-        public List<Token> Tokens;
+        public Type Type { get; }
         public bool Matches = true;
 
         protected AstNode(Type type)
@@ -20,7 +19,7 @@ namespace Hades.Language.Parser.Ast
 
         public override string ToString()
         {
-            return $"[{Type.ToString().ToUpper()}] {DoToString()}";
+            return $"[{Type.ToString().ToUpper().Replace("AST","") + "NODE"}] {DoToString()}";
         }
 
         public static AstNode Parse(Func<AstNode> statement)

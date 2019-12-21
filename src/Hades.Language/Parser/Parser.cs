@@ -18,6 +18,7 @@ namespace Hades.Language.Parser
         private MaybeToken Next => Peek(1);
 
         private readonly Func<(bool matches, bool isDone)> End;
+        private readonly Func<(bool matches, bool isDone)> EndSubmodule;
         
         private MaybeToken Peek(int by)
         {
@@ -30,6 +31,7 @@ namespace Hades.Language.Parser
         {
             _tokens = tokens;
             End = () => Match(Matches(Type.PARSER_DONE));
+            EndSubmodule = () => Match(Matches(Type.PARSER_DONE_SUBNODE));
         }
 
         private (bool matches, bool isDone) Match(params MatchPair[] matchPairs)
@@ -38,6 +40,12 @@ namespace Hades.Language.Parser
             {
                 if (matchPair.Type == Type.PARSER_DONE)
                 {
+                    return (true, true);
+                }
+
+                if (matchPair.Type == Type.PARSER_DONE_SUBNODE)
+                {
+                    _index--;
                     return (true, true);
                 }
 
@@ -64,6 +72,7 @@ namespace Hades.Language.Parser
                 var complexNode = matchPair.Type switch
                 {
                     Type.AstArraySize => ParseArraySize(),
+                    Type.AstDatatype => ParseDatatype(),
                     _ => (matches: false, isDone: false, node: new UnmatchedNode())
                 };
 
@@ -92,22 +101,37 @@ namespace Hades.Language.Parser
         /// <returns></returns>
         private (bool matches, bool isDone, AstNode node) ParseArraySize()
         {
+            var node = new ArraySizeNode();
+            
+            void AddToken(AstNode arraySizeNode)
+            {
+                if (arraySizeNode is ArraySizeNode a)
+                {
+                    node.Tokens.AddRange(a.Tokens);
+                }
+                else
+                {
+                    node.Tokens.Add(arraySizeNode);
+                }
+            }
+
             (bool matches, bool isDone) MultipleSizes()
             {
                 return Match(
                     Matches(Type.Comma, () =>
                     {
                         return Match(
-                            Matches(Type.AstArraySize, End));
-                    }),
-                    Matches(Type.PARSER_DONE));
+                            Matches(Type.AstArraySize, EndSubmodule, AddToken));
+                    }, _ => node.IsMultiDimensional = true),
+                    Matches(Type.PARSER_DONE_SUBNODE));
             }
             
-            Match(
-                Matches(Type.Integer, MultipleSizes),
-                Matches(Type.AstStatement, MultipleSizes),
-                Matches(Type.Multiplication, End));
-            return (false, false, null);
+            var (matches, isDone) = Match(
+                Matches(Type.Integer, MultipleSizes, AddToken),
+                Matches(Type.Multiplication, EndSubmodule, AddToken),
+                Matches(Type.AstStatement, MultipleSizes, AddToken));
+
+            return (matches, isDone, node);
         }
 
         #region VariableDeclaration
@@ -137,6 +161,10 @@ namespace Hades.Language.Parser
             var node = new VariableDeclarationNode();
 
             (bool matches, bool isDone) EndOrAssign() => Match(ParseAssign(), Matches(Type.PARSER_DONE));
+            (bool matches, bool isDone) ArrayDeclarationOrIdentifier() =>
+                Match(
+                    ParseArrayDeclaration(),
+                    Matches(Type.Identifier, EndOrAssign, SetName));
             void SetName(AstNode identifier) => node.Name = (IdentifierNode) identifier;
 
             MatchPair ParseArrayDeclaration()
@@ -152,7 +180,7 @@ namespace Hades.Language.Parser
                                     return Match(
                                         Matches(Type.Identifier, EndOrAssign, SetName));
                                 }));
-                        }, arraySize => { node.IsArray = true; node.ArraySize = arraySize; }));
+                        }, arraySize => { node.IsArray = true; node.ArraySize = (ArraySizeNode) arraySize; }));
                 });
             }
 
@@ -175,34 +203,20 @@ namespace Hades.Language.Parser
                         Matches(Type.AstDatatype, () =>
                         {
                             return Match(
-                                Matches(Type.Nullable, () =>
-                                {
-                                    return Match(
-                                        ParseArrayDeclaration(),
-                                        Matches(Type.Identifier, EndOrAssign, SetName));
-                                }),
+                                Matches(Type.Nullable, ArrayDeclarationOrIdentifier, _ => node.IsNullable = true),
                                 ParseArrayDeclaration(),
                                 Matches(Type.Identifier, EndOrAssign, SetName));
-                        }),
-                        Matches(Type.Multiplication, () =>
-                        {
-                            return Match(
-                                ParseArrayDeclaration(),
-                                Matches(Type.Identifier, EndOrAssign, SetName));
-                        }),
-                        Matches(Type.Identifier, EndOrAssign, SetName));
+                        }, dataType => node.Datatype = (GenericNode) dataType),
+                        Matches(Type.Multiplication, ArrayDeclarationOrIdentifier),
+                        Matches(Type.Identifier, EndOrAssign, SetName),
+                        ParseArrayDeclaration());
                 }),
                 Matches(Type.Let, () =>
                 {
                     return Match(
-                        Matches(Type.AstDatatype, () =>
-                        {
-                            return Match(
-                                ParseArrayDeclaration(),
-                                Matches(Type.Identifier, EndOrAssign, SetName));
-                        }),
+                        Matches(Type.AstDatatype, ArrayDeclarationOrIdentifier, dataType => node.Datatype = (GenericNode) dataType),
                         Matches(Type.Identifier, EndOrAssign, SetName));
-                }));
+                }, _ => node.IsConstant = true));
 
             if (result.matches && result.isDone)
             {
@@ -237,12 +251,15 @@ namespace Hades.Language.Parser
         /// | "object"
         /// | "proto"
         /// | "lambda"
-        /// | MULTIPLICATION
         /// </summary>
         /// <returns></returns>
-        private AstNode Datatype()
+        private (bool matches, bool isDone, AstNode node) ParseDatatype()
         {
-            return null;
+            if (!Current.IsEof && Datatypes.All.Contains(Current.Value.Value))
+            {
+                return (true, true, new GenericNode(new Token {Type = Type.AstDatatype, Value = Current.Value.Value}));
+            }
+            return (false, true, null);
         }
 
         /// <summary>

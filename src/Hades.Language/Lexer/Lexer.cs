@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Hades.Language.Lexer
 {
@@ -56,7 +58,7 @@ namespace Hades.Language.Lexer
 			return c == ' ' || c == '\n' || c == '\t';
 		}
 
-		private Token GetKeywordOrToken(Token token)
+		private List<Token> GetKeywordOrToken(Token token)
 		{
 			token.Type = token.Value switch
 			{
@@ -99,7 +101,13 @@ namespace Hades.Language.Lexer
 				_ => token.Type
 			};
 
-			return token;
+			if (Datatypes.All.Any(x => Regex.IsMatch(token.Value, $"{x}\\?")))
+			{
+				var datatype = Regex.Match(token.Value ?? "", @"([^\?]+)?").Groups[1].Value;
+				return new List<Token>{new Token{Type = Type.Identifier, Value = datatype}, new Token{Type = Type.Nullable, Value = "?"}};
+			}
+
+			return new List<Token> {token};
 		}
 
 		private Token LexLiteral()
@@ -267,10 +275,10 @@ namespace Hades.Language.Lexer
 			{
 				switch (Ch.Value)
 				{
-					case char c when char.IsLetter(c) || c == '_':
-						tokens.Add(GetKeywordOrToken(LexLiteral()));
+					case { } c when char.IsLetter(c) || c == '_':
+						tokens.AddRange(GetKeywordOrToken(LexLiteral()));
 						break;
-					case char c when char.IsDigit(c):
+					case { } c when char.IsDigit(c):
 						tokens.Add(LexNumber());
 						break;
 					case '"':
@@ -409,7 +417,7 @@ namespace Hades.Language.Lexer
 						Consume();
 						tokens.Add(CreateToken(Type.Semicolon));
 						break;
-					case char _ when IsWhiteSpace():
+					case { } _ when IsWhiteSpace():
 						Advance();
 						break;
 					case '?':

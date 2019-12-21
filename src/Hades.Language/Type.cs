@@ -1,5 +1,19 @@
+using System.Collections.Generic;
+
 namespace Hades.Language
 {
+    public static class Datatypes
+    {
+        private const string Int = "int";
+        private const string Dec = "dec";
+        private const string Bool = "bool";
+        private const string String = "string";
+        private const string Object = "object";
+        private const string Proto = "proto";
+        private const string Lambda = "lambda";
+
+        public static readonly List<string> All = new List<string>{Int, Dec, Bool, String, Object, Proto, Lambda};
+    }
     public enum Type
     {
         Identifier,
@@ -129,7 +143,8 @@ namespace Hades.Language
 
         #region Parser Symbols
 
-        PARSER_DONE
+        PARSER_DONE,
+        PARSER_DONE_SUBNODE
 
         #endregion
     }
