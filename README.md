@@ -31,18 +31,18 @@ fruits
 
 ### Function guards
 ```swift
-with console fixed from std:io
+with console from std:io
 
-func myFunction(int a) requires a < 10
+func myFunction(a int) requires a < 10
     console.out("a is smaller than 10")
 end
 
-func myFunction(int a) requires a > 10
+func myFunction(a int) requires a > 10
     console.out("a is greater than 10")
 end
 
-out(myFunction(5))   // a is smaller than 10
-out(myFunction(17))  // a is greater than 10
+myFunction(5) // a is smaller than 10
+myFunction(17) // a is greater than 10
 ```
 
 ### Actors
@@ -81,6 +81,21 @@ send(pingPid, {:ping, pongPid})
 with console from std:io
 
 func fib(n)
+    if((n is 0) or (n is 1))
+        put n
+    end
+    
+    put fib(n-1) + fib(n-2)
+end
+
+fib(10) |> console.out
+```
+
+### Optional static typing
+```js
+with console from std:io
+
+func fib(n int64) -> int64
     if((n is 0) or (n is 1))
         put n
     end
