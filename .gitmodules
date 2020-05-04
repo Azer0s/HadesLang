@@ -1,5 +1,0 @@
-
-[submodule "docs"]
-	path = docs
-	url = https://github.com/Azer0s/HadesDoc.git
-	branch = master

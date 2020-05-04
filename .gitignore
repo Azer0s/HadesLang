@@ -264,3 +264,7 @@ _site/api/
 _site/
 
 api/
+
+src/.DS_Store
+
+cmake-build-debug/
